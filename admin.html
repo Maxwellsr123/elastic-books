@@ -182,12 +182,12 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var why=(it.insight&&it.reasoning)?'<div style="font-size:12px;color:var(--ink3);line-height:1.55;margin-top:5px">'+esc(it.reasoning)+'</div>':'';
     var rcpt=it.receipt_url?'<div style="margin-top:9px"><a href="'+it.receipt_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ind);text-decoration:none"><i class="ti ti-file-text" style="font-size:15px"></i> Open receipt ↗</a></div>':'';
     var badge=it.reconciled?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:11px;vertical-align:-1px"></i> Reconciled</span>'
-      :it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)"><i class="ti ti-user-search" style="font-size:11px;vertical-align:-1px"></i> With a human — owner asked for help</span>'
+      :it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)"><i class="ti ti-user-search" style="font-size:11px;vertical-align:-1px"></i> With a looper — owner asked for a looper</span>'
       :it.lane==="ready"?'<span class="pill p-ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px"></i> Ready to reconcile</span>'
       :it.lane==="await_receipt"?'<span class="pill p-warn"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Confirmed · waiting on receipt</span>'
       :it.lane==="review"?'<span class="pill p-warn"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Needs a check</span>'
       :'<span class="pill p-mut"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Waiting on owner</span>';
-    // receipt situation, stated plainly so Jewel knows whether to wait for one
+    // receipt situation, stated plainly so the looper knows whether to wait for one
     var rstat=it.receipt==="have"?'<div style="font-size:12px;color:var(--grn);margin-top:6px"><i class="ti ti-paperclip" style="font-size:13px;vertical-align:-2px"></i> Receipt attached</div>'
       :it.receipt==="not_needed"?'<div style="font-size:12px;color:var(--ink3);margin-top:6px"><i class="ti ti-receipt-off" style="font-size:13px;vertical-align:-2px"></i> No receipt needed (tax / fee / fine / personal)</div>'
       :'<div style="font-size:12px;color:var(--amb);margin-top:6px"><i class="ti ti-mail-search" style="font-size:13px;vertical-align:-2px"></i> Receipt still needed — Ava is chasing it</div>';
@@ -210,7 +210,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       c("Ready to reconcile",lc.ready||0,"var(--grn)","ready")+
       c("Awaiting receipt",lc.await_receipt||0,"var(--amb)","await_receipt")+
       c("Awaiting owner",lc.confirm||0,"var(--ink)","confirm")+
-      c("With a human",lc.looper||0,"var(--blu)","looper");
+      c("With a looper",lc.looper||0,"var(--blu)","looper");
   }
   function dqueue(){
     var box=document.getElementById("dqueue");
@@ -229,7 +229,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       box.innerHTML=arr.map(function(it){
         var open=(""+dsel)===(""+it.id);
         var amt=it.amount!=null?(" — $"+it.amount):"";
-        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="to_pay"?'<span class="pill" style="background:#fdecea;color:#b42318">bill</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a human</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
+        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="to_pay"?'<span class="pill" style="background:#fdecea;color:#b42318">bill</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a looper</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
         var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ldetail(it)+'</div>':'';
         return '<div class="qcard">'+head+body+'</div>';
       }).join("");
@@ -249,7 +249,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     if(pd){var pid=pd.getAttribute("data-paid");pd.style.opacity=".5";apost("chase-feedback",{company_id:KPA_ID,id:pid,action:"paid"}).then(function(){loadLive();}).catch(function(){pd.style.opacity="1";});return;}
     var cs=e.target.closest(".cmt-send");
     if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";
-      apost("chase-comment",{company_id:KPA_ID,id:cid,author:"jewel",text:t}).then(function(){loadLive();}).catch(function(){cs.style.opacity="1";});return;}
+      apost("chase-comment",{company_id:KPA_ID,id:cid,author:"looper",text:t}).then(function(){loadLive();}).catch(function(){cs.style.opacity="1";});return;}
     var r=e.target.closest("[data-dr]");if(r){var id2=r.getAttribute("data-dr");dsel=((""+dsel)===(""+id2))?null:id2;dqueue();}
   });
   document.getElementById("dbtn").addEventListener("click",function(){document.getElementById("dfile").click();});

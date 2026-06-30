@@ -143,8 +143,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
           <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
           <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
-          <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With a human</div><div class="n" id="u_looper">—</div><div class="d">our team is on it</div></div>
-          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">ready for Jewel</div></div>
+          <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With a looper</div><div class="n" id="u_looper">—</div><div class="d">a looper is on it</div></div>
+          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">ready for a looper</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
@@ -185,7 +185,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       '<button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">No receipt</button></div>';
     var row3='<div class="acts"><button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt to this</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none"></div>';
     var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:11px':'')+'"><b style="text-transform:capitalize;color:'+(a?'var(--indtx)':'var(--ink)')+'">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
-    var looperBtn=i.looper?'<span class="pill p-ind"><i class="ti ti-user-check" style="font-size:11px;vertical-align:-1px"></i> Our team is on it</span>':'<button class="tbtn" data-fb="looper" data-id="'+id+'"><i class="ti ti-user-search"></i> Get a human</button>';
+    var looperBtn=i.looper?'<span class="pill p-ind"><i class="ti ti-user-check" style="font-size:11px;vertical-align:-1px"></i> Our team is on it</span>':'<button class="tbtn" data-fb="looper" data-id="'+id+'"><i class="ti ti-user-search"></i> Get a looper</button>';
     var hasC=(i.comments||[]).length>0;
     var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div><div style="margin-top:7px">'+looperBtn+'</div></div>';
     var box='<div class="think">'+head+row1+row2+row3+cwrap+'</div>';
@@ -220,8 +220,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
     if(f==="bills"){list=U_ITEMS.filter(function(i){return i.lane==="to_pay";});htxt="Bills to pay — incoming, not yet paid";row=billRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No bills waiting — Ava is watching your inbox.';}
-    else if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
-    else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With a human — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
+    else if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — ready for a looper to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
+    else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With a looper — a looper is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
     else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
     else{list=U_ITEMS.filter(function(i){return i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
