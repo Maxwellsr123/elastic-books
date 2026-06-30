@@ -140,6 +140,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
         </div>
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+          <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
           <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
           <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
           <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With a human</div><div class="n" id="u_looper">—</div><div class="d">our team is on it</div></div>
@@ -194,12 +195,23 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'">Back to business</button></div>';}
     var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
+  function billRow(i){
+    var id=i.id;
+    var due=i.date?(' · due '+i.date):'';
+    var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View bill ↗</a>':'';
+    var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:11px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
+    var hasC=(i.comments||[]).length>0;
+    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this bill…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
+    var box='<div class="think">'+(i.insight?'<div class="g">💡 '+esc(i.insight)+'</div>':'')+'<div class="acts"><button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+(hasC?' ('+i.comments.length+')':'')+'</button><button class="tbtn draw" data-fb="ignore" data-id="'+id+'"><i class="ti ti-eye-off"></i> Ignore</button><button class="tbtn" data-fb="ignore_always" data-id="'+id+'">Always ignore</button></div>'+cwrap+'</div>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-file-invoice"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.insight||"bill to pay")+due+'</div></div>'+rc+'<span class="pill" style="background:#fdecea;color:#b42318">to pay</span></div>'+box+'</div>';
+  }
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
+    if(f==="bills"){list=U_ITEMS.filter(function(i){return i.lane==="to_pay";});htxt="Bills to pay — incoming, not yet paid";row=billRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No bills waiting — Ava is watching your inbox.';}
+    else if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
     else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With a human — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
-    else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
+    else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
     else{list=U_ITEMS.filter(function(i){return i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
@@ -221,10 +233,12 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       var c=d.counts||{};
       U_ITEMS=d.items||[];
       var nf=function(test){return U_ITEMS.filter(test).length;};
-      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper");
+      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper"),bl=document.getElementById("u_bills"),bt=document.getElementById("u_billstot");
       if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
-      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});
+      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay";});
       if(lp)lp.textContent=nf(function(i){return i.lane==="looper";});
+      if(bl)bl.textContent=nf(function(i){return i.lane==="to_pay";});
+      if(bt){var tot=U_ITEMS.filter(function(i){return i.lane==="to_pay";}).reduce(function(s,i){return s+Math.abs(Number(i.amount)||0);},0);bt.textContent=tot?(uMoney(tot)+" due"):"incoming, unpaid";}
       if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
       renderHome();renderIntg(d.integrations);
     }).catch(function(){});

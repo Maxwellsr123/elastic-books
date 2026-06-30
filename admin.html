@@ -162,6 +162,15 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
   function ldetail(it){
+    if(it.lane==="to_pay"){
+      var bdue=it.date?(' · due '+it.date):'';
+      var bv=it.receipt_url?'<div style="margin-top:9px"><a href="'+it.receipt_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ind);text-decoration:none"><i class="ti ti-file-text" style="font-size:15px"></i> View bill ↗</a></div>':'';
+      var bcm=(it.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin:5px 0;line-height:1.5;'+(a?'background:var(--indbg);padding:7px 10px;border-radius:10px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
+      return '<div style="margin-bottom:8px"><span class="pill" style="background:#fdecea;color:#b42318"><i class="ti ti-file-invoice" style="font-size:11px;vertical-align:-1px"></i> Bill to pay</span></div>'+
+        '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6">'+esc(it.insight||"incoming bill")+(it.amount!=null?(' · <b>$'+it.amount+'</b>'):'')+bdue+'</div>'+bv+
+        '<div style="font-size:11px;color:var(--ink3);margin-top:9px"><i class="ti ti-info-circle" style="font-size:12px"></i> Ava spotted this in the inbox. Once it’s paid it’ll come back as a bank line to reconcile.</div>'+
+        '<div style="margin-top:11px;border-top:1px solid var(--line);padding-top:9px">'+(bcm||'<div style="font-size:12px;color:var(--ink3)">No notes yet.</div>')+'<div style="display:flex;gap:6px;margin-top:7px"><input class="cmt-in" data-id="'+it.id+'" placeholder="Add a note…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="btn cmt-send" data-id="'+it.id+'">Send</button></div></div>';
+    }
     var src=it.flagged?'<i class="ti ti-alert-triangle" style="color:var(--amb)"></i> Ava found a likely receipt but the amount’s off — check before reconciling'
       :it.bucket==="ready"?'<i class="ti ti-check" style="color:var(--grn)"></i> '+(it.source==="gmail"?"receipt found in Gmail and attached":"receipt attached")
       :it.insight?'<i class="ti ti-bulb" style="color:var(--ind)"></i> <b>Ava’s read:</b> '+esc(it.insight)+(it.confidence!=null?' <span style="color:var(--ink3)">('+Math.round(it.confidence*100)+'% sure)</span>':'')
@@ -194,6 +203,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function dtally(){
     var c=function(l,n,col,bk){var on=dfilter===bk;return '<div class="card stat" data-bk="'+bk+'" style="cursor:pointer;'+(on?"outline:2px solid var(--ind);outline-offset:-1px;":"")+'"><div class="l">'+l+'</div><div class="n" style="color:'+col+'">'+n+'</div></div>';};
     document.getElementById("dtally").innerHTML=
+      c("Bills to pay",lc.to_pay||0,"var(--red)","to_pay")+
       c("Ready to reconcile",lc.ready||0,"var(--grn)","ready")+
       c("Awaiting receipt",lc.await_receipt||0,"var(--amb)","await_receipt")+
       c("Awaiting owner",lc.confirm||0,"var(--ink)","confirm")+
@@ -206,16 +216,17 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       if(!live.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Queue empty. Drop a Xero screenshot to add one.</div>';return;}
       var arr=dfilter?live.filter(function(it){
         if(dfilter==="ready")return it.lane==="ready";
-        if(dfilter==="await_receipt")return it.receipt==="needed"&&it.lane!=="looper"&&!it.reconciled;
+        if(dfilter==="await_receipt")return it.receipt==="needed"&&it.lane!=="looper"&&it.lane!=="to_pay"&&!it.reconciled;
         if(dfilter==="confirm")return it.lane==="guess";
         if(dfilter==="looper")return it.lane==="looper";
+        if(dfilter==="to_pay")return it.lane==="to_pay";
         return it.lane===dfilter;
       }):live;
       if(!arr.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Nothing in this view — tap the card again to clear the filter.</div>';return;}
       box.innerHTML=arr.map(function(it){
         var open=(""+dsel)===(""+it.id);
         var amt=it.amount!=null?(" — $"+it.amount):"";
-        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a human</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
+        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="to_pay"?'<span class="pill" style="background:#fdecea;color:#b42318">bill</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a human</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
         var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ldetail(it)+'</div>':'';
         return '<div class="qcard">'+head+body+'</div>';
       }).join("");
@@ -255,8 +266,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
             else if(m.error&&String(m.error).indexOf("RESEND")>=0){p.textContent="✓ found "+found+" · "+(m.count||0)+" ready to email (connect Resend)";}
             else{p.textContent="✓ found "+found+" · "+(m.count||0)+" to chase";}
             loadLive();clr(9000);
-            // Ava joins the dots on whatever couldn't be matched (best-guess reasoning)
-            post("chase-insight",{company_id:KPA_ID}).then(function(){loadLive();}).catch(function(){});
+            // Ava joins the dots on whatever couldn't be matched, then scouts the inbox for new bills to pay
+            post("chase-insight",{company_id:KPA_ID}).then(function(){return post("chase-bills",{company_id:KPA_ID});}).then(function(){loadLive();}).catch(function(){});
           });
         }).catch(function(){loadLive();clr(6000);});
       }).catch(function(err){p.style.color="var(--amb)";p.textContent="Network error — "+err;});};
