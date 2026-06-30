@@ -9,12 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F6F6FB;--card:#fff;--line:#EBEBF1;--ink:#16161D;--ink2:#6A6A78;--ink3:#9B9BA8;
---ind:#6366F1;--ind2:#8B5CF6;--indbg:#EEF0FF;--indtx:#4338CA;
---grn:#067647;--grnbg:#ECFDF3;--amb:#B54708;--ambbg:#FFFAEB;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;
+--ind:#5B54E6;--ind2:#7B74EE;--indbg:#EEEDFB;--indtx:#3D36C4;
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .app{display:flex;min-height:100vh}
-.side{width:236px;background:#141319;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh}
+.side{width:236px;background:#100F15;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh;border-right:1px solid #1d1c24}
 .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
 .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
 .brand b{font-weight:600;font-size:16px}.brand .ad{font-size:10px;font-weight:600;letter-spacing:.5px;color:#8B8B98;background:#262533;padding:2px 6px;border-radius:5px;margin-left:auto}
@@ -31,7 +32,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--grnbg);color:var(--grn)}
 .wrap{padding:24px 28px;max-width:1000px}
 .grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,1fr)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(16,17,33,.03),0 8px 22px rgba(16,17,33,.04)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(20,20,24,.025),0 16px 34px rgba(20,20,24,.04)}
 .stat{padding:15px 17px}.stat .l{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px}
 .stat .n{font-size:25px;font-weight:600;margin-top:6px}
 .sec{font-size:14px;font-weight:600;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
@@ -56,8 +57,8 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
 .bub.them{background:#fff;border:1px solid var(--line);margin-left:auto}
 .bub .who{font-size:11px;font-weight:600;opacity:.7;margin-bottom:3px}
 .tier{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
-.btn-p{background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;border:0}
-.btn-p:hover{filter:brightness(1.06)}
+.btn-p{background:var(--ind);color:#fff;border:0;box-shadow:0 1px 2px rgba(91,84,230,.25),0 6px 16px rgba(91,84,230,.22)}
+.btn-p:hover{background:#4a43d8}
 .drop{border:2px dashed #D6D6E6;border-radius:18px;padding:26px;text-align:center;background:linear-gradient(180deg,#FBFBFE,#F3F3FB);margin-bottom:18px;transition:border-color .15s}
 .drop:hover{border-color:var(--ind)}
 .dz{width:54px;height:54px;border-radius:15px;margin:0 auto 12px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:27px}
@@ -105,7 +106,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
           <div style="font-weight:600;margin-bottom:12px">Onboard a new client</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
             <input id="acName" placeholder="Business name" style="flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
-            <input id="acEmail" placeholder="Owner email (optional)" style="flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
+            <input id="acEmail" placeholder="Owner email — we'll send them the invite" style="flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
             <button class="btn btn-p" id="acCreate">Create + get links</button>
           </div>
           <div id="acResult" style="font-size:13px"></div>
@@ -210,12 +211,19 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
     fetch(AC,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:name,owner_email:email})})
       .then(function(r){return r.json();}).then(function(d){
         if(d.error){res.style.color="var(--amb)";res.textContent="Couldn't create — "+d.error;return;}
-        res.innerHTML='<div style="color:var(--grn);font-weight:500;margin-bottom:8px"><i class="ti ti-circle-check"></i> '+name+' created — send the owner these to connect:</div>'+
-          '<div style="display:flex;flex-direction:column;gap:6px">'+
-          '<a href="'+d.connect.gmail+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-mail" style="font-size:14px;vertical-align:-2px"></i> Connect Gmail</a>'+
-          '<a href="'+d.connect.xero+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-calculator" style="font-size:14px;vertical-align:-2px"></i> Connect Xero</a>'+
-          '<span style="color:var(--ink2)"><i class="ti ti-brand-slack" style="font-size:14px;vertical-align:-2px"></i> '+d.connect.slack+'</span>'+
-          '</div>';
+        res.style.color="";
+        if(d.emailed){
+          res.innerHTML='<div style="color:var(--grn);font-weight:600;margin-bottom:4px"><i class="ti ti-circle-check"></i> '+name+' created — invite emailed to '+email+'</div>'+
+            '<div style="font-size:12.5px;color:var(--ink2)">They\'ll get an Ava-branded email with one-tap links to connect Gmail &amp; Xero.</div>';
+        } else {
+          var note=email?'<div style="font-size:12px;color:var(--amb);margin-bottom:8px">Couldn\'t email the invite'+(d.email_error?(' ('+d.email_error+')'):'')+' — send these links yourself:</div>':'<div style="font-size:12.5px;color:var(--ink2);margin-bottom:8px">Created — send the owner these to connect:</div>';
+          res.innerHTML='<div style="color:var(--grn);font-weight:600;margin-bottom:6px"><i class="ti ti-circle-check"></i> '+name+' created</div>'+note+
+            '<div style="display:flex;flex-direction:column;gap:6px">'+
+            '<a href="'+d.connect.gmail+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-mail" style="font-size:14px;vertical-align:-2px"></i> Connect Gmail</a>'+
+            '<a href="'+d.connect.xero+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-calculator" style="font-size:14px;vertical-align:-2px"></i> Connect Xero</a>'+
+            '<span style="color:var(--ink2)"><i class="ti ti-brand-slack" style="font-size:14px;vertical-align:-2px"></i> '+d.connect.slack+'</span>'+
+            '</div>';
+        }
         document.getElementById("acName").value="";document.getElementById("acEmail").value="";
       }).catch(function(err){res.style.color="var(--amb)";res.textContent="Network error — "+err;});
   });
