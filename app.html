@@ -108,8 +108,6 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     <div class="brand"><div class="logo">A</div><b>Ava</b></div>
     <nav class="nav" id="nav">
       <a data-p="home" class="on"><i class="ti ti-home"></i> Home</a>
-      <a data-p="receipts"><i class="ti ti-receipt"></i> Receipts</a>
-      <a data-p="personal"><i class="ti ti-user-heart"></i> Personal<span id="u_pcount" style="margin-left:auto;font-size:11px;color:#8B8B98"></span></a>
     </nav>
     <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic Books</div></div>
   </aside>
@@ -150,29 +148,12 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
       </section>
 
-      <section id="receipts" class="hidden">
-        <div class="sec" style="margin-top:0">This month's receipts</div>
-        <div class="card" id="udone"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading…</div></div></div>
-      </section>
-
-      <section id="personal" class="hidden">
-        <div style="font-size:13px;color:var(--ink2);margin-bottom:14px;max-width:560px">Personal & drawings — kept out of your main feed, no receipts needed. Tap <b>Back to business</b> on anything that's actually a work expense.</div>
-        <div class="card" id="upersonal"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing here — Ava moves personal spending here when you tap <b>Personal</b> on it.</div></div></div>
-      </section>
 
     </div>
   </main>
 </div>
 <script>
 (function(){
-  var titles={home:"Home",receipts:"Receipts",personal:"Personal"};
-  document.getElementById("nav").addEventListener("click",function(e){
-    var a=e.target.closest("[data-p]");if(!a)return;
-    document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
-    var p=a.getAttribute("data-p");
-    ["home","receipts","personal"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
-    document.getElementById("ptitle").textContent=titles[p];
-  });
   function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
   var FB="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-feedback";
 
@@ -209,15 +190,16 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
   }
-  function personalRow(i){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.account||"Drawings")+(i.insight?(" · "+esc(i.insight)):"")+'</div></div><button class="tbtn" data-fb="restore" data-id="'+i.id+'">Back to business</button></div>';}
-  function doneRow(i){var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
+  function doneRow(i){
+    if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'">Back to business</button></div>';}
+    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&(i.lane==="ready"||i.lane==="done");});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
-    else if(f==="looper"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="looper";});htxt="With a human — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
-    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
-    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
+    if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
+    else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With a human — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
+    else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
+    else{list=U_ITEMS.filter(function(i){return i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
@@ -233,20 +215,17 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       row("Gmail","ti-mail","#EA4335",g.gmail,g.gmail_url,false)+
       row("Xero","ti-calculator","#13B5EA",g.xero,g.xero_url,true);
   }
-  function renderDone(){var db=document.getElementById("udone");if(!db)return;var done=U_ITEMS.filter(function(i){return !i.personal&&(i.bucket==="ready"||i.bucket==="review");});db.innerHTML=done.length?done.slice(0,40).map(doneRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing sorted yet — Ava is on it.</div></div>';}
-  function renderPersonal(){var pb=document.getElementById("upersonal");if(!pb)return;var p=U_ITEMS.filter(function(i){return i.personal;});if(p.length)pb.innerHTML=p.map(personalRow).join("");}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
       U_ITEMS=d.items||[];
-      var nf=function(test){return U_ITEMS.filter(function(i){return !i.personal&&test(i);}).length;};
+      var nf=function(test){return U_ITEMS.filter(test).length;};
       var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper");
       if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
       if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});
       if(lp)lp.textContent=nf(function(i){return i.lane==="looper";});
       if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
-      renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
-      var pc=document.getElementById("u_pcount");if(pc)pc.textContent=(c.personal||0)?(" "+c.personal):"";
+      renderHome();renderIntg(d.integrations);
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
