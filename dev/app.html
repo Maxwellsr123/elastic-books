@@ -119,6 +119,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div>
       <div style="display:flex;align-items:center;gap:14px;">
         <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
+        <button id="setupbtn" title="Setup" style="background:none;border:1px solid var(--line);border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center"><i class="ti ti-settings" style="font-size:18px"></i></button>
         <div class="av">MR</div>
       </div>
     </div>
@@ -323,6 +324,87 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     fetch(U,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:CO,company_name:CN,role:ROLE,page:PG,text:t})})
       .then(function(r){return r.json();}).then(function(){document.getElementById("fbtext").value="";msg.textContent="Thanks — got it. 🙏";b.disabled=false;b.textContent="Send to the team";setTimeout(function(){panel.style.display="none";msg.textContent="";},1600);})
       .catch(function(){b.disabled=false;b.textContent="Send to the team";msg.style.color="var(--amb)";msg.textContent="Couldn't send — try again.";});
+  });
+})();
+</script>
+<div id="setupov" style="position:fixed;inset:0;z-index:80;background:rgba(15,15,20,.45);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px">
+  <div style="width:100%;max-width:520px;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)">
+      <div><div style="font-weight:700;font-size:17px">Setup</div><div style="font-size:12.5px;color:var(--ink2)">Settings for Auto Bookkeeping</div></div>
+      <button id="setupx" style="background:none;border:none;cursor:pointer;color:var(--ink2);font-size:24px;line-height:1">&times;</button>
+    </div>
+    <div style="padding:6px 20px 18px;max-height:70vh;overflow:auto" id="setupbody"><div style="padding:24px 0;color:var(--ink2);font-size:13px">Loading…</div></div>
+    <div style="padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;align-items:center">
+      <span id="setupmsg" style="font-size:12.5px;color:var(--grn);margin-right:auto"></span>
+      <button id="setupsave" class="btn btn-p" style="justify-content:center">Save</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
+  var ov=document.getElementById("setupov"),body=document.getElementById("setupbody"),msg=document.getElementById("setupmsg");
+  var S=null, ICONN={};
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
+  function sec(title,sub,inner){return '<div style="padding:16px 0;border-bottom:1px solid var(--line)"><div style="font-weight:600;font-size:14px">'+title+'</div>'+(sub?'<div style="font-size:12px;color:var(--ink2);margin:2px 0 11px">'+sub+'</div>':'<div style="height:9px"></div>')+inner+'</div>';}
+  function pill(txt,ok){return '<span class="pill '+(ok?'p-ok':'p-warn')+'" style="font-size:11.5px">'+(ok?'<i class="ti ti-check" style="font-size:11px;vertical-align:-1px"></i> ':'')+txt+'</span>';}
+  function connectBtn(label,url){return url?'<a href="'+esc(url)+'" class="btn btn-p" style="text-decoration:none;font-size:12.5px;padding:7px 13px">'+label+'</a>':'<span class="pill p-warn" style="font-size:11.5px">connect link unavailable</span>';}
+
+  function render(){
+    if(!S){body.innerHTML='<div style="padding:24px 0;color:var(--ink2);font-size:13px">Loading…</div>';return;}
+    // 1. Inboxes
+    var inboxes=(S.inboxes||[]);
+    var inHtml=inboxes.length?inboxes.map(function(x){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)"><i class="ti ti-mail" style="font-size:17px;color:#EA4335"></i><div style="flex:1;font-size:13.5px;font-weight:500">'+esc(x.email)+'</div>'+pill("Connected",true)+'</div>';}).join(""):'<div style="font-size:13px;color:var(--ink2);padding:6px 0 10px">No inbox connected yet — Ava needs at least one to scan.</div>';
+    inHtml+='<div style="margin-top:11px">'+connectBtn('<i class="ti ti-plus" style="font-size:13px;vertical-align:-2px"></i> Add an inbox',ICONN.gmail_url)+'</div>';
+    var s1=sec("Inboxes Ava scans","Connect every inbox where receipts and bills land — Ava reads them all.",inHtml);
+
+    // 2. Xero
+    var xHtml='<div style="display:flex;align-items:center;gap:10px;padding:4px 0 2px"><i class="ti ti-calculator" style="font-size:18px;color:#13B5EA"></i><div style="flex:1;font-size:13.5px;font-weight:500">Xero</div>'+(S.xero_connected?pill("Connected",true):connectBtn("Connect Xero",ICONN.xero_url))+'</div>';
+    var s2=sec("Xero","For chasing overdue invoices and attaching receipts to the right place.",xHtml+'<div style="font-size:11.5px;color:var(--ink2);background:var(--bg);border-radius:9px;padding:9px 11px;margin-top:10px"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px"></i> Ava can&rsquo;t pull unreconciled payments from Xero — that always comes in as a manual upload. Who handles that upload is set below.</div>');
+
+    // 3. Who runs the books
+    function opt(val,icon,label,desc){var on=S.bookkeeping===val;return '<div class="bkopt" data-bk="'+val+'" style="display:flex;gap:11px;align-items:flex-start;padding:12px;border:1.5px solid '+(on?'var(--ind)':'var(--line)')+';border-radius:12px;margin-bottom:9px;cursor:pointer;background:'+(on?'rgba(99,102,241,.05)':'#fff')+'"><i class="ti '+icon+'" style="font-size:19px;color:'+(on?'var(--ind)':'var(--ink3)')+';margin-top:1px"></i><div style="flex:1"><div style="font-weight:600;font-size:13.5px">'+label+'</div><div style="font-size:12px;color:var(--ink2);margin-top:1px">'+desc+'</div></div><div style="width:18px;height:18px;border-radius:50%;border:1.5px solid '+(on?'var(--ind)':'var(--line)')+';display:flex;align-items:center;justify-content:center">'+(on?'<div style="width:9px;height:9px;border-radius:50%;background:var(--ind)"></div>':'')+'</div></div>';}
+    var bk=opt("elastic","ti-sparkles","Elastic does it","Recommended — we run your books for you, every day.")+
+           opt("own","ti-user","My own bookkeeper","Invite your bookkeeper to pick up the reconciled work.")+
+           opt("self","ti-upload","I'll do it myself","Self-serve — you upload your Xero export and reconcile.");
+    var ownEmail=S.bookkeeping==="own"?'<input id="bkemail" type="email" placeholder="your bookkeeper&rsquo;s email" value="'+esc(S.own_bookkeeper_email||"")+'" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;box-sizing:border-box;margin-top:2px">':'';
+    var s3=sec("Who runs your books","Whichever you pick, the Elastic team always sees it on our side so we can help.",bk+ownEmail);
+
+    // 4. Daily email recipients
+    var recs=(S.daily_recipients||[]);
+    var chips=recs.length?recs.map(function(e,idx){return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12.5px;margin:0 7px 7px 0">'+esc(e)+' <span class="rmrec" data-i="'+idx+'" style="cursor:pointer;color:var(--ink3);font-weight:700">&times;</span></span>';}).join(""):'<div style="font-size:12.5px;color:var(--ink2);margin-bottom:8px">No-one gets the daily summary yet.</div>';
+    var addr='<div style="display:flex;gap:8px;margin-top:4px"><input id="recinput" type="email" placeholder="add an email" style="flex:1;border:1px solid var(--line);border-radius:10px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box"><button id="recadd" class="btn" style="border:1px solid var(--line)">Add</button></div>';
+    var s4=sec("Daily summary email","Everyone here gets Ava&rsquo;s daily wrap. Add the whole office if you like.",'<div>'+chips+'</div>'+addr);
+
+    body.innerHTML=s1+s2+s3+s4;
+    body.querySelectorAll(".bkopt").forEach(function(el){el.addEventListener("click",function(){S.bookkeeping=this.getAttribute("data-bk");render();});});
+    var be=document.getElementById("bkemail");if(be)be.addEventListener("input",function(){S.own_bookkeeper_email=this.value;});
+    body.querySelectorAll(".rmrec").forEach(function(el){el.addEventListener("click",function(){S.daily_recipients.splice(+this.getAttribute("data-i"),1);render();});});
+    var ra=document.getElementById("recadd");if(ra)ra.addEventListener("click",function(){var i=document.getElementById("recinput"),v=(i.value||"").trim().toLowerCase();if(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)&&S.daily_recipients.indexOf(v)<0){S.daily_recipients.push(v);render();}else{i.style.borderColor="var(--amb)";}});
+  }
+  function open(){
+    ov.style.display="flex";msg.textContent="";S=null;render();
+    Promise.all([
+      fetch(API+"/feature-settings?company="+CO).then(function(r){return r.json();}).catch(function(){return {};}),
+      fetch(API+"/chase-list?company="+CO).then(function(r){return r.json();}).catch(function(){return {};})
+    ]).then(function(res){
+      S=(res[0]&&res[0].settings)||{bookkeeping:"elastic",daily_recipients:[],inboxes:[],xero_connected:false};
+      if(!S.daily_recipients)S.daily_recipients=[];
+      ICONN=(res[1]&&res[1].integrations)||{};
+      render();
+    });
+  }
+  function close(){ov.style.display="none";}
+  var sb=document.getElementById("setupbtn");if(sb)sb.addEventListener("click",open);
+  document.getElementById("setupx").addEventListener("click",close);
+  ov.addEventListener("click",function(e){if(e.target===ov)close();});
+  document.getElementById("setupsave").addEventListener("click",function(){
+    if(!S)return;var b=this;b.disabled=true;b.textContent="Saving…";msg.style.color="var(--grn)";
+    var payload={bookkeeping:S.bookkeeping,own_bookkeeper_email:S.own_bookkeeper_email||"",daily_recipients:S.daily_recipients||[]};
+    fetch(API+"/feature-settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,feature:"auto_bookkeeping",settings:payload})})
+      .then(function(r){return r.json();}).then(function(){b.disabled=false;b.textContent="Save";msg.textContent="Saved ✓";setTimeout(function(){msg.textContent="";},2000);})
+      .catch(function(){b.disabled=false;b.textContent="Save";msg.style.color="var(--amb)";msg.textContent="Couldn't save — try again.";});
   });
 })();
 </script>
