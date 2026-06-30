@@ -140,9 +140,10 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
         </div>
-        <div class="grid g3">
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
           <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
           <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
+          <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With a human</div><div class="n" id="u_looper">—</div><div class="d">our team is on it</div></div>
           <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">ready for Jewel</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
@@ -192,7 +193,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var row1='<div class="acts">'+
       '<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Right</button>'+
       '<button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> Nope</button>'+
-      '<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Comment</button></div>';
+      '<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button></div>';
     var row2='<div class="acts">'+
       '<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button>'+
       '<button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>'+
@@ -200,9 +201,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       '<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs receipt</button>'+
       '<button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">No receipt</button></div>';
     var row3='<div class="acts"><button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt to this</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none"></div>';
-    var cmts=(i.comments||[]).map(function(c){return '<div style="font-size:11.5px;margin-top:4px"><b style="text-transform:capitalize;color:var(--ink)">'+esc(c.author)+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
-    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:none;margin-top:8px"><div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Note for Jewel…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
-    var box='<div class="think">'+head+row1+row2+row3+cwrap+(cmts?('<div style="margin-top:7px">'+cmts+'</div>'):'')+'</div>';
+    var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:11px':'')+'"><b style="text-transform:capitalize;color:'+(a?'var(--indtx)':'var(--ink)')+'">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
+    var looperBtn=i.looper?'<span class="pill p-ind"><i class="ti ti-user-check" style="font-size:11px;vertical-align:-1px"></i> Our team is on it</span>':'<button class="tbtn" data-fb="looper" data-id="'+id+'"><i class="ti ti-user-search"></i> Get a human</button>';
+    var hasC=(i.comments||[]).length>0;
+    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div><div style="margin-top:7px">'+looperBtn+'</div></div>';
+    var box='<div class="think">'+head+row1+row2+row3+cwrap+'</div>';
     var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
   }
@@ -212,7 +215,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
     if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&(i.lane==="ready"||i.lane==="done");});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
-    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
+    else if(f==="looper"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="looper";});htxt="With a human — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
+    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
     else{list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
@@ -236,16 +240,17 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       var c=d.counts||{};
       U_ITEMS=d.items||[];
       var nf=function(test){return U_ITEMS.filter(function(i){return !i.personal&&test(i);}).length;};
-      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done");
+      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper");
       if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
-      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done";});
+      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper";});
+      if(lp)lp.textContent=nf(function(i){return i.lane==="looper";});
       if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
       renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
       var pc=document.getElementById("u_pcount");if(pc)pc.textContent=(c.personal||0)?(" "+c.personal):"";
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
-  var CM="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-comment";
+  var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
   document.addEventListener("click",function(e){
     var b=e.target.closest("[data-fb]");
     if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");b.style.opacity=".5";
@@ -253,8 +258,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
     var cs=e.target.closest(".cmt-send");
-    if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";
-      fetch(CM,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,author:"owner",text:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";});return;}
+    if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";cs.textContent="Ava…";if(inp)inp.value="";
+      fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
     var at=e.target.closest("[data-attach]");
     if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
   });

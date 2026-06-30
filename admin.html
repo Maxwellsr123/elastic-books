@@ -110,7 +110,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <span id="dproc" style="display:block;font-size:12px;color:var(--ink3);margin-top:9px"></span>
           <input type="file" id="dfile" accept="image/*,.pdf,.csv,.xlsx,.xls" style="display:none">
         </div>
-        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="dtally"></div>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px" id="dtally"></div>
         <div id="dqueue" style="display:flex;flex-direction:column;gap:9px"></div>
       </section>
 
@@ -169,6 +169,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var why=(it.insight&&it.reasoning)?'<div style="font-size:12px;color:var(--ink3);line-height:1.55;margin-top:5px">'+esc(it.reasoning)+'</div>':'';
     var rcpt=it.receipt_url?'<div style="margin-top:9px"><a href="'+it.receipt_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ind);text-decoration:none"><i class="ti ti-file-text" style="font-size:15px"></i> Open receipt ↗</a></div>':'';
     var badge=it.reconciled?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:11px;vertical-align:-1px"></i> Reconciled</span>'
+      :it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)"><i class="ti ti-user-search" style="font-size:11px;vertical-align:-1px"></i> With a human — owner asked for help</span>'
       :it.lane==="ready"?'<span class="pill p-ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px"></i> Ready to reconcile</span>'
       :it.lane==="await_receipt"?'<span class="pill p-warn"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Confirmed · waiting on receipt</span>'
       :it.lane==="review"?'<span class="pill p-warn"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Needs a check</span>'
@@ -178,10 +179,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       :it.receipt==="not_needed"?'<div style="font-size:12px;color:var(--ink3);margin-top:6px"><i class="ti ti-receipt-off" style="font-size:13px;vertical-align:-2px"></i> No receipt needed (tax / fee / fine / personal)</div>'
       :'<div style="font-size:12px;color:var(--amb);margin-top:6px"><i class="ti ti-mail-search" style="font-size:13px;vertical-align:-2px"></i> Receipt still needed — Ava is chasing it</div>';
     var act=it.reconciled?''
+      :it.lane==="looper"?'<button class="btn btn-p" data-resolve="'+it.id+'">Sorted — hand back to Ava</button> <span style="font-size:12px;color:var(--ink3)">reply in the thread below, then hand back</span>'
       :it.lane==="ready"?'<button class="btn btn-p" data-recon="'+it.id+'">Mark reconciled in Xero</button>'
       :it.lane==="await_receipt"?'<span style="font-size:12px;color:var(--ink3)">Owner confirmed — reconcile once the receipt lands</span>'
       :'<span style="font-size:12px;color:var(--ink3)">Owner needs to confirm (👍 in their app) before reconciling</span>';
-    var cm=(it.comments||[]).map(function(c){return '<div style="font-size:12px;margin:5px 0;line-height:1.5"><b style="color:var(--ink);text-transform:capitalize">'+esc(c.author)+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
+    var cm=(it.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin:5px 0;line-height:1.5;'+(a?'background:var(--indbg);padding:7px 10px;border-radius:10px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
     var cbox='<div style="margin-top:11px;border-top:1px solid var(--line);padding-top:9px">'+(cm||'<div style="font-size:12px;color:var(--ink3)">No notes yet.</div>')+'<div style="display:flex;gap:6px;margin-top:7px"><input class="cmt-in" data-id="'+it.id+'" placeholder="Add a note for Max…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="btn cmt-send" data-id="'+it.id+'">Send</button></div></div>';
     return '<div style="margin-bottom:8px">'+badge+'</div>'+
       '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6">'+src+'</div>'+why+rstat+rcpt+
@@ -193,7 +195,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     document.getElementById("dtally").innerHTML=
       c("Ready to reconcile",lc.ready||0,"var(--grn)","ready")+
       c("Awaiting receipt",lc.await_receipt||0,"var(--amb)","await_receipt")+
-      c("Awaiting owner",lc.confirm||0,"var(--ink)","confirm");
+      c("Awaiting owner",lc.confirm||0,"var(--ink)","confirm")+
+      c("With a human",lc.looper||0,"var(--blu)","looper");
   }
   function dqueue(){
     var box=document.getElementById("dqueue");
@@ -202,15 +205,16 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       if(!live.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Queue empty. Drop a Xero screenshot to add one.</div>';return;}
       var arr=dfilter?live.filter(function(it){
         if(dfilter==="ready")return it.lane==="ready";
-        if(dfilter==="await_receipt")return it.receipt==="needed"&&!it.reconciled;
+        if(dfilter==="await_receipt")return it.receipt==="needed"&&it.lane!=="looper"&&!it.reconciled;
         if(dfilter==="confirm")return it.lane==="guess";
+        if(dfilter==="looper")return it.lane==="looper";
         return it.lane===dfilter;
       }):live;
       if(!arr.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Nothing in this view — tap the card again to clear the filter.</div>';return;}
       box.innerHTML=arr.map(function(it){
         var open=(""+dsel)===(""+it.id);
         var amt=it.amount!=null?(" — $"+it.amount):"";
-        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
+        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a human</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
         var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ldetail(it)+'</div>':'';
         return '<div class="qcard">'+head+body+'</div>';
       }).join("");
@@ -224,6 +228,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var rc=e.target.closest("[data-recon]");
     if(rc){var id=rc.getAttribute("data-recon");rc.style.opacity=".5";rc.textContent="Reconciling…";
       apost("chase-feedback",{company_id:KPA_ID,id:id,action:"reconciled"}).then(function(m){if(m&&m.error){rc.style.opacity="1";rc.textContent="Mark reconciled in Xero";alert(m.error);}else loadLive();}).catch(function(){rc.style.opacity="1";});return;}
+    var rs=e.target.closest("[data-resolve]");
+    if(rs){var rid=rs.getAttribute("data-resolve");rs.style.opacity=".5";apost("chase-feedback",{company_id:KPA_ID,id:rid,action:"looper_resolve"}).then(function(){loadLive();}).catch(function(){rs.style.opacity="1";});return;}
     var cs=e.target.closest(".cmt-send");
     if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";
       apost("chase-comment",{company_id:KPA_ID,id:cid,author:"jewel",text:t}).then(function(){loadLive();}).catch(function(){cs.style.opacity="1";});return;}
