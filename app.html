@@ -77,7 +77,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .acts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
 .tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .tbtn:hover{background:var(--bg)}.tbtn.on{background:var(--ind);color:#fff;border-color:var(--ind)}
-.tbtn.draw{margin-left:auto;color:var(--ink2)}
+.tbtn.draw{color:var(--ink2)}
+.sep{width:1px;height:20px;background:var(--line);margin:0 3px;align-self:center;display:inline-block}
 @media (max-width:680px){
   .think{margin-left:16px;margin-right:16px}
   html,body{overflow-x:hidden;max-width:100vw}
@@ -177,21 +178,25 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
   var U_ITEMS=[],U_FILTER="confirm";
   function needRow(i){
-    var ins="";
-    if(i.insight){
-      var conf=i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"";
-      var why=i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':"";
-      ins='<div class="think"><div class="g">💡 Ava thinks: '+esc(i.insight)+conf+'</div>'+why+
-        '<div class="acts">'+
-        '<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+i.id+'"><i class="ti ti-thumb-up"></i> Right</button>'+
-        '<button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+i.id+'"><i class="ti ti-thumb-down"></i> Nope</button>'+
-        '<button class="tbtn draw" data-fb="personal" data-id="'+i.id+'"><i class="ti ti-user-heart"></i> Personal'+(i.ava_personal?" ✓":"")+'</button>'+
-        '</div></div>';
-    }
-    var rpill=i.receipt==="not_needed"?'<span class="pill p-ok">no receipt needed</span>'
-      :i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>'
-      :'<span class="pill p-warn">send receipt</span>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+ins+'</div>';
+    var id=i.id;
+    var head=i.insight?'<div class="g">💡 Ava thinks: '+esc(i.insight)+(i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"")+'</div>'+(i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':""):'';
+    var isP=i.personal, noR=i.receipt==="not_needed";
+    var row1='<div class="acts">'+
+      '<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Right</button>'+
+      '<button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> Nope</button>'+
+      '<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Comment</button></div>';
+    var row2='<div class="acts">'+
+      '<button class="tbtn'+(!isP?" on":"")+'" data-fb="business" data-id="'+id+'">Business</button>'+
+      '<button class="tbtn'+(isP?" on":"")+'" data-fb="personal" data-id="'+id+'">Personal</button>'+
+      '<span class="sep"></span>'+
+      '<button class="tbtn'+(i.receipt==="needed"?" on":"")+'" data-fb="needs_receipt" data-id="'+id+'">Needs receipt</button>'+
+      '<button class="tbtn'+(noR?" on":"")+'" data-fb="no_receipt" data-id="'+id+'">No receipt</button></div>';
+    var row3='<div class="acts"><button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt to this</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none"></div>';
+    var cmts=(i.comments||[]).map(function(c){return '<div style="font-size:11.5px;margin-top:4px"><b style="text-transform:capitalize;color:var(--ink)">'+esc(c.author)+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
+    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:none;margin-top:8px"><div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Note for Jewel…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
+    var box='<div class="think">'+head+row1+row2+row3+cwrap+(cmts?('<div style="margin-top:7px">'+cmts+'</div>'):'')+'</div>';
+    var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
   }
   function personalRow(i){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.account||"Drawings")+(i.insight?(" · "+esc(i.insight)):"")+'</div></div><button class="tbtn" data-fb="restore" data-id="'+i.id+'">Back to business</button></div>';}
   function doneRow(i){var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
@@ -228,13 +233,23 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
+  var CM="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-comment";
   document.addEventListener("click",function(e){
-    var b=e.target.closest("[data-fb]");if(!b)return;
-    var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
-    b.style.opacity=".5";
-    fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})})
-      .then(function(r){return r.json();}).then(function(){loadList();})
-      .catch(function(){b.style.opacity="1";});
+    var b=e.target.closest("[data-fb]");
+    if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");b.style.opacity=".5";
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){b.style.opacity="1";});return;}
+    var ct=e.target.closest("[data-cmt]");
+    if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
+    var cs=e.target.closest(".cmt-send");
+    if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";
+      fetch(CM,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,author:"owner",text:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";});return;}
+    var at=e.target.closest("[data-attach]");
+    if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
+  });
+  document.addEventListener("change",function(e){
+    var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
+    var id=f.getAttribute("data-id"),file=f.files[0];f.value="";
+    readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(){loadList();}).catch(function(){});
   });
   loadList();
   var ukind="receipt";
