@@ -118,6 +118,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       <a href="index.html"><i class="ti ti-arrow-left"></i> All features</a>
       <a data-p="desk" class="on"><i class="ti ti-clipboard-list"></i> Desk</a>
       <a data-p="clients"><i class="ti ti-users"></i> Clients</a>
+      <a data-p="team"><i class="ti ti-user-shield"></i> Admins</a>
     </nav>
     <div class="foot"><div class="a">EA</div><div><div class="w">Elastic Admin</div><div class="s">operator</div></div></div>
   </aside>
@@ -160,16 +161,29 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div id="clientlist"><div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">Loading clients…</div></div></div>
         </div>
       </section>
+
+      <section id="team" class="hidden">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Admin access</div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:14px;max-width:560px">Who can open this desk. Add a teammate's email and Ava emails them a one-tap sign-in link.</div>
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input id="atEmail" placeholder="teammate@elasticadmin.com" style="flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
+            <button class="btn btn-p" id="atAdd">Add &amp; invite</button>
+          </div>
+          <div id="atResult" style="font-size:13px;margin-top:8px"></div>
+        </div>
+        <div class="card" id="adminlist"><div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">Loading…</div></div></div>
+      </section>
     </div>
   </main>
 </div>
 <script>
 (function(){
-  var titles={desk:"Desk",clients:"Clients"};
+  var titles={desk:"Desk",clients:"Clients",team:"Admins"};
   document.getElementById("nav").addEventListener("click",function(e){
     var a=e.target.closest("[data-p]");if(!a)return;
     document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
-    var p=a.getAttribute("data-p");["desk","clients"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
+    var p=a.getAttribute("data-p");["desk","clients","team"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});if(p==="team")loadAdmins();
     document.getElementById("ptitle").textContent=titles[p];
   });
 
@@ -336,6 +350,30 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   document.addEventListener("click",function(e){var b=e.target.closest(".copyl");if(!b)return;var l=b.getAttribute("data-l");if(navigator.clipboard)navigator.clipboard.writeText(l);var o=b.textContent;b.textContent="Copied!";setTimeout(function(){b.textContent=o;},1200);});
   loadClients();
+
+  // ── Admins (team access) ──────────────────────────────────────────────
+  var TEAM=API+"/admin-team",AUTHU=API+"/admin-auth";
+  function loadAdmins(){
+    fetch(TEAM).then(function(r){return r.json();}).then(function(d){
+      var box=document.getElementById("adminlist");if(!box)return;var a=d.admins||[];
+      box.innerHTML=a.length?a.map(function(u){return '<div class="row"><div class="ic"><i class="ti ti-user-shield"></i></div><div style="flex:1;font-weight:500">'+esc(u.email)+'</div><button class="btn admrm" data-e="'+esc(u.email)+'" style="font-size:12px">Remove</button></div>';}).join(""):'<div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">No admins yet.</div></div>';
+    }).catch(function(){});
+  }
+  document.getElementById("atAdd").addEventListener("click",function(){
+    var e=(document.getElementById("atEmail").value||"").trim(),res=document.getElementById("atResult"),b=this;
+    if(!e){res.style.color="var(--amb)";res.textContent="Enter an email.";return;}
+    res.style.color="var(--ink3)";res.textContent="Adding…";b.disabled=true;
+    fetch(TEAM,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:e})}).then(function(r){return r.json();}).then(function(d){
+      if(d.error){res.style.color="var(--amb)";res.textContent=d.error;b.disabled=false;return;}
+      return fetch(AUTHU,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:e})}).then(function(r){return r.json();}).then(function(m){
+        res.style.color="var(--grn)";res.textContent=(m&&m.sent)?("Added — sign-in link emailed to "+e+" 🙏"):("Added — they can sign in on the admin page.");
+        document.getElementById("atEmail").value="";b.disabled=false;loadAdmins();
+      });
+    }).catch(function(){res.style.color="var(--amb)";res.textContent="Network error.";b.disabled=false;});
+  });
+  document.addEventListener("click",function(e){var b=e.target.closest(".admrm");if(!b)return;var em=b.getAttribute("data-e");if(!confirm("Remove "+em+" from admin access?"))return;
+    fetch(TEAM,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"remove",email:em})}).then(function(r){return r.json();}).then(function(d){if(d.error)alert(d.error);loadAdmins();});
+  });
 })();
 </script>
 <div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>
