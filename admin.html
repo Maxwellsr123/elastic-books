@@ -97,7 +97,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   </aside>
 
   <main class="main">
-    <div class="top"><h1 id="ptitle">Desk</h1><span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span></div>
+    <div class="top"><div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Desk</h1><span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div><span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span></div>
     <div class="wrap">
 
       <section id="desk">
@@ -306,6 +306,27 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         }
         document.getElementById("acName").value="";document.getElementById("acEmail").value="";
       }).catch(function(err){res.style.color="var(--amb)";res.textContent="Network error — "+err;});
+  });
+})();
+</script>
+<div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>
+<div id="fbpanel" style="position:fixed;right:18px;bottom:124px;z-index:61;width:300px;max-width:calc(100vw - 36px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.22);padding:14px;display:none">
+  <div style="font-weight:600;font-size:14px;margin-bottom:3px">Looper feedback</div>
+  <div style="font-size:12px;color:var(--ink2);margin-bottom:9px">Early beta — what's breaking, what's slowing you down, what would make the desk better. Be brutal.</div>
+  <textarea id="fbtext" rows="4" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Type away…"></textarea>
+  <button id="fbsend" class="btn btn-p" style="width:100%;margin-top:8px;justify-content:center">Send to super-admin</button>
+  <div id="fbmsg" style="font-size:12px;color:var(--grn);margin-top:7px;min-height:14px"></div>
+</div>
+<script>
+(function(){
+  var U="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/app-feedback";
+  var btn=document.getElementById("fbbtn"),panel=document.getElementById("fbpanel"),msg=document.getElementById("fbmsg");
+  btn.addEventListener("click",function(){panel.style.display=panel.style.display==="none"?"block":"none";});
+  document.getElementById("fbsend").addEventListener("click",function(){
+    var t=document.getElementById("fbtext").value.trim();if(!t)return;var b=this;b.disabled=true;b.textContent="Sending…";msg.style.color="var(--grn)";
+    fetch(U,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:"5c829c7f-0b63-4bbc-87b9-c24b822a564d",company_name:"KPA Plumbing",role:"looper",page:"admin desk",text:t})})
+      .then(function(r){return r.json();}).then(function(){document.getElementById("fbtext").value="";msg.textContent="Thanks — logged. 🙏";b.disabled=false;b.textContent="Send to super-admin";setTimeout(function(){panel.style.display="none";msg.textContent="";},1600);})
+      .catch(function(){b.disabled=false;b.textContent="Send to super-admin";msg.style.color="var(--amb)";msg.textContent="Couldn't send — try again.";});
   });
 })();
 </script>
