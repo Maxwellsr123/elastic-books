@@ -138,9 +138,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
         </div>
         <div class="grid g3">
-          <div class="card stat ufilt" data-filter="needs" style="cursor:pointer"><div class="l"><i class="ti ti-bell" style="font-size:16px;color:var(--amb)"></i> Needs a receipt</div><div class="n" id="u_needs">—</div><div class="d">Ava is asking you</div></div>
-          <div class="card stat ufilt" data-filter="review" style="cursor:pointer"><div class="l"><i class="ti ti-search" style="font-size:16px;color:var(--ind)"></i> In review</div><div class="n" id="u_review">—</div><div class="d">found — being reconciled</div></div>
-          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">attached &amp; reconcile-ready</div></div>
+          <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">is Ava right?</div></div>
+          <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-bell" style="font-size:16px;color:var(--amb)"></i> Send a receipt</div><div class="n" id="u_send">—</div><div class="d">Ava needs the invoice</div></div>
+          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">sorted, nothing to do</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
@@ -175,7 +175,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
   var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
-  var U_ITEMS=[],U_FILTER="needs";
+  var U_ITEMS=[],U_FILTER="confirm";
   function needRow(i){
     var ins="";
     if(i.insight){
@@ -188,16 +188,19 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         '<button class="tbtn draw" data-fb="personal" data-id="'+i.id+'"><i class="ti ti-user-heart"></i> Personal'+(i.ava_personal?" ✓":"")+'</button>'+
         '</div></div>';
     }
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div><span class="pill p-warn">send receipt</span></div>'+ins+'</div>';
+    var rpill=i.receipt==="not_needed"?'<span class="pill p-ok">no receipt needed</span>'
+      :i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>'
+      :'<span class="pill p-warn">send receipt</span>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+ins+'</div>';
   }
   function personalRow(i){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.account||"Drawings")+(i.insight?(" · "+esc(i.insight)):"")+'</div></div><button class="tbtn" data-fb="restore" data-id="'+i.id+'">Back to business</button></div>';}
   function doneRow(i){var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="ready";});htxt="Done — attached & reconcile-ready";row=doneRow;empty="Nothing done yet.";}
-    else if(f==="review"){list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="review";});htxt="In review — Ava found these, being reconciled";row=doneRow;empty="Nothing in review.";}
-    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="chasing";});htxt="Receipts Ava needs from you";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All caught up — nothing to send right now.';}
+    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&(i.lane==="ready"||i.lane==="done"||i.lane==="review");});htxt="Sorted — nothing for you to do";row=doneRow;empty="Nothing sorted yet — Ava is on it.";}
+    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.needs_receipt&&i.lane!=="guess";});htxt="Send Ava these receipts";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No receipts needed right now.';}
+    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="guess";});htxt="Is Ava right? Give her a 👍 or 👎";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
@@ -218,8 +221,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
-      var dn=document.getElementById("u_done"),nd=document.getElementById("u_needs"),rv=document.getElementById("u_review");
-      if(dn)dn.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(rv)rv.textContent=(c.review||0);
+      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done");
+      if(cf)cf.textContent=(c.confirm||0);if(sd)sd.textContent=(c.await_receipt||0);if(dn)dn.textContent=((c.ready||0)+(c.review||0)+(c.reconciled||0));
       U_ITEMS=d.items||[];renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
       var pc=document.getElementById("u_pcount");if(pc)pc.textContent=(c.personal||0)?(" "+c.personal):"";
     }).catch(function(){});
