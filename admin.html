@@ -130,8 +130,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div id="acResult" style="font-size:13px"></div>
         </div>
         <div class="card">
-          <div class="row" style="background:var(--bg);font-size:12px;color:var(--ink2);font-weight:500"><div style="width:34px"></div><div style="flex:1">Client</div><div style="width:130px">Integrations</div><div style="width:90px">Status</div></div>
-          <div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">KPA Plumbing</div><div style="width:130px;display:flex;gap:5px"><span class="pill p-ok">Gmail</span><span class="pill p-ok">Xero</span></div><div style="width:90px"><span class="pill p-ok">live</span></div></div>
+          <div class="row" style="background:var(--bg);font-size:12px;color:var(--ink2);font-weight:500"><div style="width:34px"></div><div style="flex:1">Client</div><div style="width:160px">Integrations</div><div style="width:120px">Owner link</div></div>
+          <div id="clientlist"><div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">Loading clients…</div></div></div>
         </div>
       </section>
     </div>
@@ -292,21 +292,24 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       .then(function(r){return r.json();}).then(function(d){
         if(d.error){res.style.color="var(--amb)";res.textContent="Couldn't create — "+d.error;return;}
         res.style.color="";
-        if(d.emailed){
-          res.innerHTML='<div style="color:var(--grn);font-weight:600;margin-bottom:4px"><i class="ti ti-circle-check"></i> '+name+' created — invite emailed to '+email+'</div>'+
-            '<div style="font-size:12.5px;color:var(--ink2)">They\'ll get an Ava-branded email with one-tap links to connect Gmail &amp; Xero.</div>';
-        } else {
-          var note=email?'<div style="font-size:12px;color:var(--amb);margin-bottom:8px">Couldn\'t email the invite'+(d.email_error?(' ('+d.email_error+')'):'')+' — send these links yourself:</div>':'<div style="font-size:12.5px;color:var(--ink2);margin-bottom:8px">Created — send the owner these to connect:</div>';
-          res.innerHTML='<div style="color:var(--grn);font-weight:600;margin-bottom:6px"><i class="ti ti-circle-check"></i> '+name+' created</div>'+note+
-            '<div style="display:flex;flex-direction:column;gap:6px">'+
-            '<a href="'+d.connect.gmail+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-mail" style="font-size:14px;vertical-align:-2px"></i> Connect Gmail</a>'+
-            '<a href="'+d.connect.xero+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-calculator" style="font-size:14px;vertical-align:-2px"></i> Connect Xero</a>'+
-            '<span style="color:var(--ink2)"><i class="ti ti-brand-slack" style="font-size:14px;vertical-align:-2px"></i> '+d.connect.slack+'</span>'+
-            '</div>';
-        }
-        document.getElementById("acName").value="";document.getElementById("acEmail").value="";
+        var head=d.emailed
+          ? '<div style="color:var(--grn);font-weight:600;margin-bottom:4px"><i class="ti ti-circle-check"></i> '+name+' created — invite emailed to '+email+'</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:8px">They open Ava and connect their Gmail &amp; Xero right inside the app.</div>'
+          : '<div style="color:var(--grn);font-weight:600;margin-bottom:6px"><i class="ti ti-circle-check"></i> '+name+' created — send them this link:</div>';
+        res.innerHTML=head+'<div style="display:flex;gap:6px;align-items:center"><input readonly value="'+d.owner_link+'" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12px;color:var(--ink2)"><button class="btn copyl" data-l="'+d.owner_link+'">Copy</button></div>';
+        document.getElementById("acName").value="";document.getElementById("acEmail").value="";loadClients();
       }).catch(function(err){res.style.color="var(--amb)";res.textContent="Network error — "+err;});
   });
+  function loadClients(){
+    fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
+      var box=document.getElementById("clientlist");if(!box)return;var cs=d.clients||[];
+      box.innerHTML=cs.length?cs.map(function(c){
+        var ig=(c.gmail?'<span class="pill p-ok">Gmail</span>':'<span class="pill p-mut">no Gmail</span>')+' '+(c.xero?'<span class="pill p-ok">Xero</span>':'<span class="pill p-mut">no Xero</span>');
+        return '<div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">'+esc(c.name||"—")+'</div><div style="width:160px;display:flex;gap:5px;flex-wrap:wrap">'+ig+'</div><div style="width:120px;display:flex;gap:5px"><a href="'+c.owner_link+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none">Open ↗</a><button class="btn copyl" data-l="'+c.owner_link+'" style="padding:3px 8px;font-size:11px">Copy</button></div></div>';
+      }).join(""):'<div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">No clients yet — add one above.</div></div>';
+    }).catch(function(){});
+  }
+  document.addEventListener("click",function(e){var b=e.target.closest(".copyl");if(!b)return;var l=b.getAttribute("data-l");if(navigator.clipboard)navigator.clipboard.writeText(l);var o=b.textContent;b.textContent="Copied!";setTimeout(function(){b.textContent=o;},1200);});
+  loadClients();
 })();
 </script>
 <div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>

@@ -160,7 +160,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var FB="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-feedback";
 
   var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
-  var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+  // company comes from the private link (?c=<id>); falls back to KPA for the original demo
+  var KPA=(new URLSearchParams(location.search).get("c"))||"5c829c7f-0b63-4bbc-87b9-c24b822a564d";
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
   var U_ITEMS=[],U_FILTER="confirm";
   function needRow(i){
@@ -313,7 +314,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 <script>
 (function(){
   var U="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/app-feedback";
-  var ROLE="owner",CO="5c829c7f-0b63-4bbc-87b9-c24b822a564d",CN="KPA Plumbing",PG="owner app";
+  var ROLE="owner",CO=(new URLSearchParams(location.search).get("c"))||"5c829c7f-0b63-4bbc-87b9-c24b822a564d",CN="",PG="owner app";
   var btn=document.getElementById("fbbtn"),panel=document.getElementById("fbpanel"),msg=document.getElementById("fbmsg");
   btn.addEventListener("click",function(){panel.style.display=panel.style.display==="none"?"block":"none";});
   document.getElementById("fbsend").addEventListener("click",function(){
