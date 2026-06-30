@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ava — your dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F6F6FB;--card:#fff;--line:#EBEBF1;--ink:#16161D;--ink2:#6A6A78;--ink3:#9B9BA8;
+--ind:#6366F1;--ind2:#8B5CF6;--indbg:#EEF0FF;--indtx:#4338CA;
+--grn:#067647;--grnbg:#ECFDF3;--amb:#B54708;--ambbg:#FFFAEB;--blu:#175CD3;--blubg:#EFF6FF;}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.side{width:236px;background:#141319;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
+.brand b{font-weight:600;font-size:16px}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#A7A7B4;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+.nav a:hover{background:#1F1E26;color:#fff}
+.nav a.on{background:#262533;color:#fff}
+.nav a i{font-size:18px}
+.side .foot{margin-top:auto;background:#1F1E26;border-radius:12px;padding:12px}
+.side .foot .w{font-size:13px;font-weight:500}.side .foot .s{font-size:11.5px;color:#8B8B98;margin-top:2px}
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.top h1{font-size:18px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--grnbg);color:var(--grn)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.wrap{padding:26px 28px;max-width:920px}
+.hero{background:linear-gradient(120deg,#1c1b24,#2a2740);border-radius:18px;padding:22px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
+.hero h2{font-size:20px;font-weight:600;margin-bottom:5px}
+.hero p{color:#C9C8D6;font-size:13.5px}
+.hero .spark{position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 70%)}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(16,17,33,.03),0 8px 22px rgba(16,17,33,.04)}
+.stat{padding:16px 18px}
+.stat .l{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+.stat .n{font-size:27px;font-weight:600;margin-top:7px}
+.stat .d{font-size:12px;color:var(--ink3);margin-top:2px}
+.sec{font-size:14px;font-weight:600;margin:24px 0 12px}
+.row{display:flex;align-items:center;gap:13px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ic{width:38px;height:38px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:19px;flex-shrink:0}
+.pill{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--bg)}
+.btn-p{background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;border:0}
+.btn-p:hover{filter:brightness(1.06)}
+.intg{padding:20px;display:flex;flex-direction:column;gap:14px}
+.intg .top2{display:flex;align-items:flex-start;gap:14px}
+.intg .lg{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+.intg h3{font-size:15px;font-weight:600}.intg .sub{font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.5}
+.hidden{display:none}
+.chatw{max-width:560px}
+.bub{padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.5;margin-bottom:10px;max-width:80%}
+.bub.ava{background:#fff;border:1px solid var(--line)}
+.bub.me{background:var(--indbg);color:var(--indtx);margin-left:auto}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--ink2)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.drop{border:2px dashed #D6D6E6;border-radius:18px;padding:22px;text-align:center;background:linear-gradient(180deg,#fff,#FAFAFE);transition:border-color .15s;cursor:pointer;margin-bottom:20px}
+.drop:hover{border-color:var(--ind)}
+.dz{width:50px;height:50px;border-radius:14px;margin:0 auto 11px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:25px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">A</div><b>Ava</b></div>
+    <nav class="nav" id="nav">
+      <a data-p="home" class="on"><i class="ti ti-home"></i> Home</a>
+      <a data-p="receipts"><i class="ti ti-receipt"></i> Receipts</a>
+      <a data-p="chat"><i class="ti ti-message-2"></i> Ava chat</a>
+      <a data-p="intg"><i class="ti ti-plug"></i> Integrations</a>
+      <a data-p="set"><i class="ti ti-settings"></i> Settings</a>
+    </nav>
+    <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Free trial · 9 days left</div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <h1 id="ptitle">Home</h1>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Synced · 14 min ago</span>
+        <div class="av">MR</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <section id="home">
+        <div class="hero"><div class="spark"></div>
+          <h2>Good morning, Max</h2>
+          <p>Ava checks your inbox every hour and sorts your receipts. Anything she still needs from you is in the list below — drop it in and she'll match it up.</p>
+        </div>
+        <div class="drop" id="udrop">
+          <div class="dz"><i class="ti ti-camera-plus"></i></div>
+          <div style="font-weight:600;font-size:15px">Got a receipt? Drop it here</div>
+          <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Snap a photo, or drop a PDF or file — Ava reads it and attaches it to the right spend. Or just send it in Slack or WhatsApp.</div>
+          <div style="margin-top:13px">
+            <button class="btn btn-p" data-kind="receipt"><i class="ti ti-camera" style="font-size:14px;vertical-align:-2px"></i> Add a receipt</button>
+          </div>
+          <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
+          <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
+        </div>
+        <div class="grid g3">
+          <div class="card stat ufilt" data-filter="sorted" style="cursor:pointer"><div class="l"><i class="ti ti-receipt" style="font-size:16px;color:var(--ind)"></i> Sorted</div><div class="n" id="u_sorted">—</div><div class="d">Ava found + coded</div></div>
+          <div class="card stat ufilt" data-filter="ready" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Ready</div><div class="n" id="u_ready">—</div><div class="d">receipts attached</div></div>
+          <div class="card stat ufilt" data-filter="needs" style="cursor:pointer"><div class="l"><i class="ti ti-bell" style="font-size:16px;color:var(--amb)"></i> Needs a receipt</div><div class="n" id="u_needs">—</div><div class="d">Ava is asking you</div></div>
+        </div>
+        <div class="sec" id="usechead">Receipts Ava needs from you</div>
+        <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
+      </section>
+
+      <section id="receipts" class="hidden">
+        <div class="sec" style="margin-top:0">This month's receipts</div>
+        <div class="card" id="udone"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading…</div></div></div>
+      </section>
+
+      <section id="chat" class="hidden">
+        <div class="chatw">
+          <div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px">Chat with Ava right here — no Slack or WhatsApp needed.</div>
+          <div id="uchat" style="display:flex;flex-direction:column;gap:10px;min-height:240px"></div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <input id="uchatin" style="flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-family:inherit;font-size:13.5px" placeholder="Ask Ava anything…">
+            <button class="btn btn-p" id="uchatsend"><i class="ti ti-send" style="font-size:15px"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="intg" class="hidden">
+        <div style="font-size:13.5px;color:var(--ink2);margin-bottom:18px;max-width:560px">Connect your tools so Ava can hunt receipts, chase what's missing, and get your books reconcile-ready. Read-only where it counts — Ava never sends or edits in your inbox.</div>
+        <div class="grid g1" style="gap:14px">
+          <div class="card intg" id="i-gmail">
+            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#EA4335,#FBBC05)"><i class="ti ti-mail"></i></div>
+              <div style="flex:1"><h3>Gmail</h3><div class="sub">Ava reads receipts and supplier invoices here — and hunts for the ones you're missing. Read + extract only.</div></div>
+              <span class="pill p-ok" id="s-gmail">connected</span></div>
+            <div><button class="btn" data-conn="gmail">Manage</button></div>
+          </div>
+          <div class="card intg" id="i-slack">
+            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#611f69,#E01E5A)"><i class="ti ti-brand-slack"></i></div>
+              <div style="flex:1"><h3>Slack</h3><div class="sub">Your dedicated Ava chat — answer her questions and drop receipt photos right in Slack. She hunts receipts here too.</div></div>
+              <span class="pill p-ind" id="s-slack">connect</span></div>
+            <div><button class="btn btn-p" data-conn="slack">Connect Slack</button></div>
+          </div>
+          <div class="card intg" id="i-xero">
+            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#13B5EA,#0a8bc2)"><i class="ti ti-calculator"></i></div>
+              <div style="flex:1"><h3>Xero</h3><div class="sub">Ava attaches receipts to your reconciled spends and suggests the code. She never reconciles — that stays yours.</div></div>
+              <span class="pill p-ind" id="s-xero">connect</span></div>
+            <div><button class="btn btn-p" data-conn="xero">Connect Xero</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="set" class="hidden"><div class="card stat"><div class="l">Settings</div><div class="d" style="margin-top:8px">Workspace, billing, and notification preferences live here.</div></div></section>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var titles={home:"Home",receipts:"Receipts",chat:"Ava chat",intg:"Integrations",set:"Settings"};
+  document.getElementById("nav").addEventListener("click",function(e){
+    var a=e.target.closest("[data-p]");if(!a)return;
+    document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
+    var p=a.getAttribute("data-p");
+    ["home","receipts","chat","intg","set"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
+    document.getElementById("ptitle").textContent=titles[p];
+  });
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-conn]");if(!b)return;
+    var k=b.getAttribute("data-conn");if(k==="gmail")return;
+    var s=document.getElementById("s-"+k);s.textContent="connected";s.className="pill p-ok";
+    b.outerHTML='<button class="btn" data-conn="'+k+'">Manage</button>';
+  });
+  var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/ava-web-chat";
+  var umsgs=[{role:"assistant",content:"Hi Sam — I'm Ava. Ask me anything about your books, a receipt, or what still needs doing."}];
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
+  function renderChat(){var c=document.getElementById("uchat");if(!c)return;c.innerHTML=umsgs.map(function(m){return '<div class="bub '+(m.role==="user"?"me":"ava")+'">'+esc(m.content)+'</div>';}).join("");c.scrollTop=c.scrollHeight;}
+  function sendChat(){var inp=document.getElementById("uchatin");var t=(inp.value||"").trim();if(!t)return;
+    umsgs.push({role:"user",content:t});inp.value="";umsgs.push({role:"assistant",content:"…"});renderChat();var ti=umsgs.length-1;
+    fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({messages:umsgs.filter(function(m){return m.content!=="…"})})})
+      .then(function(r){return r.json();}).then(function(d){umsgs[ti]={role:"assistant",content:d.reply||d.error||"Sorry — try that again?"};renderChat();})
+      .catch(function(){umsgs[ti]={role:"assistant",content:"Network error — try again."};renderChat();});}
+  document.getElementById("uchatsend").addEventListener("click",sendChat);
+  document.getElementById("uchatin").addEventListener("keydown",function(e){if(e.key==="Enter")sendChat();});
+  renderChat();
+
+  var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
+  var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+  function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
+  var U_ITEMS=[],U_FILTER="needs";
+  function needRow(i){return '<div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div><span class="pill p-warn">send receipt</span></div>';}
+  function doneRow(i){var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
+  function renderHome(){
+    var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
+    var f=U_FILTER,list,htxt,row,empty;
+    if(f==="ready"){list=U_ITEMS.filter(function(i){return i.bucket==="ready";});htxt="Ready — receipts attached";row=doneRow;empty="Nothing ready yet.";}
+    else if(f==="sorted"){list=U_ITEMS.filter(function(i){return i.bucket==="ready"||i.bucket==="review";});htxt="Sorted by Ava";row=doneRow;empty="Nothing sorted yet — Ava is on it.";}
+    else{list=U_ITEMS.filter(function(i){return i.bucket==="chasing";});htxt="Receipts Ava needs from you";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All caught up — nothing to send right now.';}
+    if(head)head.textContent=htxt;
+    box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
+    document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
+  }
+  function renderDone(){var db=document.getElementById("udone");if(!db)return;var done=U_ITEMS.filter(function(i){return i.bucket==="ready"||i.bucket==="review";});db.innerHTML=done.length?done.slice(0,40).map(doneRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing sorted yet — Ava is on it.</div></div>';}
+  function loadList(){
+    fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
+      var c=d.counts||{};
+      var rd=document.getElementById("u_ready"),nd=document.getElementById("u_needs"),so=document.getElementById("u_sorted");
+      if(rd)rd.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(so)so.textContent=((c.ready||0)+(c.review||0));
+      U_ITEMS=d.items||[];renderHome();renderDone();
+    }).catch(function(){});
+  }
+  document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
+  loadList();
+  var ukind="receipt";
+  document.querySelectorAll("[data-kind]").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();ukind=this.getAttribute("data-kind");document.getElementById("ufile").click();});});
+  function readB64(f){return new Promise(function(res,rej){var rd=new FileReader();rd.onload=function(){res(String(rd.result).split(",")[1]);};rd.onerror=rej;rd.readAsDataURL(f);});}
+  document.getElementById("ufile").addEventListener("change",function(){
+    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;
+    var p=document.getElementById("uproc");this.value="";
+    // process one at a time — a matched line flips to "proposed", so the next
+    // receipt in the batch won't grab the same line.
+    var done=0,matched=0,added=0,fail=0;
+    (function next(idx){
+      if(idx>=files.length){
+        p.style.color="var(--grn)";
+        p.textContent="✓ "+files.length+" file"+(files.length>1?"s":"")+" — "+matched+" matched to a spend, "+added+" filed"+(fail?(", "+fail+" couldn't read"):"");
+        loadList();return;
+      }
+      var f=files[idx];
+      p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+" ("+(idx+1)+"/"+files.length+")…";
+      readB64(f).then(function(b64){
+        return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:ukind,filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});
+      }).then(function(d){
+        if(d&&d.error){fail++;}
+        else{done++;matched+=(d.matched||0);added+=((d.count||0)-(d.matched||0));}
+        next(idx+1);
+      }).catch(function(){fail++;next(idx+1);});
+    })(0);
+  });
+})();
+</script>
+</body>
+</html>

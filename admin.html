@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ava — admin</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F6F6FB;--card:#fff;--line:#EBEBF1;--ink:#16161D;--ink2:#6A6A78;--ink3:#9B9BA8;
+--ind:#6366F1;--ind2:#8B5CF6;--indbg:#EEF0FF;--indtx:#4338CA;
+--grn:#067647;--grnbg:#ECFDF3;--amb:#B54708;--ambbg:#FFFAEB;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.side{width:236px;background:#141319;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
+.brand b{font-weight:600;font-size:16px}.brand .ad{font-size:10px;font-weight:600;letter-spacing:.5px;color:#8B8B98;background:#262533;padding:2px 6px;border-radius:5px;margin-left:auto}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#A7A7B4;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+.nav a:hover{background:#1F1E26;color:#fff}.nav a.on{background:#262533;color:#fff}.nav a i{font-size:18px}
+.nav a .ct{margin-left:auto;font-size:11px;background:#33323F;color:#C9C8D6;padding:1px 7px;border-radius:99px}
+.side .foot{margin-top:auto;display:flex;align-items:center;gap:9px;background:#1F1E26;border-radius:12px;padding:11px}
+.side .foot .a{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.side .foot .w{font-size:13px;font-weight:500}.side .foot .s{font-size:11px;color:#8B8B98}
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.top h1{font-size:18px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--grnbg);color:var(--grn)}
+.wrap{padding:24px 28px;max-width:1000px}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(16,17,33,.03),0 8px 22px rgba(16,17,33,.04)}
+.stat{padding:15px 17px}.stat .l{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.stat .n{font-size:25px;font-weight:600;margin-top:6px}
+.sec{font-size:14px;font-weight:600;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
+.row{display:flex;align-items:center;gap:13px;padding:12px 16px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+.ic{width:34px;height:34px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:18px;flex-shrink:0}
+.pill{font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}.p-red{background:var(--redbg);color:var(--red)}.p-mut{background:var(--bg);color:var(--ink2)}
+.btn{font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--bg)}
+.hidden{display:none}
+.fbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.fbar button{font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink2)}
+.fbar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.conv{display:grid;grid-template-columns:300px 1fr;gap:14px}
+.tlist .t{display:flex;gap:11px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.tlist .t:hover{background:var(--bg)}.tlist .t.on{background:var(--indbg)}
+.tlist .t .nm{font-size:13px;font-weight:500}.tlist .t .pv{font-size:12px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.ch{width:14px;font-size:15px}
+.thread{padding:18px 20px}
+.bub{padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.55;margin-bottom:11px;max-width:84%}
+.bub.ava{background:var(--indbg);color:#312e81;margin-right:auto}
+.bub.them{background:#fff;border:1px solid var(--line);margin-left:auto}
+.bub .who{font-size:11px;font-weight:600;opacity:.7;margin-bottom:3px}
+.tier{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.btn-p{background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;border:0}
+.btn-p:hover{filter:brightness(1.06)}
+.drop{border:2px dashed #D6D6E6;border-radius:18px;padding:26px;text-align:center;background:linear-gradient(180deg,#FBFBFE,#F3F3FB);margin-bottom:18px;transition:border-color .15s}
+.drop:hover{border-color:var(--ind)}
+.dz{width:54px;height:54px;border-radius:15px;margin:0 auto 12px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:27px}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.qhead{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer}
+.thumb{width:38px;height:38px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:18px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">A</div><b>Ava</b><span class="ad">ADMIN</span></div>
+    <nav class="nav" id="nav">
+      <a data-p="desk" class="on"><i class="ti ti-clipboard-list"></i> Desk <span class="ct">14</span></a>
+      <a data-p="over"><i class="ti ti-layout-dashboard"></i> Overview</a>
+      <a data-p="clients"><i class="ti ti-users"></i> Clients <span class="ct">19</span></a>
+      <a data-p="act"><i class="ti ti-radar"></i> Ava activity</a>
+      <a data-p="conv"><i class="ti ti-messages"></i> Conversations <span class="ct">9</span></a>
+      <a data-p="intg"><i class="ti ti-plug"></i> Integrations</a>
+    </nav>
+    <div class="foot"><div class="a">EA</div><div><div class="w">Elastic Admin</div><div class="s">operator</div></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top"><h1 id="ptitle">Desk</h1><span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeping hourly · 4 inboxes · 9 min ago</span></div>
+    <div class="wrap">
+
+      <section id="desk">
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:14px;max-width:600px">Drop the bank-line screenshots you pull from Xero. Ava reads each one, checks Gmail first, and starts the chase for anything missing — you just work the queue. She also sweeps every connected inbox hourly, so the desk stays fresh on its own.</div>
+        <div class="fbar" id="dclient"><button class="on" data-d="KPA">KPA Plumbing · live</button><button data-d="Moods">Moods</button><button data-d="Bosch">Bosch</button><button data-d="Nexus">Nexus</button></div>
+        <div class="drop" id="ddrop">
+          <div class="dz"><i class="ti ti-photo-plus"></i></div>
+          <div style="font-weight:600;font-size:15px">Drop your Xero bank lines</div>
+          <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Screenshot, PDF, CSV or Excel export — Ava reads every line on it</div>
+          <button class="btn btn-p" id="dbtn" style="margin-top:14px"><i class="ti ti-upload" style="font-size:14px;vertical-align:-2px"></i> Upload a file</button>
+          <span id="dproc" style="display:block;font-size:12px;color:var(--ink3);margin-top:9px"></span>
+          <input type="file" id="dfile" accept="image/*,.pdf,.csv,.xlsx,.xls" style="display:none">
+        </div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="dtally"></div>
+        <div id="dqueue" style="display:flex;flex-direction:column;gap:9px"></div>
+      </section>
+
+      <section id="over" class="hidden">
+        <div class="grid g4">
+          <div class="card stat"><div class="l"><i class="ti ti-building" style="font-size:15px;color:var(--ind)"></i> Active clients</div><div class="n">19</div></div>
+          <div class="card stat"><div class="l"><i class="ti ti-paperclip" style="font-size:15px;color:var(--grn)"></i> Attached today</div><div class="n">61</div></div>
+          <div class="card stat"><div class="l"><i class="ti ti-message-question" style="font-size:15px;color:var(--amb)"></i> Questions out</div><div class="n">23</div></div>
+          <div class="card stat"><div class="l"><i class="ti ti-phone" style="font-size:15px;color:var(--ind)"></i> Escalations</div><div class="n">2</div></div>
+        </div>
+        <div class="sec"><i class="ti ti-flame" style="color:var(--amb)"></i> Clients that need a look</div>
+        <div class="card">
+          <div class="row"><div class="ic" style="color:var(--ind)"><i class="ti ti-building-store"></i></div><div style="flex:1"><div style="font-weight:500">Bosch Building</div><div style="font-size:12px;color:var(--ink2)">subcontractor cost unallocated 4 days · no job system</div></div><span class="pill p-red">4d blocked</span></div>
+          <div class="row"><div class="ic" style="color:var(--ind)"><i class="ti ti-building-store"></i></div><div style="flex:1"><div style="font-weight:500">Moods Plumbing</div><div style="font-size:12px;color:var(--ink2)">Z Energy — no reply, escalating to a call</div></div><span class="pill p-warn">escalating</span></div>
+          <div class="row"><div class="ic" style="color:var(--ind)"><i class="ti ti-building-store"></i></div><div style="flex:1"><div style="font-weight:500">Nexus Energy</div><div style="font-size:12px;color:var(--ink2)">35 receipts dropped in chat · all attached</div></div><span class="pill p-ok">on track</span></div>
+        </div>
+      </section>
+
+      <section id="clients" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:14px;font-weight:600">Clients</div>
+          <button class="btn btn-p" id="acToggle"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Add client</button>
+        </div>
+        <div class="card hidden" id="acForm" style="margin-bottom:14px;padding:16px">
+          <div style="font-weight:600;margin-bottom:12px">Onboard a new client</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+            <input id="acName" placeholder="Business name" style="flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
+            <input id="acEmail" placeholder="Owner email (optional)" style="flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px">
+            <button class="btn btn-p" id="acCreate">Create + get links</button>
+          </div>
+          <div id="acResult" style="font-size:13px"></div>
+        </div>
+        <div class="card">
+          <div class="row" style="background:var(--bg);font-size:12px;color:var(--ink2);font-weight:500"><div style="width:34px"></div><div style="flex:1">Client</div><div style="width:130px">Integrations</div><div style="width:90px">Open</div><div style="width:90px">Autonomy</div></div>
+          <div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">Moods Plumbing</div><div style="width:130px;display:flex;gap:5px"><span class="pill p-ok">Gmail</span><span class="pill p-ok">Xero</span></div><div style="width:90px"><span class="pill p-warn">2</span></div><div style="width:90px"><span class="pill p-ok">auto</span></div></div>
+          <div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">KPA Plumbing</div><div style="width:130px;display:flex;gap:5px"><span class="pill p-ok">Gmail</span><span class="pill p-ok">Slack</span></div><div style="width:90px"><span class="pill p-warn">3</span></div><div style="width:90px"><span class="pill p-ind">draft</span></div></div>
+          <div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">Bosch Building</div><div style="width:130px;display:flex;gap:5px"><span class="pill p-ok">Gmail</span><span class="pill p-mut">no Xero</span></div><div style="width:90px"><span class="pill p-red">5</span></div><div style="width:90px"><span class="pill p-warn">ask</span></div></div>
+          <div class="row"><div class="ic"><i class="ti ti-building-store"></i></div><div style="flex:1;font-weight:500">Nexus Energy</div><div style="width:130px;display:flex;gap:5px"><span class="pill p-ok">Slack</span><span class="pill p-mut">no Xero</span></div><div style="width:90px"><span class="pill p-ok">0</span></div><div style="width:90px"><span class="pill p-ok">auto</span></div></div>
+        </div>
+      </section>
+
+      <section id="act" class="hidden">
+        <div class="fbar" id="af"><button class="on" data-f="All">All</button><button data-f="Moods">Moods</button><button data-f="KPA">KPA</button><button data-f="Bosch">Bosch</button><button data-f="Nexus">Nexus</button></div>
+        <div class="card" id="afeed"></div>
+      </section>
+
+      <section id="conv" class="hidden">
+        <div class="fbar"><button class="on">All</button><button>Email</button><button>Slack</button></div>
+        <div class="conv">
+          <div class="card tlist" id="tlist" style="overflow:hidden"></div>
+          <div class="card thread" id="thread"></div>
+        </div>
+      </section>
+
+      <section id="intg" class="hidden">
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:16px;max-width:560px">Per-client connections. Ava hunts receipts in Gmail and Slack, and attaches to Xero. Send a chase to whichever channel the client actually uses.</div>
+        <div class="card">
+          <div class="row"><div class="ic" style="color:#EA4335"><i class="ti ti-mail"></i></div><div style="flex:1"><div style="font-weight:500">Gmail</div><div style="font-size:12px;color:var(--ink2)">receipt hunting · read + extract only</div></div><span class="pill p-ok">17 / 19 connected</span></div>
+          <div class="row"><div class="ic" style="color:#611f69"><i class="ti ti-brand-slack"></i></div><div style="flex:1"><div style="font-weight:500">Slack</div><div style="font-size:12px;color:var(--ink2)">dedicated Ava chat + receipt drops + hunting</div></div><span class="pill p-ind">9 / 19 connected</span></div>
+          <div class="row"><div class="ic" style="color:#13B5EA"><i class="ti ti-calculator"></i></div><div style="flex:1"><div style="font-weight:500">Xero</div><div style="font-size:12px;color:var(--ink2)">attach receipts · suggest codes · never reconcile</div></div><span class="pill p-ok">10 / 19 connected</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var titles={desk:"Desk",over:"Overview",clients:"Clients",act:"Ava activity",conv:"Conversations",intg:"Integrations"};
+  document.getElementById("nav").addEventListener("click",function(e){
+    var a=e.target.closest("[data-p]");if(!a)return;
+    document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
+    var p=a.getAttribute("data-p");["desk","over","clients","act","conv","intg"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
+    document.getElementById("ptitle").textContent=titles[p];
+  });
+
+  var feed=[
+    {c:"Moods",i:"ti-mail-search",t:"Hourly sweep — found 6 new receipts",x:"10:02am"},
+    {c:"Moods",i:"ti-paperclip",t:"Attached Mico receipt ($284.50) — reconcile-ready",x:"6:01am"},
+    {c:"KPA",i:"ti-world",t:"Anthropic $312 marked zero-rated (overseas)",x:"6:02am"},
+    {c:"Bosch",i:"ti-database",t:"Logged subcontractor $640 to Ava's ledger (no Fergus)",x:"6:03am"},
+    {c:"Nexus",i:"ti-paperclip",t:"Attached 3 receipts dropped in Slack",x:"6:05am"},
+    {c:"KPA",i:"ti-brand-slack",t:"Asked Max in Slack — Wise payment domestic or overseas?",x:"8:00am"},
+    {c:"Moods",i:"ti-mail-forward",t:"Emailed Sam — which account paid the $1,240?",x:"8:00am"},
+    {c:"Moods",i:"ti-phone-outgoing",t:"Z Energy: no reply 3 days → escalating to a call",x:"now"}
+  ];
+  function renderFeed(f){
+    f=f||"All";var fc=feed.filter(function(e){return f==="All"||e.c===f});
+    document.getElementById("afeed").innerHTML=fc.map(function(e){var now=e.x==="now";
+      return '<div class="row"'+(now?' style="background:var(--indbg)"':'')+'><div class="ic"'+(now?' style="color:var(--ind)"':'')+'><i class="ti '+e.i+'"></i></div><div style="flex:1"><div style="font-weight:500;font-size:13.5px">'+e.t+'</div><div style="font-size:12px;color:var(--ink2)">'+e.c+'</div></div><span style="font-size:11.5px;color:var(--ink3)">'+e.x+'</span></div>';
+    }).join("");
+  }
+  document.getElementById("af").addEventListener("click",function(e){if(e.target.tagName!=="BUTTON")return;this.querySelectorAll("button").forEach(function(x){x.classList.remove("on")});e.target.classList.add("on");renderFeed(e.target.getAttribute("data-f"));});
+  renderFeed();
+
+  var threads=[
+    {id:0,ch:"slack",who:"Max · KPA",cl:"KPA Plumbing",pv:"domestic or overseas?",msgs:[
+      {f:"ava",w:"Ava",t:"Hi Max — quick one for the books: this Wise payment of $880, is it to a NZ supplier (so it needs GST) or overseas?"},
+      {f:"them",w:"Max",t:"Overseas — it's a US contractor."},
+      {f:"ava",w:"Ava",t:"Perfect, coded as zero-rated. Thanks!"}]},
+    {id:1,ch:"email",who:"Sam · Moods",cl:"Moods Plumbing",pv:"which account paid the $1,240?",msgs:[
+      {f:"ava",w:"Ava",t:"Morning Sam — to close off June: which account paid the $1,240 to ANZ on the 14th? I can't see it in Xero."},
+      {f:"them",w:"Sam",t:"That came out of the personal account, sorry."},
+      {f:"ava",w:"Ava",t:"No worries — I'll flag it for Jewel to journal across. One down!"}]},
+    {id:2,ch:"email",who:"owner · Bosch",cl:"Bosch Building",pv:"which job for the $640?",msgs:[
+      {f:"ava",w:"Ava",t:"Hi — the $640 to Robbie Builder, which job should it go against? You're not on Fergus so I'll hold it in your job ledger."},
+      {f:"ava",w:"Ava",t:"(nudge 2) Just bumping this one — happy to take a job name or address."}]},
+    {id:3,ch:"slack",who:"Sam · Moods",cl:"Moods Plumbing",pv:"job or the van?",msgs:[
+      {f:"ava",w:"Ava",t:"Was the Z Energy $96.20 fuel for a job or the van?"},
+      {f:"them",w:"Sam",t:"The van"},
+      {f:"ava",w:"Ava",t:"Got it — coded to vehicle expenses."}]}
+  ];
+  function chIcon(ch){return ch==="slack"?'<i class="ti ti-brand-slack ch" style="color:#611f69"></i>':'<i class="ti ti-mail ch" style="color:#EA4335"></i>';}
+  function renderList(sel){
+    document.getElementById("tlist").innerHTML=threads.map(function(t){
+      return '<div class="t'+(t.id===sel?' on':'')+'" data-t="'+t.id+'">'+chIcon(t.ch)+'<div style="min-width:0"><div class="nm">'+t.who+'</div><div class="pv">'+t.pv+'</div></div></div>';
+    }).join("");
+  }
+  function renderThread(id){
+    var t=threads[id];
+    document.getElementById("thread").innerHTML='<div style="display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:15px">'+chIcon(t.ch)+'<div style="font-weight:600">'+t.who+'</div><span class="pill p-mut" style="margin-left:auto">'+(t.ch==="slack"?"Slack":"Gmail")+'</span></div>'+
+      t.msgs.map(function(m){return '<div class="bub '+m.f+'"><div class="who">'+m.w+'</div>'+m.t+'</div>';}).join("");
+  }
+  document.getElementById("tlist").addEventListener("click",function(e){var t=e.target.closest("[data-t]");if(!t)return;var id=+t.getAttribute("data-t");renderList(id);renderThread(id);});
+  renderList(0);renderThread(0);
+
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var KPA_ID="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+  var dcid={KPA:KPA_ID,Moods:null,Bosch:null,Nexus:null};
+  var dcur="KPA",dsel=null,dnid=200,live=[],lc={review:0,chasing:0,ready:0},lload=false,dfilter=null;
+  var dd={
+    Moods:[{id:1,sup:"Mico Plumbing",amt:"284.50",date:"18 Jun",gmail:"found",gst:"37.11",code:"Materials",job:"#468",st:"review"},
+      {id:2,sup:"Z Energy",amt:"96.20",date:"20 Jun",gmail:"missing",find:false,q:"Fuel for a job or the van? And GST?",st:"missing"}],
+    Bosch:[{id:1,sup:"Robbie Builder (sub)",amt:"640.00",date:"12 Jun",gmail:"found",gst:"83.48",code:"Subcontractors",job:"unknown",st:"missing",find:false,q:"Which job? Bosch has no Fergus — held in Ava's ledger."}],
+    Nexus:[{id:1,sup:"PlaceMakers",amt:"410.00",date:"23 Jun",gmail:"found",gst:"53.48",code:"Materials",job:"job 71",st:"review"}]
+  };
+  var dinc=[{sup:"Repco",amt:"212.30",date:"28 Jun",gmail:"found",gst:"27.69",code:"Vehicle",job:"overhead"},
+    {sup:"Halo Trade Group",amt:"200.00",date:"27 Jun",gmail:"missing",find:false,q:"What's this $200 for?"}];
+  function isLive(){return !!dcid[dcur];}
+  function dpill(b){
+    if(b==="ready")return '<span class="pill p-ok">ready</span>';
+    if(b==="review")return '<span class="pill p-ind">review</span>';
+    if(b==="chasing")return '<span class="pill p-warn">needs receipt</span>';
+    if(b==="missing")return '<span class="pill p-warn">missing</span>';
+    if(b==="processing")return '<span class="pill p-mut">Ava reading…</span>';
+    return '<span class="pill p-mut">'+b+'</span>';
+  }
+  function ddetail(x){
+    var lock='<div style="font-size:11px;color:var(--ink3);margin-top:9px"><i class="ti ti-lock" style="font-size:12px"></i> Ava attaches — you reconcile in Xero.</div>';
+    if(x.st==="review")return '<div style="font-size:12.5px;color:var(--ink2);line-height:1.7"><i class="ti ti-check" style="color:var(--grn)"></i> tax invoice found in Gmail · GST $'+x.gst+' · code <span style="color:var(--ink)">'+x.code+'</span> · job <span style="color:var(--ink)">'+x.job+'</span></div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" data-da="ready" data-id="'+x.id+'">Attach + mark ready</button></div>'+lock;
+    if(x.st==="missing")return '<div style="font-size:12.5px;color:var(--ink2);line-height:1.7"><i class="ti ti-mail-off" style="color:var(--amb)"></i> nothing in Gmail. Needs the owner: <span style="color:var(--ink)">"'+x.q+'"</span></div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" data-da="ask" data-id="'+x.id+'">Ask owner</button></div>'+lock;
+    return '<div style="font-size:12.5px;color:var(--grn);line-height:1.6"><i class="ti ti-circle-check"></i> Ava attached the receipt. Reconcile in Xero.</div>';
+  }
+  function ldetail(it){
+    var src=it.flagged?'<i class="ti ti-alert-triangle" style="color:var(--amb)"></i> Ava found a likely receipt but something’s off — please check before reconciling':(it.bucket==="ready"?'<i class="ti ti-check" style="color:var(--grn)"></i> '+(it.source==="gmail"?"receipt found in Gmail and attached":"attached"):(it.dropped?'<i class="ti ti-photo" style="color:var(--ind)"></i> dropped screenshot — Ava read it; hunting for the matching receipt':'<i class="ti ti-mail-search" style="color:var(--amb)"></i> no receipt yet — Ava sweeps Gmail hourly and will chase the owner'));
+    var rcpt=it.receipt_url?'<div style="margin-top:9px"><a href="'+it.receipt_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ind);text-decoration:none"><i class="ti ti-file-text" style="font-size:15px"></i> Open receipt ↗</a></div>':'';
+    return '<div style="font-size:12.5px;color:var(--ink2);line-height:1.7">'+src+(it.note?(' · <span style="color:var(--ink3)">'+it.note+'</span>'):'')+'</div>'+rcpt+'<div style="font-size:11px;color:var(--ink3);margin-top:8px"><i class="ti ti-lock" style="font-size:12px"></i> Managed by Ava — reconcile in Xero. Ava never reconciles.</div>';
+  }
+  function dtally(){
+    var rev,ch,rd;
+    if(isLive()){rev=lc.review;ch=lc.chasing;rd=lc.ready;}
+    else{var it=dd[dcur];rev=it.filter(function(x){return x.st==="review"}).length;ch=it.filter(function(x){return x.st==="missing"||x.st==="chasing"}).length;rd=it.filter(function(x){return x.st==="ready"}).length;}
+    var c=function(l,n,col,bk){var on=dfilter===bk;return '<div class="card stat" data-bk="'+bk+'" style="cursor:pointer;'+(on?"outline:2px solid var(--ind);outline-offset:-1px;":"")+'"><div class="l">'+l+'</div><div class="n" style="color:'+col+'">'+n+'</div></div>';};
+    document.getElementById("dtally").innerHTML=c("To review",rev,"var(--ink)","review")+c("Chasing",ch,"var(--amb)","chasing")+c("Ready",rd,"var(--grn)","ready");
+  }
+  function dqueue(){
+    var box=document.getElementById("dqueue");
+    if(isLive()){
+      if(lload){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Loading KPA’s live queue…</div>';return;}
+      if(!live.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Queue empty. Drop a Xero screenshot to add one.</div>';return;}
+      var arr=dfilter?live.filter(function(it){return it.bucket===dfilter;}):live;
+      if(!arr.length){box.innerHTML='<div style="padding:18px;text-align:center;color:var(--ink3);font-size:13px">Nothing in this view — tap the card again to clear the filter.</div>';return;}
+      box.innerHTML=arr.map(function(it){
+        var open=(""+dsel)===(""+it.id);
+        var amt=it.amount!=null?(" — $"+it.amount):"";
+        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.flagged?'<span class="pill p-warn">flagged</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3)"></i></div>';
+        var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ldetail(it)+'</div>':'';
+        return '<div class="qcard">'+head+body+'</div>';
+      }).join("");
+      return;
+    }
+    var it=dd[dcur];
+    box.innerHTML=it.map(function(x){
+      var open=dsel===x.id;
+      var head='<div class="qhead" data-dr="'+x.id+'"><div class="thumb"><i class="ti ti-photo"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+x.sup+' — $'+x.amt+'</div><div style="font-size:12px;color:var(--ink3)">'+x.date+'</div></div>'+dpill(x.st==="missing"||x.st==="chasing"?"missing":x.st)+'<i class="ti ti-chevron-'+(open?'up':'down')+'" style="font-size:16px;color:var(--ink3)"></i></div>';
+      var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ddetail(x)+'</div>':'';
+      return '<div class="qcard">'+head+body+'</div>';
+    }).join("");
+  }
+  function drender(){dtally();dqueue();}
+  function loadLive(){if(!isLive())return;lload=true;drender();fetch(API+"/chase-list?company="+KPA_ID).then(function(r){return r.json();}).then(function(d){live=d.items||[];lc=d.counts||lc;lload=false;drender();}).catch(function(){lload=false;drender();});}
+  document.getElementById("dclient").addEventListener("click",function(e){if(e.target.tagName!=="BUTTON")return;this.querySelectorAll("button").forEach(function(x){x.classList.remove("on")});e.target.classList.add("on");dcur=e.target.getAttribute("data-d");dsel=null;dfilter=null;if(isLive())loadLive();else drender();});
+  document.getElementById("dtally").addEventListener("click",function(e){var c=e.target.closest("[data-bk]");if(!c)return;var bk=c.getAttribute("data-bk");dfilter=(dfilter===bk)?null:bk;dsel=null;drender();});
+  document.getElementById("dqueue").addEventListener("click",function(e){
+    var b=e.target.closest("[data-da]");
+    if(b&&!isLive()){var x=dd[dcur].find(function(y){return y.id===+b.getAttribute("data-id")}),a=b.getAttribute("data-da");if(a==="ready")x.st="ready";else if(a==="ask")x.st="chasing";drender();return;}
+    var r=e.target.closest("[data-dr]");if(r){var id=r.getAttribute("data-dr");dsel=((""+dsel)===(""+id))?null:(isLive()?id:+id);dqueue();}
+  });
+  document.getElementById("dbtn").addEventListener("click",function(){
+    if(isLive()){document.getElementById("dfile").click();return;}
+    var t=dinc[dnid%dinc.length];dnid++;var x=Object.assign({id:dnid,st:"processing"},t);dd[dcur].push(x);dsel=x.id;
+    document.getElementById("dproc").textContent="Ava is reading the screenshot…";drender();
+    setTimeout(function(){x.st=(x.gmail==="found")?"review":"missing";document.getElementById("dproc").textContent=x.gmail==="found"?"Found the receipt in Gmail.":"No receipt — needs the owner.";drender();setTimeout(function(){document.getElementById("dproc").textContent="";},2500);},1300);
+  });
+  document.getElementById("dfile").addEventListener("change",function(){
+    var f=this.files[0];if(!f)return;var p=document.getElementById("dproc");
+    function post(fn,b){return fetch(API+"/"+fn,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json();});}
+    function clr(ms){setTimeout(function(){p.textContent="";},ms||8000);}
+    p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+"…";
+    var rd=new FileReader();rd.onload=function(){var b64=String(rd.result).split(",")[1];
+      post("chase-drop",{company_id:KPA_ID,kind:"bankline",filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64}).then(function(d){
+        if(d.error){p.style.color="var(--amb)";p.textContent="Couldn't read that — "+d.error;return;}
+        p.style.color="var(--grn)";var added=d.count;p.textContent="✓ Added "+added+" line"+(added===1?"":"s")+" — checking what Ava already knows…";loadLive();
+        post("chase-code",{company_id:KPA_ID}).catch(function(){return {};}).then(function(cc){
+          var personal=(cc&&cc.auto_coded)||0,coded=(cc&&cc.known_coded_still_chased)||0;loadLive();p.textContent="✓ "+added+" added"+(personal?(" · "+personal+" personal (no receipt)"):"")+(coded?(" · "+coded+" auto-coded"):"")+" — hunting Gmail…";
+          return post("chase-hunt",{company_id:KPA_ID});
+        }).then(function(h){loadLive();var found=(h&&h.found)||0;p.textContent="✓ found "+found+" in Gmail · emailing the owner…";
+          return post("chase-email",{company_id:KPA_ID}).then(function(m){
+            if(m.sent){p.textContent="✓ Done · found "+found+" · emailed "+m.count+" to "+m.to;}
+            else if(m.error&&String(m.error).indexOf("RESEND")>=0){p.textContent="✓ found "+found+" · "+(m.count||0)+" ready to email (connect Resend)";}
+            else{p.textContent="✓ found "+found+" · "+(m.count||0)+" to chase";}
+            loadLive();clr(9000);
+          });
+        }).catch(function(){loadLive();clr(6000);});
+      }).catch(function(err){p.style.color="var(--amb)";p.textContent="Network error — "+err;});};
+    rd.readAsDataURL(f);this.value="";
+  });
+  if(isLive())loadLive();else drender();
+
+  var AC="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/admin-add-client";
+  document.getElementById("acToggle").addEventListener("click",function(){document.getElementById("acForm").classList.toggle("hidden");});
+  document.getElementById("acCreate").addEventListener("click",function(){
+    var name=(document.getElementById("acName").value||"").trim();
+    var email=(document.getElementById("acEmail").value||"").trim();
+    var res=document.getElementById("acResult");
+    if(!name){res.style.color="var(--amb)";res.textContent="Enter a business name.";return;}
+    res.style.color="var(--ink3)";res.textContent="Creating…";
+    fetch(AC,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:name,owner_email:email})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d.error){res.style.color="var(--amb)";res.textContent="Couldn't create — "+d.error;return;}
+        res.innerHTML='<div style="color:var(--grn);font-weight:500;margin-bottom:8px"><i class="ti ti-circle-check"></i> '+name+' created — send the owner these to connect:</div>'+
+          '<div style="display:flex;flex-direction:column;gap:6px">'+
+          '<a href="'+d.connect.gmail+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-mail" style="font-size:14px;vertical-align:-2px"></i> Connect Gmail</a>'+
+          '<a href="'+d.connect.xero+'" target="_blank" style="color:var(--ind);text-decoration:none"><i class="ti ti-calculator" style="font-size:14px;vertical-align:-2px"></i> Connect Xero</a>'+
+          '<span style="color:var(--ink2)"><i class="ti ti-brand-slack" style="font-size:14px;vertical-align:-2px"></i> '+d.connect.slack+'</span>'+
+          '</div>';
+        document.getElementById("acName").value="";document.getElementById("acEmail").value="";
+      }).catch(function(err){res.style.color="var(--amb)";res.textContent="Network error — "+err;});
+  });
+})();
+</script>
+</body>
+</html>
