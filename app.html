@@ -141,9 +141,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
         </div>
         <div class="grid g3">
-          <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">is Ava right?</div></div>
-          <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-bell" style="font-size:16px;color:var(--amb)"></i> Send a receipt</div><div class="n" id="u_send">—</div><div class="d">Ava needs the invoice</div></div>
-          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">sorted, nothing to do</div></div>
+          <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
+          <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
+          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">ready for Jewel</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
@@ -211,9 +211,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&(i.lane==="ready"||i.lane==="done"||i.lane==="review");});htxt="Sorted — nothing for you to do";row=doneRow;empty="Nothing sorted yet — Ava is on it.";}
-    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.needs_receipt&&i.lane!=="guess";});htxt="Send Ava these receipts";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No receipts needed right now.';}
-    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="guess";});htxt="Is Ava right? Give her a 👍 or 👎";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
+    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&(i.lane==="ready"||i.lane==="done");});htxt="Done — ready for Jewel to reconcile";row=doneRow;empty="Nothing done yet — Ava is on it.";}
+    else if(f==="send"){list=U_ITEMS.filter(function(i){return !i.personal&&i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
+    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
@@ -234,9 +234,13 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
+      U_ITEMS=d.items||[];
+      var nf=function(test){return U_ITEMS.filter(function(i){return !i.personal&&test(i);}).length;};
       var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done");
-      if(cf)cf.textContent=(c.confirm||0);if(sd)sd.textContent=(c.await_receipt||0);if(dn)dn.textContent=((c.ready||0)+(c.review||0)+(c.reconciled||0));
-      U_ITEMS=d.items||[];renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
+      if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
+      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done";});
+      if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
+      renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
       var pc=document.getElementById("u_pcount");if(pc)pc.textContent=(c.personal||0)?(" "+c.personal):"";
     }).catch(function(){});
   }
