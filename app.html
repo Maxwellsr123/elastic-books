@@ -195,15 +195,26 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'">Back to business</button></div>';}
     var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
+  function dueStatus(date){
+    if(!date)return{txt:"to pay",col:"#b42318"};
+    var days=Math.round((new Date(date)-new Date())/864e5);
+    if(days<0)return{txt:"overdue",col:"#b42318"};
+    if(days===0)return{txt:"due today",col:"#b42318"};
+    if(days<=7)return{txt:"due in "+days+"d",col:"#b5630f"};
+    return{txt:"due "+date,col:"#67676e"};
+  }
   function billRow(i){
-    var id=i.id;
-    var due=i.date?(' · due '+i.date):'';
-    var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View bill ↗</a>':'';
+    var id=i.id;var ds=dueStatus(i.date);
+    var rc=i.receipt_url?'<a class="tbtn" href="'+i.receipt_url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-text"></i> View bill</a>':'';
+    var pay=i.pay_url?'<a class="tbtn" href="'+i.pay_url+'" target="_blank" style="text-decoration:none;background:#0e7a50;color:#fff;border-color:#0e7a50"><i class="ti ti-credit-card"></i> Pay this bill ↗</a>':'';
+    var payref=(!i.pay_url&&i.pay_ref)?'<div style="font-size:12px;color:var(--ink2);margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px"><b>Pay to:</b> '+esc(i.pay_ref)+'</div>':'';
     var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:11px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
     var hasC=(i.comments||[]).length>0;
     var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this bill…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
-    var box='<div class="think">'+(i.insight?'<div class="g">💡 '+esc(i.insight)+'</div>':'')+'<div class="acts"><button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+(hasC?' ('+i.comments.length+')':'')+'</button><button class="tbtn draw" data-fb="ignore" data-id="'+id+'"><i class="ti ti-eye-off"></i> Ignore</button><button class="tbtn" data-fb="ignore_always" data-id="'+id+'">Always ignore</button></div>'+cwrap+'</div>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-file-invoice"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.insight||"bill to pay")+due+'</div></div>'+rc+'<span class="pill" style="background:#fdecea;color:#b42318">to pay</span></div>'+box+'</div>';
+    var box='<div class="think">'+(i.insight?'<div class="g">💡 '+esc(i.insight)+'</div>':'')+payref+
+      '<div class="acts">'+pay+'<button class="tbtn" data-fb="paid" data-id="'+id+'"><i class="ti ti-check"></i> Mark paid</button>'+rc+'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+(hasC?' ('+i.comments.length+')':'')+'</button></div>'+
+      '<div class="acts"><button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Right</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> Nope</button><span class="sep"></span><button class="tbtn draw" data-fb="ignore" data-id="'+id+'"><i class="ti ti-eye-off"></i> Ignore</button><button class="tbtn" data-fb="ignore_always" data-id="'+id+'">Always ignore</button></div>'+cwrap+'</div>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-file-invoice"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.insight||"bill to pay")+'</div></div><span class="pill" style="background:#fdecea;color:'+ds.col+'">'+ds.txt+'</span></div>'+box+'</div>';
   }
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;

@@ -164,10 +164,13 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function ldetail(it){
     if(it.lane==="to_pay"){
       var bdue=it.date?(' · due '+it.date):'';
-      var bv=it.receipt_url?'<div style="margin-top:9px"><a href="'+it.receipt_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ind);text-decoration:none"><i class="ti ti-file-text" style="font-size:15px"></i> View bill ↗</a></div>':'';
+      var bpay=it.pay_url?'<a class="btn btn-p" href="'+it.pay_url+'" target="_blank" style="text-decoration:none">Pay this bill ↗</a> ':'';
+      var bref=(!it.pay_url&&it.pay_ref)?'<div style="font-size:12px;color:var(--ink2);margin-top:7px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px"><b>Pay to:</b> '+esc(it.pay_ref)+'</div>':'';
+      var bv=it.receipt_url?'<a class="btn" href="'+it.receipt_url+'" target="_blank" style="text-decoration:none">View bill ↗</a> ':'';
       var bcm=(it.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin:5px 0;line-height:1.5;'+(a?'background:var(--indbg);padding:7px 10px;border-radius:10px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
       return '<div style="margin-bottom:8px"><span class="pill" style="background:#fdecea;color:#b42318"><i class="ti ti-file-invoice" style="font-size:11px;vertical-align:-1px"></i> Bill to pay</span></div>'+
-        '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6">'+esc(it.insight||"incoming bill")+(it.amount!=null?(' · <b>$'+it.amount+'</b>'):'')+bdue+'</div>'+bv+
+        '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6">'+esc(it.insight||"incoming bill")+(it.amount!=null?(' · <b>$'+it.amount+'</b>'):'')+bdue+'</div>'+bref+
+        '<div style="margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+bpay+bv+'<button class="btn" data-paid="'+it.id+'">Mark paid</button></div>'+
         '<div style="font-size:11px;color:var(--ink3);margin-top:9px"><i class="ti ti-info-circle" style="font-size:12px"></i> Ava spotted this in the inbox. Once it’s paid it’ll come back as a bank line to reconcile.</div>'+
         '<div style="margin-top:11px;border-top:1px solid var(--line);padding-top:9px">'+(bcm||'<div style="font-size:12px;color:var(--ink3)">No notes yet.</div>')+'<div style="display:flex;gap:6px;margin-top:7px"><input class="cmt-in" data-id="'+it.id+'" placeholder="Add a note…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="btn cmt-send" data-id="'+it.id+'">Send</button></div></div>';
     }
@@ -242,6 +245,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       apost("chase-feedback",{company_id:KPA_ID,id:id,action:"reconciled"}).then(function(m){if(m&&m.error){rc.style.opacity="1";rc.textContent="Mark reconciled in Xero";alert(m.error);}else loadLive();}).catch(function(){rc.style.opacity="1";});return;}
     var rs=e.target.closest("[data-resolve]");
     if(rs){var rid=rs.getAttribute("data-resolve");rs.style.opacity=".5";apost("chase-feedback",{company_id:KPA_ID,id:rid,action:"looper_resolve"}).then(function(){loadLive();}).catch(function(){rs.style.opacity="1";});return;}
+    var pd=e.target.closest("[data-paid]");
+    if(pd){var pid=pd.getAttribute("data-paid");pd.style.opacity=".5";apost("chase-feedback",{company_id:KPA_ID,id:pid,action:"paid"}).then(function(){loadLive();}).catch(function(){pd.style.opacity="1";});return;}
     var cs=e.target.closest(".cmt-send");
     if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";
       apost("chase-comment",{company_id:KPA_ID,id:cid,author:"jewel",text:t}).then(function(){loadLive();}).catch(function(){cs.style.opacity="1";});return;}
