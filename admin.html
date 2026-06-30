@@ -85,6 +85,32 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 </style>
 </head>
 <body>
+<div id="adminlogin" style="position:fixed;inset:0;z-index:200;background:#100F15;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif">
+  <div style="max-width:360px;width:100%;background:#fff;border-radius:18px;padding:26px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4)">
+    <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#5B54E6,#7B74EE);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;margin:0 auto 16px">A</div>
+    <div style="font-weight:700;font-size:18px;margin-bottom:4px">Ava Admin <span style="font-size:10px;font-weight:700;background:#fde68a;color:#92400e;padding:2px 6px;border-radius:5px;vertical-align:middle">BETA</span></div>
+    <div id="almsg" style="font-size:13px;color:#67676e;margin-bottom:16px">Sign in with your work email.</div>
+    <input id="alemail" type="email" autocomplete="email" placeholder="you@elasticadmin.com" style="width:100%;padding:11px 12px;border:1px solid #e9e9e2;border-radius:10px;font-family:inherit;font-size:14px;box-sizing:border-box;margin-bottom:10px">
+    <button id="albtn" style="width:100%;padding:12px;border:0;border-radius:10px;background:#5B54E6;color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Send me a sign-in link</button>
+  </div>
+</div>
+<script>
+(function(){
+  var AUTH="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/admin-auth";
+  var login=document.getElementById("adminlogin"),msg=document.getElementById("almsg");
+  function verify(tok,cb){fetch(AUTH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:tok})}).then(function(r){return r.json();}).then(function(d){cb(!!(d&&d.ok));}).catch(function(){cb(false);});}
+  var t=new URLSearchParams(location.search).get("t"),saved=localStorage.getItem("ava_admin_t");
+  if(t){verify(t,function(ok){if(ok){localStorage.setItem("ava_admin_t",t);history.replaceState({},"",location.pathname);login.style.display="none";}else{msg.style.color="#b42318";msg.textContent="That link's invalid — request a new one below.";}});}
+  else if(saved){verify(saved,function(ok){if(ok){login.style.display="none";}else{localStorage.removeItem("ava_admin_t");}});}
+  document.getElementById("albtn").addEventListener("click",function(){
+    var e=(document.getElementById("alemail").value||"").trim();if(!e)return;var b=this;b.disabled=true;b.textContent="Sending…";msg.style.color="#67676e";
+    fetch(AUTH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:e})}).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){msg.style.color="#0e7a50";msg.textContent="Sign-in link sent to "+e+" — check your inbox.";b.textContent="Link sent ✓";}
+      else{msg.style.color="#b42318";msg.textContent=(d&&d.error)||"Couldn't send — try again.";b.disabled=false;b.textContent="Send me a sign-in link";}
+    }).catch(function(){b.disabled=false;b.textContent="Send me a sign-in link";});
+  });
+})();
+</script>
 <div class="app">
   <aside class="side">
     <div class="brand"><div class="logo">A</div><b>Ava</b><span class="ad">ADMIN</span></div>
