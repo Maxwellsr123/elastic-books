@@ -127,9 +127,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
         </div>
         <div class="grid g3">
-          <div class="card stat ufilt" data-filter="sorted" style="cursor:pointer"><div class="l"><i class="ti ti-receipt" style="font-size:16px;color:var(--ind)"></i> Sorted</div><div class="n" id="u_sorted">—</div><div class="d">Ava found + coded</div></div>
-          <div class="card stat ufilt" data-filter="ready" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Ready</div><div class="n" id="u_ready">—</div><div class="d">receipts attached</div></div>
           <div class="card stat ufilt" data-filter="needs" style="cursor:pointer"><div class="l"><i class="ti ti-bell" style="font-size:16px;color:var(--amb)"></i> Needs a receipt</div><div class="n" id="u_needs">—</div><div class="d">Ava is asking you</div></div>
+          <div class="card stat ufilt" data-filter="review" style="cursor:pointer"><div class="l"><i class="ti ti-search" style="font-size:16px;color:var(--ind)"></i> In review</div><div class="n" id="u_review">—</div><div class="d">found — being reconciled</div></div>
+          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">attached &amp; reconcile-ready</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
@@ -163,8 +163,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="ready"){list=U_ITEMS.filter(function(i){return i.bucket==="ready";});htxt="Ready — receipts attached";row=doneRow;empty="Nothing ready yet.";}
-    else if(f==="sorted"){list=U_ITEMS.filter(function(i){return i.bucket==="ready"||i.bucket==="review";});htxt="Sorted by Ava";row=doneRow;empty="Nothing sorted yet — Ava is on it.";}
+    if(f==="done"){list=U_ITEMS.filter(function(i){return i.bucket==="ready";});htxt="Done — attached & reconcile-ready";row=doneRow;empty="Nothing done yet.";}
+    else if(f==="review"){list=U_ITEMS.filter(function(i){return i.bucket==="review";});htxt="In review — Ava found these, being reconciled";row=doneRow;empty="Nothing in review.";}
     else{list=U_ITEMS.filter(function(i){return i.bucket==="chasing";});htxt="Receipts Ava needs from you";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All caught up — nothing to send right now.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
@@ -185,8 +185,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
-      var rd=document.getElementById("u_ready"),nd=document.getElementById("u_needs"),so=document.getElementById("u_sorted");
-      if(rd)rd.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(so)so.textContent=((c.ready||0)+(c.review||0));
+      var dn=document.getElementById("u_done"),nd=document.getElementById("u_needs"),rv=document.getElementById("u_review");
+      if(dn)dn.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(rv)rv.textContent=(c.review||0);
       U_ITEMS=d.items||[];renderHome();renderDone();renderIntg(d.integrations);
     }).catch(function(){});
   }
