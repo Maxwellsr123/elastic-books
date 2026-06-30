@@ -69,7 +69,17 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .drop{border:2px dashed #D6D6E6;border-radius:18px;padding:22px;text-align:center;background:linear-gradient(180deg,#fff,#FAFAFE);transition:border-color .15s;cursor:pointer;margin-bottom:20px}
 .drop:hover{border-color:var(--ind)}
 .dz{width:50px;height:50px;border-radius:14px;margin:0 auto 11px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:25px}
+.qitem{border-bottom:1px solid var(--line)}.qitem:last-child{border-bottom:0}.qitem .row{border-bottom:0}
+.think{margin:0 16px 10px 67px;background:var(--indbg);border-radius:12px;padding:11px 13px}
+.think .g{font-size:13px;color:var(--indtx);font-weight:500;line-height:1.45}
+.think .g .conf{font-size:11px;font-weight:600;background:rgba(255,255,255,.6);color:var(--indtx);padding:1px 7px;border-radius:99px;margin-left:5px}
+.think .w{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
+.acts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.tbtn:hover{background:var(--bg)}.tbtn.on{background:var(--ind);color:#fff;border-color:var(--ind)}
+.tbtn.draw{margin-left:auto;color:var(--ink2)}
 @media (max-width:680px){
+  .think{margin-left:16px;margin-right:16px}
   html,body{overflow-x:hidden;max-width:100vw}
   .app{flex-direction:column}
   .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;align-items:center;padding:5px 6px;border-right:0;border-top:1px solid #1d1c24;z-index:30}
@@ -96,6 +106,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     <nav class="nav" id="nav">
       <a data-p="home" class="on"><i class="ti ti-home"></i> Home</a>
       <a data-p="receipts"><i class="ti ti-receipt"></i> Receipts</a>
+      <a data-p="personal"><i class="ti ti-user-heart"></i> Personal<span id="u_pcount" style="margin-left:auto;font-size:11px;color:#8B8B98"></span></a>
     </nav>
     <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic Books</div></div>
   </aside>
@@ -140,32 +151,53 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         <div class="card" id="udone"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading…</div></div></div>
       </section>
 
+      <section id="personal" class="hidden">
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:14px;max-width:560px">Personal & drawings — kept out of your main feed, no receipts needed. Tap <b>Back to business</b> on anything that's actually a work expense.</div>
+        <div class="card" id="upersonal"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing here — Ava moves personal spending here when you tap <b>Personal</b> on it.</div></div></div>
+      </section>
+
     </div>
   </main>
 </div>
 <script>
 (function(){
-  var titles={home:"Home",receipts:"Receipts"};
+  var titles={home:"Home",receipts:"Receipts",personal:"Personal"};
   document.getElementById("nav").addEventListener("click",function(e){
     var a=e.target.closest("[data-p]");if(!a)return;
     document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
     var p=a.getAttribute("data-p");
-    ["home","receipts"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
+    ["home","receipts","personal"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
     document.getElementById("ptitle").textContent=titles[p];
   });
+  function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
+  var FB="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-feedback";
 
   var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
   var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
   var U_ITEMS=[],U_FILTER="needs";
-  function needRow(i){return '<div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div><span class="pill p-warn">send receipt</span></div>';}
+  function needRow(i){
+    var ins="";
+    if(i.insight){
+      var conf=i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"";
+      var why=i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':"";
+      ins='<div class="think"><div class="g">💡 Ava thinks: '+esc(i.insight)+conf+'</div>'+why+
+        '<div class="acts">'+
+        '<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+i.id+'"><i class="ti ti-thumb-up"></i> Right</button>'+
+        '<button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+i.id+'"><i class="ti ti-thumb-down"></i> Nope</button>'+
+        '<button class="tbtn draw" data-fb="personal" data-id="'+i.id+'"><i class="ti ti-user-heart"></i> Personal'+(i.ava_personal?" ✓":"")+'</button>'+
+        '</div></div>';
+    }
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div><span class="pill p-warn">send receipt</span></div>'+ins+'</div>';
+  }
+  function personalRow(i){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.account||"Drawings")+(i.insight?(" · "+esc(i.insight)):"")+'</div></div><button class="tbtn" data-fb="restore" data-id="'+i.id+'">Back to business</button></div>';}
   function doneRow(i){var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
-    if(f==="done"){list=U_ITEMS.filter(function(i){return i.bucket==="ready";});htxt="Done — attached & reconcile-ready";row=doneRow;empty="Nothing done yet.";}
-    else if(f==="review"){list=U_ITEMS.filter(function(i){return i.bucket==="review";});htxt="In review — Ava found these, being reconciled";row=doneRow;empty="Nothing in review.";}
-    else{list=U_ITEMS.filter(function(i){return i.bucket==="chasing";});htxt="Receipts Ava needs from you";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All caught up — nothing to send right now.';}
+    if(f==="done"){list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="ready";});htxt="Done — attached & reconcile-ready";row=doneRow;empty="Nothing done yet.";}
+    else if(f==="review"){list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="review";});htxt="In review — Ava found these, being reconciled";row=doneRow;empty="Nothing in review.";}
+    else{list=U_ITEMS.filter(function(i){return !i.personal&&i.bucket==="chasing";});htxt="Receipts Ava needs from you";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All caught up — nothing to send right now.';}
     if(head)head.textContent=htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
@@ -181,16 +213,26 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       row("Gmail","ti-mail","#EA4335",g.gmail,g.gmail_url,false)+
       row("Xero","ti-calculator","#13B5EA",g.xero,g.xero_url,true);
   }
-  function renderDone(){var db=document.getElementById("udone");if(!db)return;var done=U_ITEMS.filter(function(i){return i.bucket==="ready"||i.bucket==="review";});db.innerHTML=done.length?done.slice(0,40).map(doneRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing sorted yet — Ava is on it.</div></div>';}
+  function renderDone(){var db=document.getElementById("udone");if(!db)return;var done=U_ITEMS.filter(function(i){return !i.personal&&(i.bucket==="ready"||i.bucket==="review");});db.innerHTML=done.length?done.slice(0,40).map(doneRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing sorted yet — Ava is on it.</div></div>';}
+  function renderPersonal(){var pb=document.getElementById("upersonal");if(!pb)return;var p=U_ITEMS.filter(function(i){return i.personal;});if(p.length)pb.innerHTML=p.map(personalRow).join("");}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
       var dn=document.getElementById("u_done"),nd=document.getElementById("u_needs"),rv=document.getElementById("u_review");
       if(dn)dn.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(rv)rv.textContent=(c.review||0);
-      U_ITEMS=d.items||[];renderHome();renderDone();renderIntg(d.integrations);
+      U_ITEMS=d.items||[];renderHome();renderDone();renderPersonal();renderIntg(d.integrations);
+      var pc=document.getElementById("u_pcount");if(pc)pc.textContent=(c.personal||0)?(" "+c.personal):"";
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-fb]");if(!b)return;
+    var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
+    b.style.opacity=".5";
+    fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})})
+      .then(function(r){return r.json();}).then(function(){loadList();})
+      .catch(function(){b.style.opacity="1";});
+  });
   loadList();
   var ukind="receipt";
   document.querySelectorAll("[data-kind]").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();ukind=this.getAttribute("data-kind");document.getElementById("ufile").click();});});

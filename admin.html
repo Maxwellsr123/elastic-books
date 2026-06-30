@@ -210,6 +210,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
             else if(m.error&&String(m.error).indexOf("RESEND")>=0){p.textContent="✓ found "+found+" · "+(m.count||0)+" ready to email (connect Resend)";}
             else{p.textContent="✓ found "+found+" · "+(m.count||0)+" to chase";}
             loadLive();clr(9000);
+            // Ava joins the dots on whatever couldn't be matched (best-guess reasoning)
+            post("chase-insight",{company_id:KPA_ID}).then(function(){loadLive();}).catch(function(){});
           });
         }).catch(function(){loadLive();clr(6000);});
       }).catch(function(err){p.style.color="var(--amb)";p.textContent="Network error — "+err;});};
