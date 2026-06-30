@@ -77,6 +77,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .acts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
 .tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .tbtn:hover{background:var(--bg)}.tbtn.on{background:var(--ind);color:#fff;border-color:var(--ind)}
+.tbtn.sug{background:var(--indbg);color:var(--indtx);border-color:#cbc8f6;border-style:dashed}
+.tbtn.sug::after{content:" · Ava";font-size:10px;opacity:.6;font-weight:600}
 .tbtn.draw{color:var(--ink2)}
 .sep{width:1px;height:20px;background:var(--line);margin:0 3px;align-self:center;display:inline-block}
 @media (max-width:680px){
@@ -180,17 +182,23 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function needRow(i){
     var id=i.id;
     var head=i.insight?'<div class="g">💡 Ava thinks: '+esc(i.insight)+(i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"")+'</div>'+(i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':""):'';
-    var isP=i.personal, noR=i.receipt==="not_needed";
+    // Ava SUGGESTS one side of each toggle (soft "·Ava" glow); a real click locks it SOLID.
+    var kc=i.kind_confirmed, avaP=i.ava_personal;          // kc = user explicitly picked business/personal
+    var bizCls=i.personal?"":(kc?" on":(!avaP?" sug":""));
+    var perCls=i.personal?" on":(kc?"":(avaP?" sug":""));
+    var rLocked=(i.receipt_required===true||i.receipt_required===false); // user set the receipt rule
+    var needsCls=i.receipt==="needed"?(rLocked?" on":" sug"):"";
+    var noCls=i.receipt==="not_needed"?(rLocked?" on":" sug"):"";
     var row1='<div class="acts">'+
       '<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Right</button>'+
       '<button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> Nope</button>'+
       '<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Comment</button></div>';
     var row2='<div class="acts">'+
-      '<button class="tbtn'+(!isP?" on":"")+'" data-fb="business" data-id="'+id+'">Business</button>'+
-      '<button class="tbtn'+(isP?" on":"")+'" data-fb="personal" data-id="'+id+'">Personal</button>'+
+      '<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button>'+
+      '<button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>'+
       '<span class="sep"></span>'+
-      '<button class="tbtn'+(i.receipt==="needed"?" on":"")+'" data-fb="needs_receipt" data-id="'+id+'">Needs receipt</button>'+
-      '<button class="tbtn'+(noR?" on":"")+'" data-fb="no_receipt" data-id="'+id+'">No receipt</button></div>';
+      '<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs receipt</button>'+
+      '<button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">No receipt</button></div>';
     var row3='<div class="acts"><button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt to this</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none"></div>';
     var cmts=(i.comments||[]).map(function(c){return '<div style="font-size:11.5px;margin-top:4px"><b style="text-transform:capitalize;color:var(--ink)">'+esc(c.author)+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
     var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:none;margin-top:8px"><div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Note for Jewel…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
