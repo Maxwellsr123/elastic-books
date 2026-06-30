@@ -77,18 +77,15 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
     <nav class="nav" id="nav">
       <a data-p="home" class="on"><i class="ti ti-home"></i> Home</a>
       <a data-p="receipts"><i class="ti ti-receipt"></i> Receipts</a>
-      <a data-p="chat"><i class="ti ti-message-2"></i> Ava chat</a>
-      <a data-p="intg"><i class="ti ti-plug"></i> Integrations</a>
-      <a data-p="set"><i class="ti ti-settings"></i> Settings</a>
     </nav>
-    <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Free trial · 9 days left</div></div>
+    <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic Books</div></div>
   </aside>
 
   <main class="main">
     <div class="top">
       <h1 id="ptitle">Home</h1>
       <div style="display:flex;align-items:center;gap:14px;">
-        <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Synced · 14 min ago</span>
+        <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
         <div class="av">MR</div>
       </div>
     </div>
@@ -123,73 +120,19 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink
         <div class="card" id="udone"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading…</div></div></div>
       </section>
 
-      <section id="chat" class="hidden">
-        <div class="chatw">
-          <div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px">Chat with Ava right here — no Slack or WhatsApp needed.</div>
-          <div id="uchat" style="display:flex;flex-direction:column;gap:10px;min-height:240px"></div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <input id="uchatin" style="flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-family:inherit;font-size:13.5px" placeholder="Ask Ava anything…">
-            <button class="btn btn-p" id="uchatsend"><i class="ti ti-send" style="font-size:15px"></i></button>
-          </div>
-        </div>
-      </section>
-
-      <section id="intg" class="hidden">
-        <div style="font-size:13.5px;color:var(--ink2);margin-bottom:18px;max-width:560px">Connect your tools so Ava can hunt receipts, chase what's missing, and get your books reconcile-ready. Read-only where it counts — Ava never sends or edits in your inbox.</div>
-        <div class="grid g1" style="gap:14px">
-          <div class="card intg" id="i-gmail">
-            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#EA4335,#FBBC05)"><i class="ti ti-mail"></i></div>
-              <div style="flex:1"><h3>Gmail</h3><div class="sub">Ava reads receipts and supplier invoices here — and hunts for the ones you're missing. Read + extract only.</div></div>
-              <span class="pill p-ok" id="s-gmail">connected</span></div>
-            <div><button class="btn" data-conn="gmail">Manage</button></div>
-          </div>
-          <div class="card intg" id="i-slack">
-            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#611f69,#E01E5A)"><i class="ti ti-brand-slack"></i></div>
-              <div style="flex:1"><h3>Slack</h3><div class="sub">Your dedicated Ava chat — answer her questions and drop receipt photos right in Slack. She hunts receipts here too.</div></div>
-              <span class="pill p-ind" id="s-slack">connect</span></div>
-            <div><button class="btn btn-p" data-conn="slack">Connect Slack</button></div>
-          </div>
-          <div class="card intg" id="i-xero">
-            <div class="top2"><div class="lg" style="background:linear-gradient(135deg,#13B5EA,#0a8bc2)"><i class="ti ti-calculator"></i></div>
-              <div style="flex:1"><h3>Xero</h3><div class="sub">Ava attaches receipts to your reconciled spends and suggests the code. She never reconciles — that stays yours.</div></div>
-              <span class="pill p-ind" id="s-xero">connect</span></div>
-            <div><button class="btn btn-p" data-conn="xero">Connect Xero</button></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="set" class="hidden"><div class="card stat"><div class="l">Settings</div><div class="d" style="margin-top:8px">Workspace, billing, and notification preferences live here.</div></div></section>
     </div>
   </main>
 </div>
 <script>
 (function(){
-  var titles={home:"Home",receipts:"Receipts",chat:"Ava chat",intg:"Integrations",set:"Settings"};
+  var titles={home:"Home",receipts:"Receipts"};
   document.getElementById("nav").addEventListener("click",function(e){
     var a=e.target.closest("[data-p]");if(!a)return;
     document.querySelectorAll("#nav a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");
     var p=a.getAttribute("data-p");
-    ["home","receipts","chat","intg","set"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
+    ["home","receipts"].forEach(function(id){document.getElementById(id).classList.toggle("hidden",id!==p)});
     document.getElementById("ptitle").textContent=titles[p];
   });
-  document.addEventListener("click",function(e){
-    var b=e.target.closest("[data-conn]");if(!b)return;
-    var k=b.getAttribute("data-conn");if(k==="gmail")return;
-    var s=document.getElementById("s-"+k);s.textContent="connected";s.className="pill p-ok";
-    b.outerHTML='<button class="btn" data-conn="'+k+'">Manage</button>';
-  });
-  var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/ava-web-chat";
-  var umsgs=[{role:"assistant",content:"Hi Sam — I'm Ava. Ask me anything about your books, a receipt, or what still needs doing."}];
-  function esc(s){return String(s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
-  function renderChat(){var c=document.getElementById("uchat");if(!c)return;c.innerHTML=umsgs.map(function(m){return '<div class="bub '+(m.role==="user"?"me":"ava")+'">'+esc(m.content)+'</div>';}).join("");c.scrollTop=c.scrollHeight;}
-  function sendChat(){var inp=document.getElementById("uchatin");var t=(inp.value||"").trim();if(!t)return;
-    umsgs.push({role:"user",content:t});inp.value="";umsgs.push({role:"assistant",content:"…"});renderChat();var ti=umsgs.length-1;
-    fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({messages:umsgs.filter(function(m){return m.content!=="…"})})})
-      .then(function(r){return r.json();}).then(function(d){umsgs[ti]={role:"assistant",content:d.reply||d.error||"Sorry — try that again?"};renderChat();})
-      .catch(function(){umsgs[ti]={role:"assistant",content:"Network error — try again."};renderChat();});}
-  document.getElementById("uchatsend").addEventListener("click",sendChat);
-  document.getElementById("uchatin").addEventListener("keydown",function(e){if(e.key==="Enter")sendChat();});
-  renderChat();
 
   var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
   var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
