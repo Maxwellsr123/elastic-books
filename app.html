@@ -69,6 +69,23 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .drop{border:2px dashed #D6D6E6;border-radius:18px;padding:22px;text-align:center;background:linear-gradient(180deg,#fff,#FAFAFE);transition:border-color .15s;cursor:pointer;margin-bottom:20px}
 .drop:hover{border-color:var(--ind)}
 .dz{width:50px;height:50px;border-radius:14px;margin:0 auto 11px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:25px}
+@media (max-width:680px){
+  .app{flex-direction:column}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;align-items:center;padding:5px 6px;border-right:0;border-top:1px solid #1d1c24;z-index:30}
+  .brand,.side .foot{display:none}
+  .nav{flex-direction:row;gap:2px;margin:0;flex:1;justify-content:space-around}
+  .nav a{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px;flex:1;justify-content:center;text-align:center;border-radius:12px}
+  .nav a i{font-size:22px}
+  .main{width:100%}
+  .top{padding:14px 18px}
+  .top .chip{display:none}
+  .wrap{padding:18px 16px 90px;max-width:100%}
+  .hero{padding:18px;border-radius:16px}.hero h2{font-size:18px}.hero p{font-size:13px}
+  .drop{padding:20px 16px}
+  .g3{gap:8px}
+  .stat{padding:13px 11px}.stat .n{font-size:22px}.stat .l{font-size:11px}.stat .d{font-size:11px}
+  .row{padding:12px 14px}
+}
 </style>
 </head>
 <body>
@@ -97,6 +114,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <h2>Good morning, Max</h2>
           <p>Ava checks your inbox every hour and sorts your receipts. Anything she still needs from you is in the list below — drop it in and she'll match it up.</p>
         </div>
+        <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
         <div class="drop" id="udrop">
           <div class="dz"><i class="ti ti-camera-plus"></i></div>
           <div style="font-weight:600;font-size:15px">Got a receipt? Drop it here</div>
@@ -151,13 +169,24 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
   }
+  function renderIntg(g){
+    var box=document.getElementById("uintg");if(!box||!g)return;
+    function row(name,ic,col,ok,url,last){
+      var right=ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> Connected</span>':(url?'<a href="'+url+'" class="btn btn-p" style="text-decoration:none;font-size:12.5px;padding:7px 14px">Connect</a>':'<span class="pill p-warn">unavailable</span>');
+      return '<div style="display:flex;align-items:center;gap:11px;padding:10px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:34px;height:34px;font-size:17px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+'</div>'+right+'</div>';
+    }
+    box.style.display="block";
+    box.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--ink2);padding:10px 0 2px">Your connected accounts</div>'+
+      row("Gmail","ti-mail","#EA4335",g.gmail,g.gmail_url,false)+
+      row("Xero","ti-calculator","#13B5EA",g.xero,g.xero_url,true);
+  }
   function renderDone(){var db=document.getElementById("udone");if(!db)return;var done=U_ITEMS.filter(function(i){return i.bucket==="ready"||i.bucket==="review";});db.innerHTML=done.length?done.slice(0,40).map(doneRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing sorted yet — Ava is on it.</div></div>';}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
       var rd=document.getElementById("u_ready"),nd=document.getElementById("u_needs"),so=document.getElementById("u_sorted");
       if(rd)rd.textContent=(c.ready||0);if(nd)nd.textContent=(c.chasing||0);if(so)so.textContent=((c.ready||0)+(c.review||0));
-      U_ITEMS=d.items||[];renderHome();renderDone();
+      U_ITEMS=d.items||[];renderHome();renderDone();renderIntg(d.integrations);
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});

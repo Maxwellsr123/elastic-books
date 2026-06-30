@@ -65,6 +65,22 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .qcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .qhead{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer}
 .thumb{width:38px;height:38px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:18px;flex-shrink:0}
+@media (max-width:680px){
+  .app{flex-direction:column}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;align-items:center;padding:5px 6px;border-right:0;border-top:1px solid #1d1c24;z-index:30}
+  .brand,.side .foot{display:none}
+  .nav{flex-direction:row;gap:2px;margin:0;flex:1;justify-content:space-around}
+  .nav a{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px;flex:1;justify-content:center;text-align:center;border-radius:12px}
+  .nav a .ct{display:none}.nav a i{font-size:22px}
+  .main{width:100%}
+  .top{padding:14px 18px}.top .chip{display:none}
+  .wrap{padding:18px 16px 90px;max-width:100%}
+  .drop{padding:20px 16px}
+  #dtally{gap:8px}
+  .stat{padding:13px 11px}.stat .n{font-size:22px}
+  .qhead{padding:11px 12px}
+  .clients-row,.row{flex-wrap:wrap}
+}
 </style>
 </head>
 <body>
