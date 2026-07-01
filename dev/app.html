@@ -133,6 +133,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <h2>Good morning, Max</h2>
           <p>Ava checks your inbox every hour and sorts your receipts. Anything she still needs from you is in the list below — drop it in and she'll match it up.</p>
         </div>
+        <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava runs the automatic bits. The human jobs can go to a looper, the owner, or their own bookkeeper — swap any of them.</div>
+          <div id="roleslist"></div>
+        </div>
         <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
         <div class="drop" id="udrop">
           <div class="dz"><i class="ti ti-camera-plus"></i></div>
@@ -336,6 +341,35 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       }).join("")||'<div style="padding:10px;font-size:12.5px;color:var(--ink3)">No clients yet.</div>';
     }).catch(function(){});
   }
+
+  // ── who does what: Ava fixed, human jobs swappable (looper / owner / bookkeeper) ──
+  var ROLES_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/roles";
+  var ROLES=null;
+  var HUMAN=[
+    {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export"},
+    {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads"},
+    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero"}
+  ];
+  var KINDOPT=[["looper","Our looper"],["owner","The owner"],["bookkeeper","Their bookkeeper"]];
+  function rRow(icon,color,title,right){return '<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line)"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+color+'"><i class="ti '+icon+'"></i></div><div style="flex:1;font-size:13.5px;font-weight:500">'+title+'</div>'+right+'</div>';}
+  function renderRoles(){
+    var box=document.getElementById("roleslist");if(!box||!ROLES)return;
+    var ava=rRow("ti-sparkles","var(--ind)","<b style=\"font-weight:600\">Ava</b> — reads, matches, codes, checks Gmail, scouts bills",'<span class="pill p-ind">automatic</span>');
+    var rows=HUMAN.map(function(h){
+      var cur=ROLES[h.k]||{kind:"looper",name:""};
+      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)">'+KINDOPT.map(function(o){return '<option value="'+o[0]+'"'+(cur.kind===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select>';
+      var name=cur.kind==="bookkeeper"?'<input class="rolename" data-role="'+h.k+'" placeholder="bookkeeper’s name" value="'+esc(cur.name||"")+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;width:150px;margin-left:8px">':'';
+      return rRow(h.icon,"var(--ink2)",h.label,'<div style="display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+sel+name+'</div>');
+    }).join("");
+    box.innerHTML=ava+rows;
+  }
+  function loadRoles(){fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).then(function(d){ROLES=d.roles||{};renderRoles();}).catch(function(){});}
+  function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
+  loadRoles();
+  document.addEventListener("change",function(e){
+    var s=e.target.closest(".roleset");if(s){var k=s.getAttribute("data-role");ROLES[k]=ROLES[k]||{name:""};ROLES[k].kind=s.value;renderRoles();saveRoles();return;}
+    var n=e.target.closest(".rolename");if(n){var k2=n.getAttribute("data-role");ROLES[k2]=ROLES[k2]||{kind:"bookkeeper"};ROLES[k2].name=n.value;saveRoles();return;}
+  });
 
   // Upload the Xero unreconciled export → same read/hunt/code/bills pipeline the desk ran
   var bankup=document.getElementById("bankup"),bfile=document.getElementById("bfile");
