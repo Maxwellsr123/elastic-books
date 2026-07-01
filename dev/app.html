@@ -140,17 +140,23 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div id="roleslist"></div>
         </div>
         <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
-        <div class="drop" id="udrop">
-          <div class="dz"><i class="ti ti-camera-plus"></i></div>
-          <div style="font-weight:600;font-size:15px">Got a receipt? Drop it here</div>
-          <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Snap a photo, or drop a PDF or file — Ava reads it and attaches it to the right spend. Or just send it in Slack or WhatsApp.</div>
-          <div style="margin-top:13px">
-            <button class="btn btn-p" data-kind="receipt"><i class="ti ti-camera" style="font-size:14px;vertical-align:-2px"></i> Add a receipt</button>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:20px">
+          <div class="drop" id="udrop" style="margin-bottom:0">
+            <div class="dz"><i class="ti ti-camera-plus"></i></div>
+            <div style="font-weight:600;font-size:15px">Drop a receipt</div>
+            <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Snap a photo or drop a file — Ava reads it and files it against the right spend. Or just send it in Slack or WhatsApp.</div>
+            <div style="margin-top:13px"><button class="btn btn-p" data-kind="receipt"><i class="ti ti-camera" style="font-size:14px;vertical-align:-2px"></i> Add a receipt</button></div>
+            <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
+            <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
           </div>
-          <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
-          <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
-          <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3)">Doing the reconciling? <a id="bankup" style="color:var(--ind);cursor:pointer;font-weight:600">Upload your Xero bank lines ↗</a> — the unreconciled export, screenshot, PDF, CSV or Excel.</div>
-          <input type="file" id="bfile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
+          <div class="drop" id="xdrop" style="margin-bottom:0;border-style:solid;border-color:#175CD3;background:linear-gradient(180deg,#fff,#F5F8FF)">
+            <div class="dz" style="background:#175CD3"><i class="ti ti-file-spreadsheet"></i></div>
+            <div style="font-weight:600;font-size:15px">Drop the Xero bank lines</div>
+            <div style="font-size:12.5px;color:var(--ink2);margin-top:4px" id="xwho">The unreconciled export — screenshot, PDF, CSV or Excel.</div>
+            <div style="margin-top:13px"><button class="btn" id="bankup" style="border-color:#175CD3;color:#175CD3;font-weight:600"><i class="ti ti-upload" style="font-size:14px;vertical-align:-2px"></i> Upload bank lines</button></div>
+            <input type="file" id="bfile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
+            <span id="xproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
+          </div>
         </div>
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
@@ -368,12 +374,19 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     }).join("");
     box.innerHTML=ava+rows;
   }
-  function loadRoles(){fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).then(function(d){ROLES=d.roles||{};renderRoles();}).catch(function(){});}
+  function updateXeroBox(){
+    var cur=(ROLES&&ROLES.upload)||{kind:"looper",name:""};var c=RCOL[cur.kind]||RCOL.looper;
+    var xd=document.getElementById("xdrop"),dz=xd&&xd.querySelector(".dz"),bu=document.getElementById("bankup"),xw=document.getElementById("xwho");
+    if(xd)xd.style.borderColor=c;if(dz)dz.style.background=c;
+    if(bu){bu.style.borderColor=c;bu.style.color=c;}
+    if(xw)xw.innerHTML='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> — the unreconciled export, screenshot, PDF, CSV or Excel.";
+  }
+  function loadRoles(){fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).then(function(d){ROLES=d.roles||{};renderRoles();updateXeroBox();}).catch(function(){});}
   function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
   loadRoles();
   document.addEventListener("change",function(e){
-    var s=e.target.closest(".roleset");if(s){var k=s.getAttribute("data-role");ROLES[k]=ROLES[k]||{name:""};ROLES[k].kind=s.value;renderRoles();saveRoles();return;}
-    var n=e.target.closest(".rolename");if(n){var k2=n.getAttribute("data-role");ROLES[k2]=ROLES[k2]||{kind:"bookkeeper"};ROLES[k2].name=n.value;saveRoles();return;}
+    var s=e.target.closest(".roleset");if(s){var k=s.getAttribute("data-role");ROLES[k]=ROLES[k]||{name:""};ROLES[k].kind=s.value;renderRoles();updateXeroBox();saveRoles();return;}
+    var n=e.target.closest(".rolename");if(n){var k2=n.getAttribute("data-role");ROLES[k2]=ROLES[k2]||{kind:"bookkeeper"};ROLES[k2].name=n.value;updateXeroBox();saveRoles();return;}
   });
   document.addEventListener("click",function(e){
     var g=e.target.closest(".rolego");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
@@ -385,7 +398,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var bankup=document.getElementById("bankup"),bfile=document.getElementById("bfile");
   if(bankup)bankup.addEventListener("click",function(){bfile.click();});
   if(bfile)bfile.addEventListener("change",function(){
-    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;var p=document.getElementById("uproc");this.value="";
+    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;var p=document.getElementById("xproc");this.value="";
     var done=0,fail=0,keep=function(){return{};};
     (function next(idx){
       if(idx>=files.length){
