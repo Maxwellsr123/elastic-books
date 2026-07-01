@@ -234,13 +234,29 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div><div style="margin-top:7px">'+looperBtn+'</div></div>';
     // one labelled row per decision so it's clear what you're answering
     var jrow=function(label,inner){return '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-top:9px"><span style="font-size:11.5px;color:var(--ink3);width:76px;flex-shrink:0;padding-top:6px">'+label+'</span><div style="display:flex;gap:6px;flex-wrap:wrap">'+inner+'</div></div>';};
-    var box='<div class="think">'+head
-      +jrow("Ava right?",'<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Yes</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> No</button><button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
+    // The full question set — only needed when the receipt's missing and Ava can't
+    // read the answers herself. Tucked behind "Not quite" so the default is one tap.
+    var qgrid=jrow("Ava right?",'<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Yes</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> No</button>')
       +jrow("Type",'<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button><button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>')
       +jrow("Receipt",'<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs one</button><button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">Not needed</button><button class="tbtn'+cantCls+'" data-fb="cant_find" data-id="'+id+'">Can\'t find</button>')
       +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button>')
-      +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>')
-      +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">')
+      +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>');
+    // Ava's best read, stated once — the fast path is a single confirm, not a grid.
+    var typeTxt=i.personal?"personal spend":"a business expense";
+    var jobTxt=(i.is_job===true||(i.is_job!==false&&i.ava_job))?" for a job":"";
+    var gstTxt=i.gst===true?", incl. GST":(i.gst===false?", no GST":"");
+    var read='Looks like '+typeTxt+jobTxt+gstTxt+(i.account?' ('+esc(i.account)+')':'')+'.';
+    var box='<div class="think">'+head
+      +'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px">'+read+' <span style="color:var(--ink3)">— right?</span></div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+        +'<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
+        +'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>'
+        +'<button class="tbtn" data-editrow="'+id+'"><i class="ti ti-adjustments-alt"></i> Not quite</button>'
+        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>'
+      +'</div>'
+      +'<input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">'
+      +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
+        +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
       +cwrap+'</div>';
     var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
@@ -326,7 +342,13 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       if(bt){var tot=U_ITEMS.filter(function(i){return i.lane==="to_pay";}).reduce(function(s,i){return s+Math.abs(Number(i.amount)||0);},0);bt.textContent=tot?(uMoney(tot)+" due"):"incoming, unpaid";}
       if(rd)rd.textContent=nf(function(i){return i.lane==="ready";});
       if(rcn)rcn.textContent=nf(function(i){return i.lane==="done";});
+      // keep the page still after an action: remember scroll + which edit-grids are open,
+      // then restore — no more jumping around when you tap a button.
+      var _sy=(document.scrollingElement||document.documentElement).scrollTop;
+      var _open=[];document.querySelectorAll(".editgrid").forEach(function(g){if(g.style.display!=="none")_open.push(g.getAttribute("data-id"));});
       renderHome();renderIntg(d.integrations);renderMyWork();
+      _open.forEach(function(oid){var g=document.querySelector('.editgrid[data-id="'+oid+'"]');if(g)g.style.display="block";});
+      try{(document.scrollingElement||document.documentElement).scrollTop=_sy;}catch(_e){}
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
@@ -346,6 +368,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var cs=e.target.closest(".cmt-send");
     if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";cs.textContent="Ava…";if(inp)inp.value="";
       fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
+    var er=e.target.closest("[data-editrow]");
+    if(er){var g=document.querySelector('.editgrid[data-id="'+er.getAttribute("data-editrow")+'"]');if(g)g.style.display=g.style.display==="none"?"block":"none";return;}
     var at=e.target.closest("[data-attach]");
     if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
     var rk=e.target.closest("[data-recon]");
