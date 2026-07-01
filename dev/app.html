@@ -131,9 +131,10 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     <div class="wrap">
       <section id="home">
         <div class="hero"><div class="spark"></div>
-          <h2>Good morning, Max</h2>
-          <p>Ava checks your inbox every hour and sorts your receipts. Anything she still needs from you is in the list below — drop it in and she'll match it up.</p>
+          <h2 id="herohi">Good morning</h2>
+          <p id="herosub">Ava does the heavy lifting. Here's anything that actually needs you.</p>
         </div>
+        <div id="mywork" style="margin-bottom:22px"></div>
         <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
           <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
           <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava does the most she can, automatically. The few human jobs default to your looper — hand any of them to someone you've added under Settings.</div>
@@ -158,6 +159,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
             <span id="xproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
           </div>
         </div>
+        <div class="sec" style="color:var(--ink2)">The whole account <span style="font-weight:400;font-size:12px;color:var(--ink3)">· everything Ava, your looper and you are working</span></div>
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
           <div class="card stat ufilt" data-filter="pile" style="cursor:pointer"><div class="l"><i class="ti ti-paperclip" style="font-size:16px;color:var(--blu)"></i> Receipt pile</div><div class="n" id="u_pile">—</div><div class="d">receipts waiting for a bank line</div></div>
@@ -304,7 +306,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       if(bl)bl.textContent=nf(function(i){return i.lane==="to_pay";});
       if(bt){var tot=U_ITEMS.filter(function(i){return i.lane==="to_pay";}).reduce(function(s,i){return s+Math.abs(Number(i.amount)||0);},0);bt.textContent=tot?(uMoney(tot)+" due"):"incoming, unpaid";}
       if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
-      renderHome();renderIntg(d.integrations);
+      renderHome();renderIntg(d.integrations);renderMyWork();
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
@@ -415,7 +417,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     Promise.all([
       fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};}),
       fetch(RUSERS_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};})
-    ]).then(function(res){ROLES=(res[0]&&res[0].roles)||{};RUSERS=(res[1]&&res[1].users)||[];renderRoles();updateXeroBox();});
+    ]).then(function(res){ROLES=(res[0]&&res[0].roles)||{};RUSERS=(res[1]&&res[1].users)||[];renderRoles();updateXeroBox();renderMyWork();});
   }
   function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
   loadRoles();
@@ -426,10 +428,36 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     renderRoles();updateXeroBox();saveRoles();
   });
   document.addEventListener("click",function(e){
-    var g=e.target.closest(".rolego");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
+    var g=e.target.closest(".rolego,.mwgo");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
     if(to==="upload"){var bf=document.getElementById("bfile");if(bf)bf.click();return;}
     U_FILTER=to;renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});
   });
+
+  // ── "your work": just the jobs that need THIS logged-in person ──
+  var SESSION=(function(){try{return JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){return null;}})();
+  function firstName(){var n=(SESSION&&SESSION.name)||((SESSION&&SESSION.email)||"").split("@")[0]||"";n=String(n).split(/[ .]+/)[0];return n?n.charAt(0).toUpperCase()+n.slice(1):"there";}
+  function jobMine(k){if(!SESSION)return true;var r=(ROLES&&ROLES[k])||{kind:"looper"};if(SESSION.looper)return r.kind!=="user";return r.kind==="user"&&r.email===SESSION.email;}
+  function renderMyWork(){
+    var box=document.getElementById("mywork");if(!box||!ROLES)return;
+    var hh=new Date().getHours(),hi=document.getElementById("herohi");if(hi)hi.textContent="Good "+(hh<12?"morning":hh<18?"afternoon":"evening")+", "+firstName();
+    var cnt=function(t){return U_ITEMS.filter(t).length;};
+    var pile=cnt(function(i){return i.lane==="pile";}),conf=cnt(function(i){return i.lane==="guess";}),ready=cnt(function(i){return i.lane==="ready";}),bills=cnt(function(i){return i.lane==="to_pay";});
+    var tasks=[];
+    if(jobMine("upload")&&pile>0)tasks.push({c:"#175CD3",icon:"ti-file-spreadsheet",label:"Drop the Xero bank lines",sub:pile+" receipt"+(pile>1?"s":"")+" waiting on a bank line",go:"upload"});
+    if(jobMine("confirm")&&conf>0)tasks.push({c:"#B5630F",icon:"ti-checkbox",label:"Confirm Ava's reads",sub:conf+" to check — 👍 or tag them",go:"confirm"});
+    if(jobMine("reconcile")&&ready>0)tasks.push({c:"#0E7A50",icon:"ti-checks",label:"Reconcile payments",sub:ready+" ready to reconcile",go:"done"});
+    if(SESSION&&!SESSION.looper&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
+    var sub=document.getElementById("herosub");
+    if(!tasks.length){
+      if(sub)sub.textContent="You're all clear — Ava and your looper have it. We'll flag anything only you can answer.";
+      box.innerHTML='<div class="card" style="padding:17px 18px;display:flex;align-items:center;gap:12px"><div class="ic" style="width:36px;height:36px;color:var(--grn);background:var(--grnbg)"><i class="ti ti-circle-check" style="font-size:19px"></i></div><div><div style="font-weight:600;font-size:14px">Nothing needs you right now</div><div style="font-size:12.5px;color:var(--ink2)">Ava and your looper are on it — drop a receipt any time.</div></div></div>';
+      return;
+    }
+    if(sub)sub.textContent="Here's what needs you — tap one to jump in.";
+    box.innerHTML='<div class="sec" style="margin:0 0 10px">'+firstName()+'’s work</div><div style="display:flex;flex-direction:column;gap:9px">'+tasks.map(function(t){
+      return '<a class="mwgo" data-go="'+t.go+'" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-left:3px solid '+t.c+';border-radius:12px;padding:13px 15px;cursor:pointer;text-decoration:none"><div class="ic" style="width:36px;height:36px;color:'+t.c+';background:'+t.c+'14"><i class="ti '+t.icon+'" style="font-size:18px"></i></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px;color:var(--ink)">'+t.label+'</div><div style="font-size:12.5px;color:var(--ink2)">'+t.sub+'</div></div><i class="ti ti-chevron-right" style="color:var(--ink3);font-size:18px"></i></a>';
+    }).join("")+'</div>';
+  }
 
   // Upload the Xero unreconciled export → same read/hunt/code/bills pipeline the desk ran
   var bankup=document.getElementById("bankup"),bfile=document.getElementById("bfile");
@@ -590,7 +618,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   if(t){
     fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
       .then(function(r){return r.json();}).then(function(d){
-        if(d&&d.ok)setS({email:d.email,looper:d.looper,companies:d.companies});
+        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,companies:d.companies});
         history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
         route();
       }).catch(function(){route();});
