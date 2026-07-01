@@ -412,12 +412,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     </div>
     <div style="padding:16px 20px">
       <div style="font-weight:600;font-size:14px;margin-bottom:3px">Users</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone here can open this board. Add the owner, your loopers, or their bookkeeper — same login for everyone.</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone you add can open this board — one login for everyone. Who does which job is set in “Who does what”.</div>
       <div id="userlist"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <input id="uName" placeholder="name" style="flex:1 1 100px;min-width:90px;border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
         <input id="uEmail" placeholder="email" style="flex:1.6 1 150px;min-width:140px;border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
-        <select id="uRole" style="border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px"><option value="owner">Owner</option><option value="bookkeeper">Bookkeeper</option><option value="team">Team</option><option value="looper">Looper</option></select>
         <button id="uAdd" class="btn btn-p">Add</button>
       </div>
       <div id="uMsg" style="font-size:12.5px;color:var(--grn);margin-top:8px;min-height:15px"></div>
@@ -429,15 +428,12 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 (function(){
   var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
   var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
-  var UCOL={owner:"#B5630F",bookkeeper:"#0E7A50",looper:"#175CD3",team:"#67676E"};
-  var UBG={owner:"#FBF1E2",bookkeeper:"#E7F6EE",looper:"#EFF6FF",team:"#EEEEEA"};
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
   var ov=document.getElementById("settingsov"),list=document.getElementById("userlist"),msg=document.getElementById("uMsg");
   var sb=document.getElementById("settingsbtn");
   function render(us){
     list.innerHTML=us.length?us.map(function(u){
-      var c=UCOL[u.role]||UCOL.team,bg=UBG[u.role]||UBG.team;
-      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:'+c+';background:'+bg+'">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div><span class="pill" style="background:'+bg+';color:'+c+';text-transform:capitalize">'+esc(u.role)+'</span><button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:var(--indtx);background:var(--indbg)">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div><button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
     }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
   }
   function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
@@ -445,10 +441,10 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
   ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});
   document.getElementById("uAdd").addEventListener("click",function(){
-    var name=document.getElementById("uName"),email=document.getElementById("uEmail"),role=document.getElementById("uRole");
+    var name=document.getElementById("uName"),email=document.getElementById("uEmail");
     var v=(email.value||"").trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){email.style.borderColor="var(--amb)";return;}
     var b=this;b.disabled=true;b.textContent="…";
-    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,name:name.value,email:v,role:role.value})})
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,name:name.value,email:v})})
       .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Add";if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;return;}name.value="";email.value="";email.style.borderColor="var(--line)";msg.style.color="var(--grn)";msg.textContent="Added ✓";setTimeout(function(){msg.textContent="";},1500);load();})
       .catch(function(){b.disabled=false;b.textContent="Add";msg.style.color="var(--amb)";msg.textContent="Couldn't add — try again.";});
   });
