@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elastic AI — connect your accounts</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;--ind:#5B54E6;--ind2:#7B74EE;--grn:#0E7A50;--grnbg:#E7F6EE;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.wrap{max-width:520px;margin:0 auto;padding:40px 18px 60px}
+.logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:21px;margin-bottom:18px}
+h1{font-size:22px;font-weight:600;margin-bottom:5px;letter-spacing:-.02em}
+.sub{font-size:13.5px;color:var(--ink2);margin-bottom:24px;line-height:1.55}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2px 18px;box-shadow:0 1px 2px rgba(20,20,24,.03),0 16px 34px rgba(20,20,24,.04)}
+.row{display:flex;align-items:center;gap:13px;padding:16px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.nm{flex:1;min-width:0}.nm b{font-weight:600;font-size:14.5px}.nm .d{font-size:12.5px;color:var(--ink2);margin-top:2px;line-height:1.45}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;border:0;background:var(--ind);color:#fff;cursor:pointer;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(91,84,230,.25)}
+.pill{font-size:12px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--grnbg);color:var(--grn);white-space:nowrap}
+.foot{font-size:12px;color:var(--ink3);margin-top:22px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">E</div>
+  <h1>Connect your accounts</h1>
+  <div class="sub">Link your inbox, Xero and Fergus and Ava can work across your business — chasing jobs, receipts and overdue invoices. Add as many as you like, any time.</div>
+  <div class="card" id="list"><div class="row"><div class="nm">Loading…</div></div></div>
+  <div class="foot">Your data stays yours. Ava reads only what she needs. — Elastic AI</div>
+</div>
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var CO=new URLSearchParams(location.search).get("c");
+  var list=document.getElementById("list");
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
+  if(!CO){list.innerHTML='<div class="row"><div class="nm">This link is missing its company code — ask whoever sent it for a fresh one.</div></div>';return;}
+  function ok(){return '<span class="pill"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>';}
+  function connect(url,label){return url?'<a class="btn" href="'+esc(url)+'">'+esc(label)+'</a>':'<span style="font-size:12px;color:var(--ink3)">unavailable</span>';}
+  function row(icon,col,bg,name,desc,right){return '<div class="row"><div class="ic" style="color:'+col+';background:'+bg+'"><i class="ti '+icon+'"></i></div><div class="nm"><b>'+name+'</b><div class="d">'+desc+'</div></div>'+right+'</div>';}
+  function render(g){
+    var inboxes=(g.inboxes&&g.inboxes.length)?g.inboxes.map(function(e){return esc(e);}).join(", "):"scan receipts &amp; urgent email";
+    list.innerHTML=
+      row("ti-mail","#EA4335","#FDECEA","Gmail",inboxes,connect(g.gmail_url,g.gmail?"Add another":"Connect"))+
+      row("ti-calculator","#0E7C93","#E7F7FC","Xero","chase overdue invoices, attach receipts",g.xero?ok():connect(g.xero_url,"Connect"))+
+      row("ti-tools","#C2410C","#FBF1E2","Fergus","jobs, quotes &amp; scheduling",g.fergus?ok():connect(g.fergus_url,"Connect"));
+  }
+  fetch(API+"/chase-list?company="+CO).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.integrations)render(d.integrations);
+    else list.innerHTML='<div class="row"><div class="nm">Couldn\'t load — check the link.</div></div>';
+  }).catch(function(){list.innerHTML='<div class="row"><div class="nm">Couldn\'t load — try again.</div></div>';});
+})();
+</script>
+</body>
+</html>
