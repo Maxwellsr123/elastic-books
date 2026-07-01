@@ -235,7 +235,19 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var looperBtn=i.looper?'<span class="pill p-ind"><i class="ti ti-user-check" style="font-size:11px;vertical-align:-1px"></i> Our team is on it</span>':'<button class="tbtn" data-fb="looper" data-id="'+id+'"><i class="ti ti-user-search"></i> Get a looper</button>';
     var hasC=(i.comments||[]).length>0;
     var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div><div style="margin-top:7px">'+looperBtn+'</div></div>';
-    var box='<div class="think">'+head+row1+row2+row3+cwrap+'</div>';
+    // Jewel's asks: tick if it's for a job (Ava soft-suggests for materials) + GST status
+    var jobSet=(i.is_job===true||i.is_job===false);
+    var jobY=i.is_job===true?" on":(!jobSet&&i.ava_job?" sug":"");
+    var jobN=i.is_job===false?" on":"";
+    var gstY=i.gst===true?" on":"";
+    var gstN=i.gst===false?" on":"";
+    var rowJG='<div class="acts">'+
+      '<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'"><i class="ti ti-briefcase"></i> For a job</button>'+
+      '<button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">Not a job</button>'+
+      '<span class="sep"></span>'+
+      '<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">GST</button>'+
+      '<button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No GST</button></div>';
+    var box='<div class="think">'+head+row1+row2+rowJG+row3+cwrap+'</div>';
     var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
   }
