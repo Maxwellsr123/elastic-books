@@ -619,7 +619,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var TMETA={
     upload:{c:"#175CD3",icon:"ti-file-spreadsheet",verb:"Drop the Xero export",tail:function(n){return n+" receipt"+(n===1?"":"s")+" waiting on a bank line";}},
     reconcile:{c:"#0E7A50",icon:"ti-checks",verb:"Reconcile",tail:function(n){return n+" payment"+(n===1?"":"s")+" ready";}},
-    confirm:{c:"#B5630F",icon:"ti-checkbox",verb:"Confirm reads",tail:function(n){return n+" of Ava's reads";}}
+    confirm:{c:"#B5630F",icon:"ti-checkbox",verb:"Confirm reads",tail:function(n){return n+" of Ava's reads";}},
+    onboard:{c:"#5B54E6",icon:"ti-plug-connected",verb:"New client — get them started",tail:function(){return "just joined · help them connect their accounts";}}
   };
   function tint(hex){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+",.12)";}
   function renderLooper(sess){
