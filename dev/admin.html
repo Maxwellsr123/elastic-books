@@ -130,7 +130,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 
       <section id="desk">
         <div style="font-size:13px;color:var(--ink2);margin-bottom:14px;max-width:600px">Drop the bank-line screenshots you pull from Xero. Ava reads each one, checks Gmail first, and starts the chase for anything missing — you just work the queue. She also sweeps every connected inbox hourly, so the desk stays fresh on its own.</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><div id="deskwho" style="font-size:12px;color:var(--ink3);font-weight:500">KPA Plumbing · live</div><a class="deskchange" style="font-size:12px;color:var(--ind);cursor:pointer">change client →</a></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px">
+          <div class="ic" style="width:36px;height:36px;font-size:19px"><i class="ti ti-building-store"></i></div>
+          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span id="deskwho" style="font-size:18px;font-weight:600">KPA Plumbing</span><span class="pill p-ok" style="font-size:11px"><i class="ti ti-point-filled" style="font-size:12px;vertical-align:-2px"></i> live</span></div>
+          <a class="deskchange" style="font-size:12.5px;color:var(--ind);cursor:pointer;margin-left:auto;white-space:nowrap">change client →</a>
+        </div>
         <div class="drop" id="ddrop">
           <div class="dz"><i class="ti ti-photo-plus"></i></div>
           <div style="font-weight:600;font-size:15px">Drop your Xero bank lines</div>
@@ -196,7 +200,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var dcid={KPA:KPA_ID};
   var dcur="KPA",dsel=null,live=[],lc={review:0,chasing:0,ready:0},lload=false,dfilter=null;
   function isLive(){return !!DESK_CO;}
-  function deskWho(){var el=document.getElementById("deskwho");if(el)el.textContent=DESK_NAME+" · live";}
+  function deskWho(){var el=document.getElementById("deskwho");if(el)el.textContent=DESK_NAME;}
   function setDesk(id,name){
     DESK_CO=id;DESK_NAME=name||"Client";live=[];dsel=null;dfilter=null;deskWho();
     // switch nav + section to Desk
