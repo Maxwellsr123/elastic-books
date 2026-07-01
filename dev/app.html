@@ -123,6 +123,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div id="clientmenu" style="display:none;position:absolute;top:44px;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16);min-width:230px;max-height:340px;overflow:auto;padding:6px"></div>
         </div>
         <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
+        <button id="settingsbtn" title="Settings" style="background:none;border:1px solid var(--line);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center"><i class="ti ti-settings" style="font-size:18px"></i></button>
         <div class="av">MR</div>
       </div>
     </div>
@@ -346,20 +347,24 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var ROLES_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/roles";
   var ROLES=null;
   var HUMAN=[
-    {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export"},
-    {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads"},
-    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero"}
+    {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export",go:"upload",where:"in the drop box below"},
+    {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads",go:"confirm",where:"the Confirm column"},
+    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero",go:"done",where:"the Done column"}
   ];
   var KINDOPT=[["looper","Our looper"],["owner","The owner"],["bookkeeper","Their bookkeeper"]];
-  function rRow(icon,color,title,right){return '<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line)"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+color+'"><i class="ti '+icon+'"></i></div><div style="flex:1;font-size:13.5px;font-weight:500">'+title+'</div>'+right+'</div>';}
+  // colour = who does it, so any user can scan the board and find THEIR jobs
+  var RCOL={ava:"#5B54E6",looper:"#175CD3",owner:"#B5630F",bookkeeper:"#0E7A50"};
+  var RBG={ava:"#EEEDFB",looper:"#EFF6FF",owner:"#FBF1E2",bookkeeper:"#E7F6EE"};
+  function whoName(cur){return cur.kind==="bookkeeper"?(cur.name?esc(cur.name):"their bookkeeper"):(cur.kind==="owner"?"the owner":"our looper");}
   function renderRoles(){
     var box=document.getElementById("roleslist");if(!box||!ROLES)return;
-    var ava=rRow("ti-sparkles","var(--ind)","<b style=\"font-weight:600\">Ava</b> — reads, matches, codes, checks Gmail, scouts bills",'<span class="pill p-ind">automatic</span>');
+    var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
     var rows=HUMAN.map(function(h){
-      var cur=ROLES[h.k]||{kind:"looper",name:""};
-      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)">'+KINDOPT.map(function(o){return '<option value="'+o[0]+'"'+(cur.kind===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select>';
-      var name=cur.kind==="bookkeeper"?'<input class="rolename" data-role="'+h.k+'" placeholder="bookkeeper’s name" value="'+esc(cur.name||"")+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;width:150px;margin-left:8px">':'';
-      return rRow(h.icon,"var(--ink2)",h.label,'<div style="display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+sel+name+'</div>');
+      var cur=ROLES[h.k]||{kind:"looper",name:""};var c=RCOL[cur.kind],bg=RBG[cur.kind];
+      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:8px;background:'+bg+';color:'+c+';font-weight:500">'+KINDOPT.map(function(o){return '<option value="'+o[0]+'"'+(cur.kind===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select>';
+      var name=cur.kind==="bookkeeper"?'<input class="rolename" data-role="'+h.k+'" placeholder="bookkeeper’s name" value="'+esc(cur.name||"")+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:8px;width:150px;margin-left:8px">':'';
+      var sub='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"'s job</span> · "+h.where+' <a class="rolego" data-go="'+h.go+'" style="color:'+c+';cursor:pointer;font-weight:500;white-space:nowrap">do it →</a>';
+      return '<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+c+';background:'+bg+'"><i class="ti '+h.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">'+h.label+'</div><div style="font-size:12px;color:var(--ink2)">'+sub+'</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sel+name+'</div></div>';
     }).join("");
     box.innerHTML=ava+rows;
   }
@@ -369,6 +374,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   document.addEventListener("change",function(e){
     var s=e.target.closest(".roleset");if(s){var k=s.getAttribute("data-role");ROLES[k]=ROLES[k]||{name:""};ROLES[k].kind=s.value;renderRoles();saveRoles();return;}
     var n=e.target.closest(".rolename");if(n){var k2=n.getAttribute("data-role");ROLES[k2]=ROLES[k2]||{kind:"bookkeeper"};ROLES[k2].name=n.value;saveRoles();return;}
+  });
+  document.addEventListener("click",function(e){
+    var g=e.target.closest(".rolego");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
+    if(to==="upload"){var bf=document.getElementById("bfile");if(bf)bf.click();return;}
+    U_FILTER=to;renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});
   });
 
   // Upload the Xero unreconciled export → same read/hunt/code/bills pipeline the desk ran
@@ -391,6 +401,59 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       readB64(f).then(function(b64){return postJ("chase-drop",{company_id:KPA,kind:"bankline",filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64});})
         .then(function(d){if(d&&d.error)fail++;else done++;next(idx+1);}).catch(function(){fail++;next(idx+1);});
     })(0);
+  });
+})();
+</script>
+<div id="settingsov" style="position:fixed;inset:0;z-index:80;background:rgba(15,15,20,.45);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:28px 12px">
+  <div style="width:100%;max-width:520px;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)">
+      <div><div style="font-weight:700;font-size:17px">Settings</div><div style="font-size:12.5px;color:var(--ink2)" id="settingsco">Users on this board</div></div>
+      <button id="settingsx" style="background:none;border:none;cursor:pointer;color:var(--ink2);font-size:24px;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px 20px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Users</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone here can open this board. Add the owner, your loopers, or their bookkeeper — same login for everyone.</div>
+      <div id="userlist"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <input id="uName" placeholder="name" style="flex:1 1 100px;min-width:90px;border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
+        <input id="uEmail" placeholder="email" style="flex:1.6 1 150px;min-width:140px;border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
+        <select id="uRole" style="border:1px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:13px"><option value="owner">Owner</option><option value="bookkeeper">Bookkeeper</option><option value="team">Team</option><option value="looper">Looper</option></select>
+        <button id="uAdd" class="btn btn-p">Add</button>
+      </div>
+      <div id="uMsg" style="font-size:12.5px;color:var(--grn);margin-top:8px;min-height:15px"></div>
+      <div style="font-size:11.5px;color:var(--ink3);margin-top:16px;border-top:1px solid var(--line);padding-top:12px"><i class="ti ti-eye" style="font-size:13px;vertical-align:-2px"></i> Watching every client and how it's tracking lives in <b style="font-weight:600">super admin</b>.</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
+  var UCOL={owner:"#B5630F",bookkeeper:"#0E7A50",looper:"#175CD3",team:"#67676E"};
+  var UBG={owner:"#FBF1E2",bookkeeper:"#E7F6EE",looper:"#EFF6FF",team:"#EEEEEA"};
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
+  var ov=document.getElementById("settingsov"),list=document.getElementById("userlist"),msg=document.getElementById("uMsg");
+  var sb=document.getElementById("settingsbtn");
+  function render(us){
+    list.innerHTML=us.length?us.map(function(u){
+      var c=UCOL[u.role]||UCOL.team,bg=UBG[u.role]||UBG.team;
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:'+c+';background:'+bg+'">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div><span class="pill" style="background:'+bg+';color:'+c+';text-transform:capitalize">'+esc(u.role)+'</span><button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
+    }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
+  }
+  function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
+  if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();});
+  document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
+  ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});
+  document.getElementById("uAdd").addEventListener("click",function(){
+    var name=document.getElementById("uName"),email=document.getElementById("uEmail"),role=document.getElementById("uRole");
+    var v=(email.value||"").trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){email.style.borderColor="var(--amb)";return;}
+    var b=this;b.disabled=true;b.textContent="…";
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,name:name.value,email:v,role:role.value})})
+      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Add";if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;return;}name.value="";email.value="";email.style.borderColor="var(--line)";msg.style.color="var(--grn)";msg.textContent="Added ✓";setTimeout(function(){msg.textContent="";},1500);load();})
+      .catch(function(){b.disabled=false;b.textContent="Add";msg.style.color="var(--amb)";msg.textContent="Couldn't add — try again.";});
+  });
+  list.addEventListener("click",function(e){var r=e.target.closest(".urm");if(!r)return;var id=r.getAttribute("data-id");r.style.opacity=".4";
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"remove",id:id})}).then(function(){load();}).catch(function(){r.style.opacity="1";});
   });
 })();
 </script>
