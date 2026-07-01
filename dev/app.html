@@ -245,11 +245,12 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'">Back to business</button></div>';}
-    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
+    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':'<span class="pill p-ok">ready</span>';var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
     // Ava NEVER reconciles in Xero (safety) — the human does it there; this just tracks it.
     var xeroLink=(!fl&&(i.reconcilable||i.reconciled))?'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" title="Open Xero to reconcile it / check it there" style="font-size:12px;color:#0E7C93;text-decoration:none;margin-right:10px;white-space:nowrap"><i class="ti ti-external-link" style="font-size:12px;vertical-align:-1px"></i> Xero</a>':'';
     var recon=i.reconciled?'<span class="pill p-ok" style="margin-right:2px" title="ticked off here — check Xero to confirm it reconciled">reconciled ✓</span>':((!fl&&i.reconcilable)?'<button class="tbtn" data-recon="'+i.id+'" title="Reconcile it in Xero, then tick it off here — Ava doesn\'t touch Xero" style="margin-right:8px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-checks"></i> Mark reconciled</button>':'');
-    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+xeroLink+recon+(i.reconciled?'':pl)+'</div>';}
+    var reopen='<button class="tbtn draw" data-reopen="'+i.id+'" title="Send it back to the working queue" style="margin-right:8px"><i class="ti ti-arrow-back-up"></i> Send back</button>';
+    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+xeroLink+reopen+recon+(i.reconciled?'':pl)+'</div>';}
   function dueStatus(date){
     if(!date)return{txt:"to pay",col:"#b42318"};
     var days=Math.round((new Date(date)-new Date())/864e5);
@@ -337,6 +338,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var rk=e.target.closest("[data-recon]");
     if(rk){var rid=rk.getAttribute("data-recon");rk.style.opacity=".5";rk.textContent="…";
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:rid,action:"reconciled"})}).then(function(r){return r.json();}).then(function(m){if(m&&m.error){rk.style.opacity="1";alert(m.error);}else loadList();}).catch(function(){rk.style.opacity="1";});return;}
+    var rp=e.target.closest("[data-reopen]");
+    if(rp){var pid=rp.getAttribute("data-reopen");rp.style.opacity=".5";
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
   });
   document.addEventListener("change",function(e){
     var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
