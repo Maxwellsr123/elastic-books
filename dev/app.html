@@ -338,15 +338,21 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var ACLIENTS="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/admin-clients";
   var clientBtn=document.getElementById("clientbtn"),clientMenu=document.getElementById("clientmenu"),clientName=document.getElementById("clientname");
   if(clientBtn){
-    clientBtn.addEventListener("click",function(e){e.stopPropagation();clientMenu.style.display=clientMenu.style.display==="none"?"block":"none";});
-    document.addEventListener("click",function(){clientMenu.style.display="none";});
-    fetch(ACLIENTS).then(function(r){return r.json();}).then(function(d){
-      var cs=(d.clients||[]);var cur=cs.filter(function(c){return c.id===KPA;})[0];
-      if(cur){if(clientName)clientName.textContent=cur.name;var fw=document.querySelector(".side .foot .w");if(fw)fw.textContent=cur.name;}
-      clientMenu.innerHTML=cs.map(function(c){var on=c.id===KPA;
-        return '<a href="?c='+c.id+'" style="display:block;padding:8px 11px;border-radius:8px;text-decoration:none;font-size:13px;color:var(--ink);'+(on?'background:var(--indbg);font-weight:600':'')+'">'+esc(c.name)+'</a>';
-      }).join("")||'<div style="padding:10px;font-size:12.5px;color:var(--ink3)">No clients yet.</div>';
-    }).catch(function(){});
+    // The switcher lists every client, so it only runs where that's safe. Until real
+    // login lands it's DEV-only; on prod each board stays scoped to its own ?c= link
+    // and we never fetch the client list from a client's browser.
+    if(!window.IS_DEV){var cp=document.getElementById("clientpick");if(cp)cp.style.display="none";}
+    else{
+      clientBtn.addEventListener("click",function(e){e.stopPropagation();clientMenu.style.display=clientMenu.style.display==="none"?"block":"none";});
+      document.addEventListener("click",function(){clientMenu.style.display="none";});
+      fetch(ACLIENTS).then(function(r){return r.json();}).then(function(d){
+        var cs=(d.clients||[]);var cur=cs.filter(function(c){return c.id===KPA;})[0];
+        if(cur){if(clientName)clientName.textContent=cur.name;var fw=document.querySelector(".side .foot .w");if(fw)fw.textContent=cur.name;}
+        clientMenu.innerHTML=cs.map(function(c){var on=c.id===KPA;
+          return '<a href="?c='+c.id+'" style="display:block;padding:8px 11px;border-radius:8px;text-decoration:none;font-size:13px;color:var(--ink);'+(on?'background:var(--indbg);font-weight:600':'')+'">'+esc(c.name)+'</a>';
+        }).join("")||'<div style="padding:10px;font-size:12.5px;color:var(--ink3)">No clients yet.</div>';
+      }).catch(function(){});
+    }
   }
 
   // ── who does what: Ava fixed, human jobs swappable (looper / owner / bookkeeper) ──
