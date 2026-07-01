@@ -283,16 +283,16 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
   }
   function renderIntg(g){
-    var box=document.getElementById("uintg");if(!box||!g)return;
-    function row(name,ic,col,ok,url,last){
-      var right=ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> Connected</span>':(url?'<a href="'+url+'" class="btn btn-p" style="text-decoration:none;font-size:12.5px;padding:7px 14px">Connect</a>':'<span class="pill p-warn">unavailable</span>');
-      return '<div style="display:flex;align-items:center;gap:11px;padding:10px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:34px;height:34px;font-size:17px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+'</div>'+right+'</div>';
+    var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
+    function stat(name,ic,col,ok,detail,last){
+      return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
     }
     box.style.display="block";
-    box.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--ink2);padding:10px 0 2px">Your connected accounts</div>'+
-      row("Gmail","ti-mail","#EA4335",g.gmail,g.gmail_url,false)+
-      row("Xero","ti-calculator","#13B5EA",g.xero,g.xero_url,true);
+    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a class="opensettings" style="font-size:12px;color:var(--ind);cursor:pointer;font-weight:500">Manage in settings</a></div>'+
+      stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
+      stat("Xero","ti-calculator","#13B5EA",g.xero,"",true);
   }
+  document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
@@ -495,6 +495,10 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       <button id="settingsx" style="background:none;border:none;cursor:pointer;color:var(--ink2);font-size:24px;line-height:1">&times;</button>
     </div>
     <div style="padding:16px 20px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Connections</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">Connect the inboxes Ava scans and your Xero. Add as many inboxes as you like.</div>
+      <div id="intglist"></div>
+      <div style="border-bottom:1px solid var(--line);margin:18px 0"></div>
       <div style="font-weight:600;font-size:14px;margin-bottom:3px">Users</div>
       <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone you add can open this board — one login for everyone. Who does which job is set in “Who does what”.</div>
       <div id="userlist"></div>
@@ -531,7 +535,15 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
   }
   function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
-  if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();});
+  function renderIntg(){
+    var g=window.__INTG||{};var box=document.getElementById("intglist");if(!box)return;
+    var inboxes=g.inboxes||[];
+    var inHtml=inboxes.length?inboxes.map(function(e){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><i class="ti ti-mail" style="font-size:16px;color:#EA4335"></i><div style="flex:1;font-size:13.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(e)+'</div><span class="pill p-ok">connected</span></div>';}).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No inbox connected yet — Ava needs at least one to scan.</div>';
+    var addGmail=g.gmail_url?'<a href="'+esc(g.gmail_url)+'" class="btn" style="margin-top:11px;border:1px dashed var(--border-stronger,#c9c9c2)"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Add an inbox</a>':'';
+    var xero='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-calculator" style="font-size:18px;color:#13B5EA"></i><div style="flex:1;font-size:13.5px;font-weight:500">Xero</div>'+(g.xero?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.xero_url?'<a href="'+esc(g.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Xero</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload.</div>';
+    box.innerHTML='<div style="font-size:12px;color:var(--ink2);margin-bottom:2px">Inboxes Ava scans</div>'+inHtml+addGmail+xero;
+  }
+  if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();renderIntg();});
   document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
   ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});
   document.getElementById("uAdd").addEventListener("click",function(){
