@@ -442,11 +442,14 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var hh=new Date().getHours(),hi=document.getElementById("herohi");if(hi)hi.textContent="Good "+(hh<12?"morning":hh<18?"afternoon":"evening")+", "+firstName();
     var cnt=function(t){return U_ITEMS.filter(t).length;};
     var pile=cnt(function(i){return i.lane==="pile";}),conf=cnt(function(i){return i.lane==="guess";}),ready=cnt(function(i){return i.lane==="ready";}),bills=cnt(function(i){return i.lane==="to_pay";});
+    var missing=cnt(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});
+    var owner=!(SESSION&&SESSION.looper);   // the business owner — only they have the receipts Ava can't find
     var tasks=[];
+    if(owner&&missing>0)tasks.push({c:"#9A5B12",icon:"ti-file-upload",label:"Send the receipts Ava's chasing",sub:missing+" she couldn't find in your inbox — only you have these",go:"send"});
     if(jobMine("upload")&&pile>0)tasks.push({c:"#175CD3",icon:"ti-file-spreadsheet",label:"Drop the Xero bank lines",sub:pile+" receipt"+(pile>1?"s":"")+" waiting on a bank line",go:"upload"});
     if(jobMine("confirm")&&conf>0)tasks.push({c:"#B5630F",icon:"ti-checkbox",label:"Confirm Ava's reads",sub:conf+" to check — 👍 or tag them",go:"confirm"});
     if(jobMine("reconcile")&&ready>0)tasks.push({c:"#0E7A50",icon:"ti-checks",label:"Reconcile payments",sub:ready+" ready to reconcile",go:"done"});
-    if(SESSION&&!SESSION.looper&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
+    if(owner&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
     var sub=document.getElementById("herosub");
     if(!tasks.length){
       if(sub)sub.textContent="You're all clear — Ava and your looper have it. We'll flag anything only you can answer.";
