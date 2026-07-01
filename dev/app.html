@@ -111,7 +111,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       <a href="index.html"><i class="ti ti-arrow-left"></i> All features</a>
       <a class="on" style="cursor:default"><i class="ti ti-book-2"></i> Auto Bookkeeping</a>
     </nav>
-    <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic Books</div></div>
+    <div class="foot"><div class="w">…</div><div class="s">Elastic Books</div></div>
   </aside>
 
   <main class="main">
@@ -119,7 +119,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div>
       <div style="display:flex;align-items:center;gap:14px;">
         <div id="clientpick" style="position:relative">
-          <button id="clientbtn" class="btn" style="border:1px solid var(--line);font-weight:600"><i class="ti ti-building-store" style="font-size:15px"></i> <span id="clientname">KPA Plumbing</span> <i class="ti ti-chevron-down" style="font-size:14px"></i></button>
+          <button id="clientbtn" class="btn" style="border:1px solid var(--line);font-weight:600"><i class="ti ti-building-store" style="font-size:15px"></i> <span id="clientname">…</span> <i class="ti ti-chevron-down" style="font-size:14px"></i></button>
           <div id="clientmenu" style="display:none;position:absolute;top:44px;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16);min-width:230px;max-height:340px;overflow:auto;padding:6px"></div>
         </div>
         <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
@@ -310,6 +310,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function loadList(){
     fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
       var c=d.counts||{};
+      // reflect the CURRENT client (?c=) everywhere — footer + switcher label. Never
+      // leave the hardcoded "KPA Plumbing" showing when a looper opens another client.
+      if(d.company){CN=d.company;var _cn=document.getElementById("clientname");if(_cn)_cn.textContent=d.company;var _fw=document.querySelector(".side .foot .w");if(_fw)_fw.textContent=d.company;document.title=(window.IS_DEV?"DEV · ":"")+d.company+" · Elastic Books";}
       U_ITEMS=d.items||[];
       var nf=function(test){return U_ITEMS.filter(test).length;};
       var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper"),bl=document.getElementById("u_bills"),bt=document.getElementById("u_billstot"),pl=document.getElementById("u_pile");
