@@ -292,13 +292,19 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   function renderIntg(g){
     var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
+    box.style.display="block";
+    // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app
+    if(!g.gmail && !g.xero && !g.fergus){
+      box.innerHTML='<div style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:12px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link your inbox, Xero and Fergus right here and Ava gets to work.</div><button class="btn btn-p opensettings">Connect accounts</button></div>';
+      return;
+    }
     function stat(name,ic,col,ok,detail,last){
       return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
     }
-    box.style.display="block";
     box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a class="opensettings" style="font-size:12px;color:var(--ind);cursor:pointer;font-weight:500">Manage in settings</a></div>'+
       stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
-      stat("Xero","ti-calculator","#13B5EA",g.xero,"",true);
+      stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false)+
+      stat("Fergus","ti-tools","#C2410C",g.fergus,"",true);
   }
   document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
   function loadList(){
@@ -558,7 +564,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var inHtml=inboxes.length?inboxes.map(function(e){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><i class="ti ti-mail" style="font-size:16px;color:#EA4335"></i><div style="flex:1;font-size:13.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(e)+'</div><span class="pill p-ok">connected</span></div>';}).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No inbox connected yet — Ava needs at least one to scan.</div>';
     var addGmail=g.gmail_url?'<a href="'+esc(g.gmail_url)+'" class="btn" style="margin-top:11px;border:1px dashed var(--border-stronger,#c9c9c2)"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Add an inbox</a>':'';
     var xero='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-calculator" style="font-size:18px;color:#13B5EA"></i><div style="flex:1;font-size:13.5px;font-weight:500">Xero</div>'+(g.xero?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.xero_url?'<a href="'+esc(g.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Xero</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload.</div>';
-    box.innerHTML='<div style="font-size:12px;color:var(--ink2);margin-bottom:2px">Inboxes Ava scans</div>'+inHtml+addGmail+xero;
+    var fergus='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-tools" style="font-size:18px;color:#C2410C"></i><div style="flex:1;font-size:13.5px;font-weight:500">Fergus</div>'+(g.fergus?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.fergus_url?'<a href="'+esc(g.fergus_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Fergus</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">Jobs, quotes and scheduling.</div>';
+    box.innerHTML='<div style="font-size:12px;color:var(--ink2);margin-bottom:2px">Inboxes Ava scans</div>'+inHtml+addGmail+xero+fergus;
   }
   if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();renderIntg();});
   document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
