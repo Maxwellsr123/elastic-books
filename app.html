@@ -209,6 +209,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var U_ITEMS=[],U_FILTER="confirm";
   function needRow(i){
     var id=i.id;
+    var noR=i.receipt==="not_needed";
     var head=i.insight?'<div class="g">💡 Ava thinks: '+esc(i.insight)+(i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"")+'</div>'+(i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':""):'';
     // Ava SUGGESTS one side of each toggle (soft "·Ava" glow); a real click locks it SOLID.
     var kc=i.kind_confirmed, avaP=i.ava_personal;          // kc = user explicitly picked business/personal
