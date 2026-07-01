@@ -118,6 +118,10 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     <div class="top">
       <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div>
       <div style="display:flex;align-items:center;gap:14px;">
+        <div id="clientpick" style="position:relative">
+          <button id="clientbtn" class="btn" style="border:1px solid var(--line);font-weight:600"><i class="ti ti-building-store" style="font-size:15px"></i> <span id="clientname">KPA Plumbing</span> <i class="ti ti-chevron-down" style="font-size:14px"></i></button>
+          <div id="clientmenu" style="display:none;position:absolute;top:44px;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16);min-width:230px;max-height:340px;overflow:auto;padding:6px"></div>
+        </div>
         <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
         <div class="av">MR</div>
       </div>
@@ -139,6 +143,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           </div>
           <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
           <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
+          <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3)">Doing the reconciling? <a id="bankup" style="color:var(--ind);cursor:pointer;font-weight:600">Upload your Xero bank lines ↗</a> — the unreconciled export, screenshot, PDF, CSV or Excel.</div>
+          <input type="file" id="bfile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
         </div>
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
@@ -197,7 +203,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'">Back to business</button></div>';}
-    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+pl+'</div>';}
+    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.bucket==="ready"?(i.known?"coded · no receipt needed":"receipt attached"):"receipt found");var pl=fl?'<span class="pill p-warn">flagged</span>':(i.bucket==="ready"?'<span class="pill p-ok">done</span>':'<span class="pill p-ind">review</span>');var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
+    var recon=i.reconciled?'<span class="pill p-ok" style="margin-right:2px">reconciled ✓</span>':((!fl&&i.reconcilable)?'<button class="tbtn" data-recon="'+i.id+'" style="margin-right:8px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-checks"></i> Reconcile</button>':'');
+    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+recon+(i.reconciled?'':pl)+'</div>';}
   function dueStatus(date){
     if(!date)return{txt:"to pay",col:"#b42318"};
     var days=Math.round((new Date(date)-new Date())/864e5);
@@ -276,6 +284,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
     var at=e.target.closest("[data-attach]");
     if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
+    var rk=e.target.closest("[data-recon]");
+    if(rk){var rid=rk.getAttribute("data-recon");rk.style.opacity=".5";rk.textContent="…";
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:rid,action:"reconciled"})}).then(function(r){return r.json();}).then(function(m){if(m&&m.error){rk.style.opacity="1";alert(m.error);}else loadList();}).catch(function(){rk.style.opacity="1";});return;}
   });
   document.addEventListener("change",function(e){
     var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
@@ -307,6 +318,44 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         else{done++;matched+=(d.matched||0);added+=((d.count||0)-(d.matched||0));}
         next(idx+1);
       }).catch(function(){fail++;next(idx+1);});
+    })(0);
+  });
+
+  // ── one board: switch client (open in dev), reconcile, and upload bank lines ──
+  function postJ(u,b){return fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/"+u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json();});}
+  var ACLIENTS="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/admin-clients";
+  var clientBtn=document.getElementById("clientbtn"),clientMenu=document.getElementById("clientmenu"),clientName=document.getElementById("clientname");
+  if(clientBtn){
+    clientBtn.addEventListener("click",function(e){e.stopPropagation();clientMenu.style.display=clientMenu.style.display==="none"?"block":"none";});
+    document.addEventListener("click",function(){clientMenu.style.display="none";});
+    fetch(ACLIENTS).then(function(r){return r.json();}).then(function(d){
+      var cs=(d.clients||[]);var cur=cs.filter(function(c){return c.id===KPA;})[0];
+      if(cur){if(clientName)clientName.textContent=cur.name;var fw=document.querySelector(".side .foot .w");if(fw)fw.textContent=cur.name;}
+      clientMenu.innerHTML=cs.map(function(c){var on=c.id===KPA;
+        return '<a href="?c='+c.id+'" style="display:block;padding:8px 11px;border-radius:8px;text-decoration:none;font-size:13px;color:var(--ink);'+(on?'background:var(--indbg);font-weight:600':'')+'">'+esc(c.name)+'</a>';
+      }).join("")||'<div style="padding:10px;font-size:12.5px;color:var(--ink3)">No clients yet.</div>';
+    }).catch(function(){});
+  }
+
+  // Upload the Xero unreconciled export → same read/hunt/code/bills pipeline the desk ran
+  var bankup=document.getElementById("bankup"),bfile=document.getElementById("bfile");
+  if(bankup)bankup.addEventListener("click",function(){bfile.click();});
+  if(bfile)bfile.addEventListener("change",function(){
+    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;var p=document.getElementById("uproc");this.value="";
+    var done=0,fail=0,keep=function(){return{};};
+    (function next(idx){
+      if(idx>=files.length){
+        p.style.color="var(--ink3)";p.textContent="Ava is checking the inbox and coding these up…";
+        postJ("chase-code",{company_id:KPA}).catch(keep)
+          .then(function(){return postJ("chase-hunt",{company_id:KPA});}).catch(keep)
+          .then(function(){return postJ("chase-insight",{company_id:KPA});}).catch(keep)
+          .then(function(){return postJ("chase-bills",{company_id:KPA});}).catch(keep)
+          .then(function(){p.style.color="var(--grn)";p.textContent="✓ "+done+" bank line"+(done===1?"":"s")+" read"+(fail?(", "+fail+" couldn't read"):"")+" — see the columns below.";loadList();});
+        return;
+      }
+      var f=files[idx];p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+" ("+(idx+1)+"/"+files.length+")…";
+      readB64(f).then(function(b64){return postJ("chase-drop",{company_id:KPA,kind:"bankline",filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64});})
+        .then(function(d){if(d&&d.error)fail++;else done++;next(idx+1);}).catch(function(){fail++;next(idx+1);});
     })(0);
   });
 })();
