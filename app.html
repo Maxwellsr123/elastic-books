@@ -166,7 +166,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
           <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
           <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With a looper</div><div class="n" id="u_looper">—</div><div class="d">a looper is on it</div></div>
-          <div class="card stat ufilt" data-filter="done" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--grn)"></i> Done</div><div class="n" id="u_done">—</div><div class="d">ready for a looper</div></div>
+          <div class="card stat ufilt" data-filter="ready" style="cursor:pointer"><div class="l"><i class="ti ti-checks" style="font-size:16px;color:var(--grn)"></i> To reconcile</div><div class="n" id="u_ready">—</div><div class="d">ready — tick off in Xero</div></div>
+          <div class="card stat ufilt" data-filter="reconciled" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--ink3)"></i> Reconciled</div><div class="n" id="u_recon">—</div><div class="d">no action needed</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
@@ -246,7 +247,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   }
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'" title="This is filed as personal (owner drawings). Click if it&#39;s actually a business expense and should go back on the books.">Not personal → business expense</button></div>';}
-    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.receipt_url?"receipt attached":i.receipt==="cant_find"?"no receipt — couldn't find it":i.known?"coded · no receipt needed":"no receipt needed");var pl=fl?'<span class="pill p-warn">flagged</span>':'<span class="pill p-ok">ready</span>';var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
+    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.receipt_url?"receipt attached":i.receipt==="cant_find"?"no receipt — couldn't find it":i.known?"coded · no receipt needed":"no receipt needed");if(i.reconciled)lbl="Reconciled · no action needed";var pl=fl?'<span class="pill p-warn">flagged</span>':'<span class="pill p-ok">ready</span>';var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'';var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
     // Ava NEVER reconciles in Xero (safety) — the human does it there; this just tracks it.
     var xeroLink=(!fl&&(i.reconcilable||i.reconciled))?'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" title="Open Xero to reconcile it / check it there" style="font-size:12px;color:#0E7C93;text-decoration:none;margin-right:10px;white-space:nowrap"><i class="ti ti-external-link" style="font-size:12px;vertical-align:-1px"></i> Xero</a>':'';
     var recon=i.reconciled?'<span class="pill p-ok" style="margin-right:2px" title="ticked off here — check Xero to confirm it reconciled">reconciled ✓</span>':((!fl&&i.reconcilable)?'<button class="tbtn" data-recon="'+i.id+'" title="Reconcile it in Xero, then tick it off here — Ava doesn\'t touch Xero" style="margin-right:8px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-checks"></i> Mark reconciled</button>':'');
@@ -282,7 +283,8 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var f=U_FILTER,list,htxt,row,empty;
     if(f==="bills"){list=U_ITEMS.filter(function(i){return i.lane==="to_pay";});htxt="Bills to pay — incoming, not yet paid";row=billRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No bills waiting — Ava is watching your inbox.';}
     else if(f==="pile"){list=U_ITEMS.filter(function(i){return i.lane==="pile";});htxt="Receipt pile — receipts in hand, waiting for the bank line";row=pileRow;empty='<i class="ti ti-paperclip" style="vertical-align:-2px"></i> Pile is empty — drop a receipt any time and it waits here until its bank line shows up.';}
-    else if(f==="done"){list=U_ITEMS.filter(function(i){return i.lane==="ready"||i.lane==="done";});htxt="Done — reconcile these in Xero, then tick them off (Ava never touches Xero herself)";row=doneRow;empty="Nothing done yet — Ava is on it.";}
+    else if(f==="ready"){list=U_ITEMS.filter(function(i){return i.lane==="ready";});htxt="To reconcile — do these in Xero, then tick them off (Ava never touches Xero herself)";row=doneRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing waiting to reconcile right now.';}
+    else if(f==="reconciled"){list=U_ITEMS.filter(function(i){return i.lane==="done";});htxt="Reconciled · no action needed — kept here for reference, clears after a week";row=doneRow;empty="Nothing reconciled in the last week.";}
     else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With a looper — a looper is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with the team right now.';}
     else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
     else{list=U_ITEMS.filter(function(i){return i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
@@ -315,14 +317,15 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       if(d.company){CN=d.company;var _cn=document.getElementById("clientname");if(_cn)_cn.textContent=d.company;var _fw=document.querySelector(".side .foot .w");if(_fw)_fw.textContent=d.company;document.title=(window.IS_DEV?"DEV · ":"")+d.company+" · Elastic Books";}
       U_ITEMS=d.items||[];
       var nf=function(test){return U_ITEMS.filter(test).length;};
-      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),dn=document.getElementById("u_done"),lp=document.getElementById("u_looper"),bl=document.getElementById("u_bills"),bt=document.getElementById("u_billstot"),pl=document.getElementById("u_pile");
+      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),rd=document.getElementById("u_ready"),rcn=document.getElementById("u_recon"),lp=document.getElementById("u_looper"),bl=document.getElementById("u_bills"),bt=document.getElementById("u_billstot"),pl=document.getElementById("u_pile");
       if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
       if(pl)pl.textContent=nf(function(i){return i.lane==="pile";});
       if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});
       if(lp)lp.textContent=nf(function(i){return i.lane==="looper";});
       if(bl)bl.textContent=nf(function(i){return i.lane==="to_pay";});
       if(bt){var tot=U_ITEMS.filter(function(i){return i.lane==="to_pay";}).reduce(function(s,i){return s+Math.abs(Number(i.amount)||0);},0);bt.textContent=tot?(uMoney(tot)+" due"):"incoming, unpaid";}
-      if(dn)dn.textContent=nf(function(i){return i.lane==="ready"||i.lane==="done";});
+      if(rd)rd.textContent=nf(function(i){return i.lane==="ready";});
+      if(rcn)rcn.textContent=nf(function(i){return i.lane==="done";});
       renderHome();renderIntg(d.integrations);renderMyWork();
     }).catch(function(){});
   }
@@ -414,7 +417,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var HUMAN=[
     {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export",go:"upload",where:"in the drop box below"},
     {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads",go:"confirm",where:"the Confirm column"},
-    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero",go:"done",where:"the Done column"}
+    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero",go:"ready",where:"the To reconcile column"}
   ];
   // colour = who does it: Ava purple, our looper blue, a named user amber
   var RCOL={ava:"#5B54E6",looper:"#175CD3",user:"#B5630F"};
@@ -477,7 +480,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     if(owner&&missing>0)tasks.push({c:"#9A5B12",icon:"ti-file-upload",label:"Send the receipts Ava's chasing",sub:missing+" she couldn't find in your inbox — only you have these",go:"send"});
     if(jobMine("upload")&&pile>0)tasks.push({c:"#175CD3",icon:"ti-file-spreadsheet",label:"Drop the Xero bank lines",sub:pile+" receipt"+(pile>1?"s":"")+" waiting on a bank line",go:"upload"});
     if(jobMine("confirm")&&conf>0)tasks.push({c:"#B5630F",icon:"ti-checkbox",label:"Confirm Ava's reads",sub:conf+" to check — 👍 or tag them",go:"confirm"});
-    if(jobMine("reconcile")&&ready>0)tasks.push({c:"#0E7A50",icon:"ti-checks",label:"Reconcile payments",sub:ready+" ready to reconcile",go:"done"});
+    if(jobMine("reconcile")&&ready>0)tasks.push({c:"#0E7A50",icon:"ti-checks",label:"Reconcile payments",sub:ready+" ready to reconcile",go:"ready"});
     if(owner&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
     var sub=document.getElementById("herosub");
     if(!tasks.length){
