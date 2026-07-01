@@ -313,8 +313,14 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
   document.addEventListener("click",function(e){
     var b=e.target.closest("[data-fb]");
-    if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");b.style.opacity=".5";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){b.style.opacity="1";});return;}
+    if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
+      // 👍 confirm reliably moves the item out of this list — drop it instantly, sync after
+      if(act==="up"){
+        U_ITEMS=U_ITEMS.filter(function(i){return i.id!==id;});
+        var card=b.closest(".qitem");if(card){card.style.transition="opacity .15s,transform .15s";card.style.opacity="0";card.style.transform="translateX(8px)";setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},150);}
+        var cm={confirm:"u_confirm",send:"u_send",looper:"u_looper"},cel=document.getElementById(cm[U_FILTER]);if(cel){var n=parseInt(cel.textContent,10);if(!isNaN(n)&&n>0)cel.textContent=n-1;}
+      } else { b.style.opacity=".5"; }
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
     var cs=e.target.closest(".cmt-send");
