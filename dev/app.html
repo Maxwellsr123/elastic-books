@@ -104,7 +104,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" style="display:none">
   <aside class="side">
     <div class="brand"><div class="logo">A</div><b>Ava</b></div>
     <nav class="nav" id="nav">
@@ -173,6 +173,29 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 
     </div>
   </main>
+</div>
+
+<section id="looperview" style="display:none;max-width:720px;margin:0 auto;padding:26px 22px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <div style="width:40px;height:40px;border-radius:50%;background:#175CD3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600" id="lpinit">A</div>
+    <div style="flex:1"><div style="font-size:19px;font-weight:600" id="lptitle">Your work</div><div style="font-size:13px;color:var(--ink2)" id="lpsum">Loading…</div></div>
+    <a id="lpout" style="font-size:12.5px;color:var(--ink3);cursor:pointer">Sign out</a>
+  </div>
+  <div id="lpchips" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 18px"></div>
+  <div id="lptasks" style="display:flex;flex-direction:column;gap:9px"></div>
+  <div id="lpempty" style="display:none;padding:24px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:14px;font-size:13px">✓ all clear across every client — nothing owed right now.</div>
+  <div style="font-size:12px;color:var(--ink3);margin-top:16px">only the jobs assigned to you show up, pooled from every client. tap one to open that client's board.</div>
+</section>
+
+<div id="loginov" style="position:fixed;inset:0;z-index:200;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:380px;text-align:center">
+    <div style="width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--ind),var(--ind2));margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px">A</div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:5px">Sign in to Ava</div>
+    <div id="logsub" style="font-size:13px;color:var(--ink2);margin-bottom:18px">Enter your email and we'll send you a sign-in link.</div>
+    <input id="logemail" type="email" placeholder="you@company.co.nz" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:14px;box-sizing:border-box;margin-bottom:10px">
+    <button id="logbtn" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Email me a link</button>
+    <div id="logmsg" style="font-size:12.5px;margin-top:10px;min-height:16px"></div>
+  </div>
 </div>
 <script>
 (function(){
@@ -499,6 +522,71 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       .then(function(r){return r.json();}).then(function(){document.getElementById("fbtext").value="";msg.textContent="Thanks — got it. 🙏";b.disabled=false;b.textContent="Send to the team";setTimeout(function(){panel.style.display="none";msg.textContent="";},1600);})
       .catch(function(){b.disabled=false;b.textContent="Send to the team";msg.style.color="var(--amb)";msg.textContent="Couldn't send — try again.";});
   });
+})();
+</script>
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var SKEY="ava_session";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
+  function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
+  function setS(s){localStorage.setItem(SKEY,JSON.stringify(s));}
+  function clearS(){localStorage.removeItem(SKEY);}
+  var qs=new URLSearchParams(location.search), hasC=qs.get("c");
+  var appEl=document.querySelector(".app"),loginEl=document.getElementById("loginov"),lpEl=document.getElementById("looperview");
+
+  var TMETA={
+    upload:{c:"#175CD3",icon:"ti-file-spreadsheet",verb:"Drop the Xero export",tail:function(n){return n+" receipt"+(n===1?"":"s")+" waiting on a bank line";}},
+    reconcile:{c:"#0E7A50",icon:"ti-checks",verb:"Reconcile",tail:function(n){return n+" payment"+(n===1?"":"s")+" ready";}},
+    confirm:{c:"#B5630F",icon:"ti-checkbox",verb:"Confirm reads",tail:function(n){return n+" of Ava's reads";}}
+  };
+  function tint(hex){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+",.12)";}
+  function renderLooper(sess){
+    document.getElementById("lpinit").textContent=(sess.email||"A")[0].toUpperCase();
+    fetch(API+"/looper-tasks?email="+encodeURIComponent(sess.email)).then(function(r){return r.json();}).then(function(d){
+      var tasks=(d&&d.tasks)||[];
+      var sum=document.getElementById("lpsum"),box=document.getElementById("lptasks"),empty=document.getElementById("lpempty"),chips=document.getElementById("lpchips");
+      var clients={};tasks.forEach(function(t){clients[t.company]=1;});var nc=Object.keys(clients).length;
+      sum.innerHTML=tasks.length?('<b style="font-weight:600;color:var(--ink)">'+tasks.length+'</b> job'+(tasks.length>1?'s':'')+' across <b style="font-weight:600;color:var(--ink)">'+nc+'</b> client'+(nc>1?'s':'')):'nothing owed right now';
+      chips.innerHTML=Object.keys(clients).map(function(c){return '<span style="font-size:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px;color:var(--ink2)">'+esc(c)+'</span>';}).join("");
+      empty.style.display=tasks.length?"none":"block";
+      box.innerHTML=tasks.map(function(t){var m=TMETA[t.type]||TMETA.reconcile;
+        return '<a href="?c='+esc(t.company_id)+'" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none"><div class="ic" style="width:34px;height:34px;font-size:17px;color:'+m.c+';background:'+tint(m.c)+'"><i class="ti '+m.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;color:var(--ink)"><b style="font-weight:600">'+esc(t.company)+'</b> · '+m.verb+'</div><div style="font-size:12px;color:var(--ink2)">'+m.tail(t.count)+'</div></div><i class="ti ti-chevron-right" style="color:var(--ink3);font-size:18px"></i></a>';
+      }).join("");
+    }).catch(function(){document.getElementById("lpsum").textContent="Couldn't load your work.";});
+  }
+
+  function showLogin(m){appEl.style.display="none";lpEl.style.display="none";loginEl.style.display="flex";if(m){var lm=document.getElementById("logmsg");lm.style.color="var(--amb)";lm.textContent=m;}}
+  function showBoard(){loginEl.style.display="none";lpEl.style.display="none";appEl.style.display="";}
+  function showLooper(s){loginEl.style.display="none";appEl.style.display="none";lpEl.style.display="block";renderLooper(s);}
+  function route(){
+    var s=getS();
+    if(!s){showLogin();return;}
+    if(s.looper && !hasC){showLooper(s);return;}
+    if(hasC && !s.looper && s.companies && !s.companies.some(function(c){return c.id===hasC;})){clearS();showLogin("You don't have access to that client.");return;}
+    if(!hasC && !s.looper && s.companies && s.companies.length){location.replace(location.pathname+"?c="+s.companies[0].id);return;}
+    showBoard();
+  }
+
+  document.getElementById("lpout").addEventListener("click",function(){clearS();location.replace(location.pathname);});
+  document.getElementById("logbtn").addEventListener("click",function(){
+    var i=document.getElementById("logemail"),v=(i.value||"").trim().toLowerCase(),lm=document.getElementById("logmsg"),b=this;
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){lm.style.color="var(--amb)";lm.textContent="Enter a valid email.";return;}
+    b.disabled=true;b.textContent="Sending…";
+    fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:v,redirect:location.origin+location.pathname})})
+      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Email me a link";if(d&&d.error){lm.style.color="var(--amb)";lm.textContent=d.error;return;}lm.style.color="var(--grn)";lm.textContent="Check your email — link sent to "+v+".";})
+      .catch(function(){b.disabled=false;b.textContent="Email me a link";lm.style.color="var(--amb)";lm.textContent="Couldn't send — try again.";});
+  });
+
+  var t=qs.get("t");
+  if(t){
+    fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok)setS({email:d.email,looper:d.looper,companies:d.companies});
+        history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
+        route();
+      }).catch(function(){route();});
+  } else { route(); }
 })();
 </script>
 </body>
