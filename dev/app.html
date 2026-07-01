@@ -125,6 +125,11 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     </div>
 
     <div class="wrap">
+      <div id="subnav" style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap">
+        <a data-s="home" class="stab" style="font-size:13px;font-weight:600;padding:7px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:#fff">Chase list</a>
+        <a data-s="uploads" class="stab" style="font-size:13px;font-weight:600;padding:7px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2);display:none">Xero uploads</a>
+        <a data-s="bookkeeper" class="stab" style="font-size:13px;font-weight:600;padding:7px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2);display:none">Bookkeeper</a>
+      </div>
       <section id="home">
         <div class="hero"><div class="spark"></div>
           <h2>Good morning, Max</h2>
@@ -150,6 +155,37 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
+      </section>
+
+      <section id="uploads" class="hidden">
+        <div class="hero"><div class="spark"></div>
+          <h2>Upload your Xero bank lines</h2>
+          <p>Export your unreconciled transactions from Xero — or just screenshot them — and drop them here. Ava reads every line, checks your inbox for the receipt, and starts chasing anything missing. Then work them on the Chase list tab.</p>
+        </div>
+        <div class="drop" id="bdrop">
+          <div class="dz"><i class="ti ti-file-spreadsheet"></i></div>
+          <div style="font-weight:600;font-size:15px">Drop your Xero export</div>
+          <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Screenshot, PDF, CSV or Excel — Ava reads every line on it.</div>
+          <div style="margin-top:13px"><button class="btn btn-p" id="bbtn"><i class="ti ti-upload" style="font-size:14px;vertical-align:-2px"></i> Upload a file</button></div>
+          <input type="file" id="bfile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
+          <span id="bproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
+        </div>
+      </section>
+
+      <section id="bookkeeper" class="hidden">
+        <div class="hero"><div class="spark"></div>
+          <h2>Your bookkeeper</h2>
+          <p>Give your own bookkeeper access to the uploads and the chase list. They log in, do the Xero uploads and reconciling — you and the Elastic team still see everything on our side.</p>
+        </div>
+        <div class="card" style="padding:18px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px">Invite your bookkeeper</div>
+          <div style="font-size:12.5px;color:var(--ink2);margin-bottom:12px">They'll get a link to this workspace.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="bkmail" type="email" placeholder="bookkeeper@example.co.nz" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;box-sizing:border-box">
+            <button class="btn btn-p" id="bkinvite">Give access</button>
+          </div>
+          <div id="bkmsg" style="font-size:12.5px;color:var(--grn);margin-top:9px;min-height:16px"></div>
+        </div>
       </section>
 
 
@@ -303,6 +339,59 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       }).catch(function(){fail++;next(idx+1);});
     })(0);
   });
+
+  // ── sub-tabs: Chase list / Xero uploads / Bookkeeper ──────────────────
+  var SETT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/feature-settings";
+  function postJ(u,b){return fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/"+u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json();});}
+  var subEls=document.querySelectorAll("#subnav .stab");
+  function showSub(s){
+    ["home","uploads","bookkeeper"].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle("hidden",id!==s);});
+    subEls.forEach(function(a){var on=a.getAttribute("data-s")===s;a.style.background=on?"var(--ink)":"#fff";a.style.color=on?"#fff":"var(--ink2)";a.style.borderColor=on?"var(--ink)":"var(--line)";});
+  }
+  document.getElementById("subnav").addEventListener("click",function(e){var a=e.target.closest(".stab");if(!a)return;showSub(a.getAttribute("data-s"));});
+  // who runs the books decides which tabs the owner sees
+  window.applyBookMode=function(mode){
+    var up=document.querySelector('#subnav [data-s="uploads"]'),bk=document.querySelector('#subnav [data-s="bookkeeper"]');
+    var showUp=(mode==="self"||mode==="own"),showBk=(mode==="own");
+    if(up)up.style.display=showUp?"":"none";
+    if(bk)bk.style.display=showBk?"":"none";
+    var us=document.getElementById("uploads"),bs=document.getElementById("bookkeeper");
+    if((us&&!us.classList.contains("hidden")&&!showUp)||(bs&&!bs.classList.contains("hidden")&&!showBk))showSub("home");
+  };
+  fetch(SETT+"?company="+KPA).then(function(r){return r.json();}).then(function(d){window.applyBookMode((d.settings&&d.settings.bookkeeping)||"elastic");}).catch(function(){});
+
+  // Xero bank-line upload (self-serve / bookkeeper) → same pipeline the looper desk runs
+  var bbtn=document.getElementById("bbtn"),bfile=document.getElementById("bfile");
+  if(bbtn)bbtn.addEventListener("click",function(){bfile.click();});
+  if(bfile)bfile.addEventListener("change",function(){
+    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;var p=document.getElementById("bproc");this.value="";
+    var done=0,fail=0;
+    (function next(idx){
+      if(idx>=files.length){
+        p.style.color="var(--ink3)";p.textContent="Ava is checking your inbox and coding these up…";
+        postJ("chase-code",{company_id:KPA}).catch(function(){return{};})
+          .then(function(){return postJ("chase-hunt",{company_id:KPA});}).catch(function(){return{};})
+          .then(function(){return postJ("chase-insight",{company_id:KPA});}).catch(function(){return{};})
+          .then(function(){return postJ("chase-bills",{company_id:KPA});}).catch(function(){return{};})
+          .then(function(){p.style.color="var(--grn)";p.textContent="✓ Done — "+done+" line"+(done===1?"":"s")+" read"+(fail?(", "+fail+" couldn't read"):"")+". Check the Chase list tab.";loadList();});
+        return;
+      }
+      var f=files[idx];p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+" ("+(idx+1)+"/"+files.length+")…";
+      readB64(f).then(function(b64){return postJ("chase-drop",{company_id:KPA,kind:"bankline",filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64});})
+        .then(function(d){if(d&&d.error)fail++;else done++;next(idx+1);}).catch(function(){fail++;next(idx+1);});
+    })(0);
+  });
+
+  // Bookkeeper invite → saves the bookkeeper email + shows the workspace link
+  var bkinvite=document.getElementById("bkinvite");
+  if(bkinvite)bkinvite.addEventListener("click",function(){
+    var i=document.getElementById("bkmail"),v=(i.value||"").trim().toLowerCase(),m=document.getElementById("bkmsg");
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){i.style.borderColor="var(--amb)";return;}
+    var b=this;b.disabled=true;b.textContent="Saving…";
+    fetch(SETT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:KPA,feature:"auto_bookkeeping",settings:{bookkeeping:"own",own_bookkeeper_email:v}})})
+      .then(function(r){return r.json();}).then(function(){b.disabled=false;b.textContent="Give access";m.style.color="var(--grn)";m.innerHTML="✓ "+v+" can log in here: <span style='color:var(--ink2)'>"+location.origin+location.pathname+"?c="+KPA+"</span>";})
+      .catch(function(){b.disabled=false;b.textContent="Give access";m.style.color="var(--amb)";m.textContent="Couldn't save — try again.";});
+  });
 })();
 </script>
 <div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>
@@ -403,7 +492,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     if(!S)return;var b=this;b.disabled=true;b.textContent="Saving…";msg.style.color="var(--grn)";
     var payload={bookkeeping:S.bookkeeping,own_bookkeeper_email:S.own_bookkeeper_email||"",daily_recipients:S.daily_recipients||[]};
     fetch(API+"/feature-settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,feature:"auto_bookkeeping",settings:payload})})
-      .then(function(r){return r.json();}).then(function(){b.disabled=false;b.textContent="Save";msg.textContent="Saved ✓";setTimeout(function(){msg.textContent="";},2000);})
+      .then(function(r){return r.json();}).then(function(){b.disabled=false;b.textContent="Save";msg.textContent="Saved ✓";if(window.applyBookMode)window.applyBookMode(S.bookkeeping);setTimeout(function(){msg.textContent="";},2000);})
       .catch(function(){b.disabled=false;b.textContent="Save";msg.style.color="var(--amb)";msg.textContent="Couldn't save — try again.";});
   });
 })();
