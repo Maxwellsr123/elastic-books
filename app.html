@@ -480,9 +480,16 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
   var ov=document.getElementById("settingsov"),list=document.getElementById("userlist"),msg=document.getElementById("uMsg");
   var sb=document.getElementById("settingsbtn");
+  function seen(ts){
+    if(!ts)return '<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">not signed in yet</span>';
+    var m=Math.round((Date.now()-new Date(ts).getTime())/60000);
+    if(m<5)return '<span style="font-size:11.5px;color:var(--grn);font-weight:500;white-space:nowrap"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--grn);vertical-align:1px;margin-right:4px"></span>online</span>';
+    var lbl=m<60?(m+"m ago"):m<1440?(Math.round(m/60)+"h ago"):(Math.round(m/1440)+"d ago");
+    return '<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">seen '+lbl+'</span>';
+  }
   function render(us){
     list.innerHTML=us.length?us.map(function(u){
-      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:var(--indtx);background:var(--indbg)">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div><button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:var(--indtx);background:var(--indbg)">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div>'+seen(u.last_seen)+'<button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
     }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
   }
   function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
