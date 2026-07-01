@@ -237,6 +237,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var badge=it.reconciled?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:11px;vertical-align:-1px"></i> Reconciled</span>'
       :it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)"><i class="ti ti-user-search" style="font-size:11px;vertical-align:-1px"></i> With a looper — owner asked for a looper</span>'
       :it.lane==="ready"?'<span class="pill p-ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px"></i> Ready to reconcile</span>'
+      :it.lane==="pile"?'<span class="pill p-ind"><i class="ti ti-paperclip" style="font-size:11px;vertical-align:-1px"></i> Receipt in the pile — waiting on the bank line</span>'
       :it.lane==="await_receipt"?'<span class="pill p-warn"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Confirmed · waiting on receipt</span>'
       :it.lane==="review"?'<span class="pill p-warn"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Needs a check</span>'
       :'<span class="pill p-mut"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Waiting on owner</span>';
@@ -261,6 +262,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     document.getElementById("dtally").innerHTML=
       c("Bills to pay",lc.to_pay||0,"var(--red)","to_pay")+
       c("Ready to reconcile",lc.ready||0,"var(--grn)","ready")+
+      c("Receipt pile",lc.pile||0,"var(--blu)","pile")+
       c("Awaiting receipt",lc.await_receipt||0,"var(--amb)","await_receipt")+
       c("Awaiting owner",lc.confirm||0,"var(--ink)","confirm")+
       c("With a looper",lc.looper||0,"var(--blu)","looper");
@@ -282,7 +284,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
       box.innerHTML=arr.map(function(it){
         var open=(""+dsel)===(""+it.id);
         var amt=it.amount!=null?(" — $"+it.amount):"";
-        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="to_pay"?'<span class="pill" style="background:#fdecea;color:#b42318">bill</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a looper</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
+        var head='<div class="qhead" data-dr="'+it.id+'"><div class="thumb"><i class="ti '+(it.flagged?"ti-alert-triangle":(it.dropped?"ti-photo":(it.bucket==="ready"?"ti-paperclip":"ti-mail-search")))+'"></i></div><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13.5px">'+it.supplier+amt+'</div><div style="font-size:12px;color:var(--ink3)">'+(it.date||"")+(it.dropped?" · dropped":"")+'</div></div>'+(it.reconciled?'<span class="pill p-ok">reconciled</span>':it.lane==="to_pay"?'<span class="pill" style="background:#fdecea;color:#b42318">bill</span>':it.lane==="looper"?'<span class="pill" style="background:var(--blubg);color:var(--blu)">with a looper</span>':it.lane==="ready"?'<span class="pill p-ok">ready</span>':it.lane==="await_receipt"?'<span class="pill p-warn">awaiting receipt</span>':it.lane==="pile"?'<span class="pill p-ind">in the pile</span>':it.lane==="review"?'<span class="pill p-warn">check</span>':it.lane==="guess"?'<span class="pill p-mut">awaiting owner</span>':dpill(it.bucket))+'<i class="ti ti-chevron-'+(open?"up":"down")+'" style="font-size:16px;color:var(--ink3);margin-left:6px"></i></div>';
         var body=open?'<div style="padding:0 14px 13px;border-top:1px solid var(--line);margin-top:1px;padding-top:11px">'+ldetail(it)+'</div>':'';
         return '<div class="qcard">'+head+body+'</div>';
       }).join("");
