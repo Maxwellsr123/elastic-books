@@ -136,7 +136,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
         </div>
         <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
           <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
-          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava runs the automatic bits. The human jobs can go to a looper, the owner, or their own bookkeeper — swap any of them.</div>
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava does the most she can, automatically. The few human jobs default to your looper — hand any of them to someone you've added under Settings.</div>
           <div id="roleslist"></div>
         </div>
         <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
@@ -355,44 +355,51 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     }
   }
 
-  // ── who does what: Ava fixed, human jobs swappable (looper / owner / bookkeeper) ──
+  // ── who does what: Ava fixed; each human job goes to our looper or a named user ──
   var ROLES_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/roles";
-  var ROLES=null;
+  var RUSERS_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/users";
+  var ROLES=null, RUSERS=[];
   var HUMAN=[
     {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export",go:"upload",where:"in the drop box below"},
     {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads",go:"confirm",where:"the Confirm column"},
     {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero",go:"done",where:"the Done column"}
   ];
-  var KINDOPT=[["looper","Our looper"],["owner","The owner"],["bookkeeper","Their bookkeeper"]];
-  // colour = who does it, so any user can scan the board and find THEIR jobs
-  var RCOL={ava:"#5B54E6",looper:"#175CD3",owner:"#B5630F",bookkeeper:"#0E7A50"};
-  var RBG={ava:"#EEEDFB",looper:"#EFF6FF",owner:"#FBF1E2",bookkeeper:"#E7F6EE"};
-  function whoName(cur){return cur.kind==="bookkeeper"?(cur.name?esc(cur.name):"their bookkeeper"):(cur.kind==="owner"?"the owner":"our looper");}
+  // colour = who does it: Ava purple, our looper blue, a named user amber
+  var RCOL={ava:"#5B54E6",looper:"#175CD3",user:"#B5630F"};
+  var RBG={ava:"#EEEDFB",looper:"#EFF6FF",user:"#FBF1E2"};
+  function whoName(cur){return cur.kind==="user"?esc(cur.name||cur.email||"someone"):"our looper";}
   function renderRoles(){
     var box=document.getElementById("roleslist");if(!box||!ROLES)return;
-    var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
+    var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills — the most she can</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
     var rows=HUMAN.map(function(h){
-      var cur=ROLES[h.k]||{kind:"looper",name:""};var c=RCOL[cur.kind],bg=RBG[cur.kind];
-      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:8px;background:'+bg+';color:'+c+';font-weight:500">'+KINDOPT.map(function(o){return '<option value="'+o[0]+'"'+(cur.kind===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select>';
-      var name=cur.kind==="bookkeeper"?'<input class="rolename" data-role="'+h.k+'" placeholder="bookkeeper’s name" value="'+esc(cur.name||"")+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:8px;width:150px;margin-left:8px">':'';
-      var sub='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"'s job</span> · "+h.where+' <a class="rolego" data-go="'+h.go+'" style="color:'+c+';cursor:pointer;font-weight:500;white-space:nowrap">do it →</a>';
-      return '<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+c+';background:'+bg+'"><i class="ti '+h.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">'+h.label+'</div><div style="font-size:12px;color:var(--ink2)">'+sub+'</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sel+name+'</div></div>';
+      var cur=ROLES[h.k]||{kind:"looper"};var isU=cur.kind==="user";var c=isU?RCOL.user:RCOL.looper,bg=isU?RBG.user:RBG.looper;
+      var opts='<option value="looper"'+(!isU?" selected":"")+'>Our looper</option>'+RUSERS.map(function(u){return '<option value="user:'+esc(u.email)+'"'+(isU&&cur.email===u.email?" selected":"")+'>'+esc(u.name||u.email)+'</option>';}).join("");
+      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:8px;background:'+bg+';color:'+c+';font-weight:500;max-width:160px">'+opts+'</select>';
+      var sub='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> · "+h.where+' <a class="rolego" data-go="'+h.go+'" style="color:'+c+';cursor:pointer;font-weight:500;white-space:nowrap">do it →</a>';
+      return '<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+c+';background:'+bg+'"><i class="ti '+h.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">'+h.label+'</div><div style="font-size:12px;color:var(--ink2)">'+sub+'</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sel+'</div></div>';
     }).join("");
     box.innerHTML=ava+rows;
   }
   function updateXeroBox(){
-    var cur=(ROLES&&ROLES.upload)||{kind:"looper",name:""};var c=RCOL[cur.kind]||RCOL.looper;
+    var cur=(ROLES&&ROLES.upload)||{kind:"looper"};var c=cur.kind==="user"?RCOL.user:RCOL.looper;
     var xd=document.getElementById("xdrop"),dz=xd&&xd.querySelector(".dz"),bu=document.getElementById("bankup"),xw=document.getElementById("xwho");
     if(xd)xd.style.borderColor=c;if(dz)dz.style.background=c;
     if(bu){bu.style.borderColor=c;bu.style.color=c;}
     if(xw)xw.innerHTML='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> — the unreconciled export, screenshot, PDF, CSV or Excel.";
   }
-  function loadRoles(){fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).then(function(d){ROLES=d.roles||{};renderRoles();updateXeroBox();}).catch(function(){});}
+  function loadRoles(){
+    Promise.all([
+      fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch(RUSERS_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};})
+    ]).then(function(res){ROLES=(res[0]&&res[0].roles)||{};RUSERS=(res[1]&&res[1].users)||[];renderRoles();updateXeroBox();});
+  }
   function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
   loadRoles();
   document.addEventListener("change",function(e){
-    var s=e.target.closest(".roleset");if(s){var k=s.getAttribute("data-role");ROLES[k]=ROLES[k]||{name:""};ROLES[k].kind=s.value;renderRoles();updateXeroBox();saveRoles();return;}
-    var n=e.target.closest(".rolename");if(n){var k2=n.getAttribute("data-role");ROLES[k2]=ROLES[k2]||{kind:"bookkeeper"};ROLES[k2].name=n.value;updateXeroBox();saveRoles();return;}
+    var s=e.target.closest(".roleset");if(!s)return;var k=s.getAttribute("data-role"),v=s.value;
+    if(v==="looper"){ROLES[k]={kind:"looper"};}
+    else{var em=v.slice(5);var u=RUSERS.filter(function(x){return x.email===em;})[0];ROLES[k]={kind:"user",email:em,name:(u&&u.name)||em};}
+    renderRoles();updateXeroBox();saveRoles();
   });
   document.addEventListener("click",function(e){
     var g=e.target.closest(".rolego");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
