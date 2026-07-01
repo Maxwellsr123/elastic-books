@@ -220,6 +220,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var rLocked=(i.receipt_required===true||i.receipt_required===false); // user set the receipt rule
     var needsCls=i.receipt==="needed"?(rLocked?" on":" sug"):"";
     var noCls=i.receipt==="not_needed"?(rLocked?" on":" sug"):"";
+    var cantCls=i.receipt==="cant_find"?" on":"";
     // Jewel's asks: for-a-job tick (Ava soft-suggests for materials) + GST status
     var jobSet=(i.is_job===true||i.is_job===false);
     var jobY=i.is_job===true?" on":(!jobSet&&i.ava_job?" sug":"");
@@ -235,7 +236,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     var box='<div class="think">'+head
       +jrow("Ava right?",'<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Yes</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> No</button><button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
       +jrow("Type",'<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button><button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>')
-      +jrow("Receipt",'<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs one</button><button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">Not needed</button>')
+      +jrow("Receipt",'<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs one</button><button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">Not needed</button><button class="tbtn'+cantCls+'" data-fb="cant_find" data-id="'+id+'">Can\'t find</button>')
       +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button>')
       +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>')
       +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button><input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">')
@@ -635,7 +636,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function route(){
     var s=getS();
     if(!s){showLogin();return;}
-    if(s.looper && !hasC && window.IS_DEV){showLooper(s);return;}  // cross-client pile is dev-only for now
+    if(s.looper && !hasC){showLooper(s);return;}  // loopers land on their cross-client pile
     if(hasC && !s.looper && s.companies && !s.companies.some(function(c){return c.id===hasC;})){clearS();showLogin("You don't have access to that client.");return;}
     if(!hasC && !s.looper && s.companies && s.companies.length){location.replace(location.pathname+"?c="+s.companies[0].id);return;}
     showBoard();
