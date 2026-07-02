@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEV · Auto Scheduling — concept</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;
+--ind:#5B54E6;--ind2:#7B74EE;--indbg:#EEEDFB;--indtx:#3D36C4;
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
+.app{display:flex;min-height:100vh}
+.side{width:236px;background:#100F15;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh;border-right:1px solid #1d1c24}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
+.brand b{font-weight:600;font-size:16px}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#A7A7B4;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+.nav a:hover{background:#1F1E26;color:#fff}
+.nav a.on{background:#262533;color:#fff}
+.nav a i{font-size:18px}
+.side .foot{margin-top:auto;background:#1F1E26;border-radius:12px;padding:12px}
+.side .foot .w{font-size:13px;font-weight:500}.side .foot .s{font-size:11.5px;color:#8B8B98;margin-top:2px}
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.top h1{font-size:18px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--grnbg);color:var(--grn)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.wrap{padding:26px 28px;max-width:940px}
+.hero{background:linear-gradient(120deg,#1c1b24,#2a2740);border-radius:18px;padding:22px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
+.hero h2{font-size:20px;font-weight:600;margin-bottom:5px}
+.hero p{color:#C9C8D6;font-size:13.5px}
+.hero .spark{position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 70%)}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(20,20,24,.025),0 16px 34px rgba(20,20,24,.04)}
+.stat{padding:16px 18px}
+.stat .l{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+.stat .n{font-size:27px;font-weight:600;margin-top:7px}
+.stat .d{font-size:12px;color:var(--ink3);margin-top:2px}
+.sec{font-size:14px;font-weight:600;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+.sec .cnt{font-size:12px;color:var(--ink3);font-weight:500}
+.row{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ic{width:38px;height:38px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:19px;flex-shrink:0}
+.pill{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}.p-red{background:var(--redbg);color:var(--red)}
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--bg)}
+.qitem{border-bottom:1px solid var(--line)}.qitem:last-child{border-bottom:0}.qitem .row{border-bottom:0}
+.think{margin:0 16px 12px 67px;background:var(--indbg);border-radius:12px;padding:11px 13px}
+.think .g{font-size:13px;color:var(--indtx);font-weight:500;line-height:1.5}
+.think .w{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
+.acts{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.tbtn:hover{background:var(--bg)}
+.tbtn.go{background:var(--ind);color:#fff;border-color:var(--ind);box-shadow:0 1px 2px rgba(91,84,230,.25),0 6px 16px rgba(91,84,230,.22)}
+.tbtn.draw{color:var(--ink2)}
+.week{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 11px 13px;min-height:132px}
+.day .dh{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:9px;display:flex;justify-content:space-between}
+.day .dh .dn{color:var(--ink3);font-weight:500}
+.job{border-radius:9px;padding:7px 9px;margin-bottom:6px;font-size:11.5px;line-height:1.35;background:var(--bg);border-left:3px solid var(--ink3)}
+.job b{font-weight:600;display:block;font-size:11.5px}
+.job.paul{border-left-color:var(--blu)}.job.mike{border-left-color:var(--grn)}
+.job.new{background:var(--indbg);border-left-color:var(--ind)}.job.new b{color:var(--indtx)}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin:10px 2px 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}.leg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+@media (max-width:760px){.app{flex-direction:column}.side{position:static;width:auto;height:auto;flex-direction:row;padding:8px}.brand,.side .foot{display:none}.nav{flex-direction:row;flex:1;justify-content:space-around}.g4{grid-template-columns:repeat(2,1fr)}.week{grid-template-columns:1fr 1fr}.think{margin-left:16px;margin-right:16px}.wrap{padding:18px 14px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">A</div><b>Ava</b></div>
+    <nav class="nav">
+      <a href="index.html"><i class="ti ti-arrow-left"></i> All features</a>
+      <a href="app.html"><i class="ti ti-book-2"></i> Auto Bookkeeping</a>
+      <a class="on" style="cursor:default"><i class="ti ti-calendar-event"></i> Auto Scheduling</a>
+    </nav>
+    <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic · Auto Scheduling</div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div style="display:flex;align-items:center;gap:10px"><h1>Auto Scheduling</h1><span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px">DEV · CONCEPT</span></div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span class="chip"><i class="ti ti-mail" style="font-size:14px"></i> Ava watches your inbox &amp; Slack</span>
+        <div class="av">MR</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="hero"><div class="spark"></div>
+        <h2>Morning, Max 👋</h2>
+        <p>3 job requests came in. Ava's already lined up a tradie and a time for 2 of them — give them the nod and she'll book it and tell the customer.</p>
+      </div>
+
+      <div class="grid g4">
+        <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n">3</div><div class="d">spotted in your inbox</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-clock-check" style="color:var(--amb)"></i> Ready to book</div><div class="n">2</div><div class="d">Ava's picked a time</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked this week</div><div class="n">5</div><div class="d">confirmed with customers</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-users" style="color:var(--blu)"></i> On the tools</div><div class="n">2<span style="font-size:15px;color:var(--ink3)"> / 3</span></div><div class="d">Paul &amp; Mike free this wk</div></div>
+      </div>
+
+      <div class="sec"><i class="ti ti-hand-finger" style="color:var(--ind)"></i> Give it the nod — Ava's lined these up <span class="cnt">2 waiting</span></div>
+      <div class="card">
+        <div class="qitem">
+          <div class="row">
+            <div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-droplet"></i></div>
+            <div style="flex:1"><div style="font-weight:600">Suzanne Chetwin — install replacement shower fitting</div>
+              <div style="font-size:12.5px;color:var(--ink2)">10/21 Clifton Road · from email, today 3:50pm</div></div>
+            <span class="pill p-warn">needs your OK</span>
+          </div>
+          <div class="think">
+            <div class="g">💡 Ava: Sue emailed asking to finally get the replacement shower part installed. She's home all next week except Tuesday.</div>
+            <div class="w">Paul's got <b>Friday 11 July</b> open — I'd put him in at <b>8:00am</b>. Nod it and I'll book the job in Fergus and email Sue to confirm.</div>
+            <div class="acts">
+              <button class="tbtn go"><i class="ti ti-check"></i> Book Paul, Fri 8am &amp; tell Sue</button>
+              <button class="tbtn"><i class="ti ti-calendar"></i> Change time</button>
+              <button class="tbtn"><i class="ti ti-user"></i> Different tradie</button>
+              <button class="tbtn draw"><i class="ti ti-message-2"></i> Chat</button>
+            </div>
+          </div>
+        </div>
+        <div class="qitem">
+          <div class="row">
+            <div class="ic" style="background:var(--redbg);color:var(--red)"><i class="ti ti-alert-triangle"></i></div>
+            <div style="flex:1"><div style="font-weight:600">Barry Wallace — blocked drain</div>
+              <div style="font-size:12.5px;color:var(--ink2)">14 Sunhill Ave · phoned in, 8:10am · <b style="color:var(--red)">urgent</b></div></div>
+            <span class="pill p-red">urgent · needs your OK</span>
+          </div>
+          <div class="think">
+            <div class="g">💡 Ava: Barry rang about a blocked drain backing up. Mike's free from 2pm today and it's 10 min from his last job.</div>
+            <div class="acts">
+              <button class="tbtn go"><i class="ti ti-check"></i> Send Mike today 2pm &amp; tell Barry</button>
+              <button class="tbtn"><i class="ti ti-calendar"></i> Change</button>
+              <button class="tbtn draw"><i class="ti ti-message-2"></i> Chat</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec"><i class="ti ti-inbox" style="color:var(--ink2)"></i> New requests Ava spotted <span class="cnt">still need a slot</span></div>
+      <div class="card">
+        <div class="row">
+          <div class="ic"><i class="ti ti-tool"></i></div>
+          <div style="flex:1"><div style="font-weight:500">Homehub — vanity install, Point Chevalier</div><div style="font-size:12.5px;color:var(--ink2)">Fergus work order HH-18216 · no time set</div></div>
+          <button class="btn"><i class="ti ti-calendar-plus"></i> Find a slot</button>
+        </div>
+        <div class="row">
+          <div class="ic"><i class="ti ti-phone"></i></div>
+          <div style="flex:1"><div style="font-weight:500">Jan Neill — booking after quote GPL-21696</div><div style="font-size:12.5px;color:var(--ink2)">Slack, yesterday · waiting on a date</div></div>
+          <button class="btn"><i class="ti ti-calendar-plus"></i> Find a slot</button>
+        </div>
+      </div>
+
+      <div class="sec"><i class="ti ti-calendar-week" style="color:var(--grn)"></i> This week <span class="cnt">Mon 7 – Fri 11 Jul</span></div>
+      <div class="week">
+        <div class="day"><div class="dh">Mon <span class="dn">7</span></div>
+          <div class="job paul"><b>8:00 · Constantia</b>Paul · hot water cylinder</div>
+          <div class="job mike"><b>10:30 · All Maint.</b>Mike · leak repair</div>
+        </div>
+        <div class="day"><div class="dh">Tue <span class="dn">8</span></div>
+          <div class="job paul"><b>9:00 · Lanta Int.</b>Paul · fitoff</div>
+        </div>
+        <div class="day"><div class="dh">Wed <span class="dn">9</span></div>
+          <div class="job mike"><b>7:30 · Homehub</b>Mike · rough-in</div>
+          <div class="job paul"><b>13:00 · GPL-21695</b>Paul · Wai St</div>
+        </div>
+        <div class="day"><div class="dh">Thu <span class="dn">10</span></div>
+          <div class="job mike"><b>8:00 · PPGD-2802</b>Mike · maintenance</div>
+        </div>
+        <div class="day"><div class="dh">Fri <span class="dn">11</span></div>
+          <div class="job new"><b>8:00 · Suzanne Chetwin</b>Paul · shower fitting <span style="color:var(--indtx)">· pending</span></div>
+        </div>
+      </div>
+      <div class="leg"><span><i style="background:var(--blu)"></i> Paul</span><span><i style="background:var(--grn)"></i> Mike</span><span><i style="background:var(--ind)"></i> Waiting your OK</span></div>
+
+      <p style="font-size:12px;color:var(--ink3);margin:22px 2px 0">Concept preview — not wired to live data yet. Real flow drives off inbound emails/calls Ava already reads, your team in Fergus, and their calendar.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>
