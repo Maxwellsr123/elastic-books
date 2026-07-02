@@ -63,7 +63,20 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
 .tl .who-ava{background:var(--indbg);color:var(--indtx)}.tl .who-max{background:var(--bg);color:var(--ink2)}.tl .who-tradie{background:var(--blubg);color:var(--blu)}.tl .who-customer{background:var(--grnbg);color:var(--grn)}
 .tl .tx{font-size:13px;line-height:1.5;padding-top:4px}.tl .tx .tt{color:var(--ink3);font-size:11.5px;margin-left:6px}
 .muted{color:var(--ink2);font-size:12.5px}
-@media (max-width:760px){.app{flex-direction:column}.side{position:static;width:auto;height:auto;flex-direction:row;padding:8px}.brand,.side .foot{display:none}.nav{flex-direction:row;flex:1;justify-content:space-around}.g4{grid-template-columns:repeat(2,1fr)}.wrap{padding:18px 14px}.row{flex-wrap:wrap}}
+@media (max-width:760px){
+  html,body{overflow-x:hidden;max-width:100vw}
+  .app{flex-direction:column}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;align-items:center;padding:5px 6px;border-right:0;border-top:1px solid #1d1c24;z-index:30}
+  .brand,.side .foot{display:none}
+  .nav{flex-direction:row;gap:2px;margin:0;flex:1;justify-content:space-around}
+  .nav a{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px;flex:1;justify-content:center;text-align:center;border-radius:12px}
+  .nav a i{font-size:22px}
+  .main{width:100%}
+  .top{padding:14px 18px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .wrap{padding:18px 14px 90px}
+  .row{flex-wrap:wrap}
+}
 </style>
 </head>
 <body>
@@ -72,7 +85,6 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
     <div class="brand"><div class="logo">A</div><b>Ava</b></div>
     <nav class="nav">
       <a href="index.html"><i class="ti ti-arrow-left"></i> All features</a>
-      <a href="app.html"><i class="ti ti-book-2"></i> Auto Bookkeeping</a>
       <a class="on" style="cursor:default"><i class="ti ti-calendar-event"></i> Auto Scheduling</a>
     </nav>
     <div class="foot"><div class="w">KPA Plumbing</div><div class="s">Elastic · Auto Scheduling</div></div>
