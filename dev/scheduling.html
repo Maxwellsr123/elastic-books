@@ -149,11 +149,15 @@ function newCard(r){
   return '<div class="row" data-sid="'+sid+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
-    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+pick+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+fbRow(r)+pick+'</div>'+
     '<div style="display:flex;flex-direction:column;gap:7px;align-items:flex-end;flex-shrink:0">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div></div></div>';
 }
 function dismiss(sid){post({company:CO,action:"dismiss",suggestion_id:sid});}
 function setKind(sid,kind){post({company:CO,action:"set_kind",suggestion_id:sid,kind:kind});}
+function fbBtn(sid,dir,active){var col=dir==="up"?"#0E7A50":"#B42318";return '<button onclick="fbk(\''+sid+'\',\''+dir+'\')" title="'+(dir==="up"?"Ava got this right":"Ava got this wrong")+'" style="border:1px solid '+(active?col:"var(--line)")+';background:'+(active?col:"#fff")+';color:'+(active?"#fff":"var(--ink2)")+';border-radius:7px;padding:3px 8px;cursor:pointer;font-size:12px;line-height:1"><i class="ti ti-thumb-'+(dir==="up"?"up":"down")+'"></i></button>';}
+function fbRow(r){var sid=r.suggestion_id||r.id;return '<div style="margin-top:7px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);flex-wrap:wrap"><span>Ava right?</span>'+fbBtn(sid,"up",r.feedback==="up")+fbBtn(sid,"down",r.feedback==="down")+'<button onclick="cmt(\''+sid+'\')" title="Add a note for Ava" style="border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:7px;padding:3px 8px;cursor:pointer;font-size:12px;line-height:1"><i class="ti ti-message-2"></i></button>'+(r.comment?'<span style="color:var(--ink2);font-style:italic">“'+esc(r.comment)+'”</span>':'')+'</div>';}
+function fbk(sid,dir){var c=(dir==="down")?prompt("What should it be? (optional note for Ava)"):null;post({company:CO,action:"feedback",suggestion_id:sid,feedback:dir,comment:c||undefined});}
+function cmt(sid){var c=prompt("Note for Ava:");if(c)post({company:CO,action:"comment",suggestion_id:sid,comment:c});}
 function waitCard(j){
   var stat=j.tradie_status;
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
