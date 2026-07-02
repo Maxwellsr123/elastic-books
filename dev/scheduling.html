@@ -34,7 +34,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .wrap{padding:26px 28px;max-width:940px}
 .hero{background:linear-gradient(120deg,#1c1b24,#2a2740);border-radius:18px;padding:22px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
 .hero h2{font-size:20px;font-weight:600;margin-bottom:5px}
-.hero p{color:#C9C8D6;font-size:13.5px}
+.hero p{color:#C9C8D6;font-size:13.5px;line-height:1.55}
 .hero .spark{position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 70%)}
 .grid{display:grid;gap:14px}
 .g4{grid-template-columns:repeat(4,1fr)}
@@ -45,34 +45,25 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 .stat .d{font-size:12px;color:var(--ink3);margin-top:2px}
 .sec{font-size:14px;font-weight:600;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
 .sec .cnt{font-size:12px;color:var(--ink3);font-weight:500}
-.row{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:flex-start;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .ic{width:38px;height:38px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:19px;flex-shrink:0}
 .pill{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:99px;white-space:nowrap}
-.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}.p-red{background:var(--redbg);color:var(--red)}
-.btn{font-family:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}.p-red{background:var(--redbg);color:var(--red)}.p-blu{background:var(--blubg);color:var(--blu)}
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:8px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{background:var(--bg)}
-.qitem{border-bottom:1px solid var(--line)}.qitem:last-child{border-bottom:0}.qitem .row{border-bottom:0}
-.think{margin:0 16px 12px 67px;background:var(--indbg);border-radius:12px;padding:11px 13px}
-.think .g{font-size:13px;color:var(--indtx);font-weight:500;line-height:1.5}
-.think .w{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
-.acts{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
-.tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-.tbtn:hover{background:var(--bg)}
-.tbtn.go{background:var(--ind);color:#fff;border-color:var(--ind);box-shadow:0 1px 2px rgba(91,84,230,.25),0 6px 16px rgba(91,84,230,.22)}
-.tbtn.draw{color:var(--ink2)}
-.week{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.day{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 11px 13px;min-height:120px}
-.day .dh{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:9px;display:flex;justify-content:space-between}
-.day .dh .dn{color:var(--ink3);font-weight:500}
-.job{border-radius:9px;padding:7px 9px;margin-bottom:6px;font-size:11.5px;line-height:1.35;background:var(--bg);border-left:3px solid var(--ink3)}
-.job b{font-weight:600;display:block;font-size:11.5px}
-.job.paul{border-left-color:var(--blu)}.job.mike{border-left-color:var(--grn)}
-.job.new{background:var(--indbg);border-left-color:var(--ind)}.job.new b{color:var(--indtx)}
-.leg{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin:10px 2px 0}
-.leg span{display:inline-flex;align-items:center;gap:6px}.leg i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.concept{position:relative;border:1px dashed #cbc8f6;border-radius:18px;background:linear-gradient(180deg,#fff,#FAFAFE)}
-@media (max-width:760px){.app{flex-direction:column}.side{position:static;width:auto;height:auto;flex-direction:row;padding:8px}.brand,.side .foot{display:none}.nav{flex-direction:row;flex:1;justify-content:space-around}.g4{grid-template-columns:repeat(2,1fr)}.week{grid-template-columns:1fr 1fr}.think{margin-left:16px;margin-right:16px}.wrap{padding:18px 14px}}
+.btn-p{background:var(--ind);color:#fff;border:0}.btn-p:hover{background:#4a43d8}
+.acts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;align-items:center}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+.tl{margin:10px 0 2px;padding-left:4px}
+.tl .step{display:flex;gap:11px;position:relative;padding-bottom:12px}
+.tl .step:last-child{padding-bottom:0}
+.tl .step:not(:last-child):before{content:"";position:absolute;left:13px;top:26px;bottom:0;width:2px;background:var(--line)}
+.tl .dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;z-index:1}
+.tl .who-ava{background:var(--indbg);color:var(--indtx)}.tl .who-max{background:var(--bg);color:var(--ink2)}.tl .who-tradie{background:var(--blubg);color:var(--blu)}.tl .who-customer{background:var(--grnbg);color:var(--grn)}
+.tl .tx{font-size:13px;line-height:1.5;padding-top:4px}.tl .tx .tt{color:var(--ink3);font-size:11.5px;margin-left:6px}
+.muted{color:var(--ink2);font-size:12.5px}
+@media (max-width:760px){.app{flex-direction:column}.side{position:static;width:auto;height:auto;flex-direction:row;padding:8px}.brand,.side .foot{display:none}.nav{flex-direction:row;flex:1;justify-content:space-around}.g4{grid-template-columns:repeat(2,1fr)}.wrap{padding:18px 14px}.row{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -89,7 +80,7 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
 
   <main class="main">
     <div class="top">
-      <div style="display:flex;align-items:center;gap:10px"><h1>Auto Scheduling</h1><span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px">DEV</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><h1>Auto Scheduling</h1><span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px">DEV · KPA</span></div>
       <div style="display:flex;align-items:center;gap:14px;">
         <span class="chip"><i class="ti ti-mail" style="font-size:14px"></i> Ava watches your inbox</span>
         <div class="av">MR</div>
@@ -99,78 +90,116 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
     <div class="wrap">
       <div class="hero"><div class="spark"></div>
         <h2>Morning, Max 👋</h2>
-        <p id="herosub">Ava's reading your inbox for job requests. Here's what's come in — give the word and she books it and tells the customer.</p>
+        <p>A job lands in your inbox → you assign a tradie → Ava asks them in the team chat → once they say yes she books it in Fergus and emails the customer. Do it here, or straight from Slack — your plumbers just reply in the chat.</p>
       </div>
 
       <div class="grid g4">
-        <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n" id="s_new">—</div><div class="d">spotted in your inbox</div></div>
-        <div class="card stat"><div class="l"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked</div><div class="n" id="s_booked">—</div><div class="d">confirmed with customers</div></div>
-        <div class="card stat"><div class="l"><i class="ti ti-mail-check" style="color:var(--blu)"></i> Source</div><div class="n" style="font-size:19px">Gmail</div><div class="d">live · read-only</div></div>
-        <div class="card stat"><div class="l"><i class="ti ti-users" style="color:var(--amb)"></i> Your crew</div><div class="n" id="s_team" style="font-size:19px">—</div><div class="d" id="s_teamd">from Fergus</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n" id="s_new">—</div><div class="d">needs a tradie</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on crew</div><div class="n" id="s_wait">—</div><div class="d">asked, no reply yet</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked</div><div class="n" id="s_booked">—</div><div class="d">in Fergus + customer told</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-users" style="color:var(--blu)"></i> Your crew</div><div class="n" id="s_crew" style="font-size:19px">—</div><div class="d">from your team</div></div>
       </div>
 
-      <div class="sec"><i class="ti ti-inbox" style="color:var(--ind)"></i> Job requests Ava spotted <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
-      <div class="card" id="reqlist"><div class="row"><div style="flex:1;color:var(--ink2)">Reading your inbox…</div></div></div>
+      <div class="sec"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — assign a tradie <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
+      <div class="card" id="lane_new"><div class="row"><div style="flex:1" class="muted">Reading your inbox…</div></div></div>
 
-      <div class="sec" style="margin-top:32px"><i class="ti ti-sparkles" style="color:var(--amb)"></i> Next: Ava picks the tradie &amp; time, you nod <span class="cnt">concept — switches on when your Fergus crew + calendar connect</span></div>
-      <div class="card concept">
-        <div class="qitem">
-          <div class="row">
-            <div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-droplet"></i></div>
-            <div style="flex:1"><div style="font-weight:600">Suzanne Chetwin — install replacement shower fitting</div>
-              <div style="font-size:12.5px;color:var(--ink2)">10/21 Clifton Road · spotted in your inbox</div></div>
-            <span class="pill p-warn">needs a time</span>
-          </div>
-          <div class="think">
-            <div class="g">💡 Ava: Sue's home all next week except Tuesday. Paul's got Friday 11 July open.</div>
-            <div class="w">Nod it and I'll put Paul in at <b>8am</b>, add the job in Fergus, and email Sue to confirm — exactly how it went last time.</div>
-            <div class="acts">
-              <button class="tbtn go"><i class="ti ti-check"></i> Book Paul, Fri 8am &amp; tell Sue</button>
-              <button class="tbtn"><i class="ti ti-calendar"></i> Change time</button>
-              <button class="tbtn"><i class="ti ti-user"></i> Different tradie</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="sec" style="margin-top:30px"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on the crew <span class="cnt" id="wait_hint"></span></div>
+      <div class="card" id="lane_wait"></div>
 
-      <div class="sec" style="margin-top:26px"><i class="ti ti-calendar-week" style="color:var(--grn)"></i> This week <span class="cnt">concept — from your Fergus calendar</span></div>
-      <div class="week">
-        <div class="day"><div class="dh">Mon <span class="dn">7</span></div><div class="job paul"><b>8:00 · Constantia</b>Paul · HWC</div><div class="job mike"><b>10:30 · All Maint.</b>Mike · leak</div></div>
-        <div class="day"><div class="dh">Tue <span class="dn">8</span></div><div class="job paul"><b>9:00 · Lanta Int.</b>Paul · fitoff</div></div>
-        <div class="day"><div class="dh">Wed <span class="dn">9</span></div><div class="job mike"><b>7:30 · Homehub</b>Mike · rough-in</div></div>
-        <div class="day"><div class="dh">Thu <span class="dn">10</span></div><div class="job mike"><b>8:00 · PPGD-2802</b>Mike · maint.</div></div>
-        <div class="day"><div class="dh">Fri <span class="dn">11</span></div><div class="job new"><b>8:00 · Suzanne C.</b>Paul · shower · pending</div></div>
-      </div>
-      <div class="leg"><span><i style="background:var(--blu)"></i> Paul</span><span><i style="background:var(--grn)"></i> Mike</span><span><i style="background:var(--ind)"></i> Waiting your OK</span></div>
+      <div class="sec" style="margin-top:30px"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked <span class="cnt">confirmed &amp; the customer's been told</span></div>
+      <div id="lane_booked"></div>
 
-      <p style="font-size:12px;color:var(--ink3);margin:24px 2px 0"><b style="color:var(--ink2)">Live now:</b> Ava reads KPA's Gmail (read-only) and surfaces every job request above. <b style="color:var(--ink2)">Next:</b> connect your Fergus crew + calendar so she proposes a tradie and time, you nod, and she books it + emails the customer — like she did for Sue Chetwin.</p>
+      <p style="font-size:12px;color:var(--ink3);margin:24px 2px 0"><b style="color:var(--ink2)">Live:</b> requests are read from KPA's Gmail; assigning messages your crew in the team Slack; the timeline is the real trail. The final Fergus job + customer email runs through Ava's confirmed flow (how Suzanne was done) — one tap away from fully automatic.</p>
     </div>
   </main>
 </div>
 <script>
 var CO=new URLSearchParams(location.search).get("c")||"5c829c7f-0b63-4bbc-87b9-c24b822a564d";
 var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var CREW=[];
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
 function ago(t){try{var h=Math.round((Date.now()-new Date(t).getTime())/3.6e6);if(h<1)return"just now";if(h<24)return h+"h ago";return Math.round(h/24)+"d ago";}catch(e){return"";}}
-function reqRow(r){
+function clock(t){try{var d=new Date(t);return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+", "+d.toLocaleTimeString("en-NZ",{hour:"numeric",minute:"2-digit"}).replace(" ","").toLowerCase();}catch(e){return"";}}
+function crewOpts(sel){return CREW.map(function(c){return '<option value="'+esc(c.slack_id)+'" data-name="'+esc(c.name)+'"'+(sel===c.slack_id?" selected":"")+'>'+esc(c.name)+'</option>';}).join("");}
+var ICO={mail:"ti-mail",user:"ti-user",send:"ti-send",message:"ti-message-2",check:"ti-check",x:"ti-x",clock:"ti-clock","calendar-check":"ti-calendar-check"};
+function timeline(tl){if(!tl||!tl.length)return"";return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(s.text)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
+
+function newCard(r){
+  var isJob=r.suggestion_id?false:false; // placeholder
+  var sid=r.suggestion_id||r.id;
   var conf=r.confidence!=null?'<span class="pill p-ind">'+Math.round(r.confidence*100)+'% job</span>':'';
-  var badge=r.stage==="booked"?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:11px;vertical-align:-1px"></i> booked</span>':'<span class="pill p-warn">needs a time</span>';
-  var act=r.stage==="booked"?'':'<button class="btn"><i class="ti ti-calendar-plus"></i> Book a time</button>';
-  return '<div class="row"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
-    '<div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(r.customer)+' — '+esc(r.subject)+'</div>'+
-    (r.snippet?'<div style="font-size:12.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
-    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div></div>'+
-    conf+badge+act+'</div>';
+  var title=(r.customer?esc(r.customer)+' — ':'')+esc(r.subject||r.job||'job request');
+  var pick='<div class="acts" id="pick-'+sid+'" style="display:none">'+
+      '<select class="crew-'+sid+'">'+crewOpts()+'</select>'+
+      '<input type="text" class="time-'+sid+'" placeholder="e.g. Fri 11 Jul, 8am" style="width:180px">'+
+      '<button class="btn btn-p" onclick="assign(\''+sid+'\')"><i class="ti ti-send"></i> Ask them</button>'+
+      '<button class="btn" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'none\'">Cancel</button></div>';
+  return '<div class="row" data-sid="'+sid+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
+    '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
+    (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
+    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+pick+'</div>'+
+    conf+'<button class="btn btn-p" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'flex\';this.style.display=\'none\'"><i class="ti ti-user-plus"></i> Assign</button></div>';
 }
-fetch(API+"/ava-schedule-list?company="+CO).then(function(r){return r.json();}).then(function(d){
-  var rs=(d.requests||[]),c=d.counts||{};
-  var nn=document.getElementById("s_new");if(nn)nn.textContent=c.new||0;
-  var nb=document.getElementById("s_booked");if(nb)nb.textContent=c.booked||0;
-  var t=document.getElementById("s_team");if(t)t.textContent=d.fergus_synced?String(c.team):"—";
-  var td=document.getElementById("s_teamd");if(td&&!d.fergus_synced)td.textContent="connect Fergus";
-  var box=document.getElementById("reqlist");
-  box.innerHTML=rs.length?rs.map(reqRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2)">No new requests right now — Ava’s watching.</div></div>';
-}).catch(function(){document.getElementById("reqlist").innerHTML='<div class="row"><div style="flex:1;color:var(--ink2)">Couldn’t reach the server — try again shortly.</div></div>';});
+function waitCard(j){
+  var stat=j.tradie_status;
+  var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
+    '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+    '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
+    (j.stage==="confirmed"?'<span class="pill p-ok">confirmed</span>':'<span class="pill p-warn">asked · waiting</span>')+'</div>';
+  var acts;
+  if(j.stage==="confirmed"){
+    acts='<div class="acts" style="margin:0 16px 12px 67px"><button class="btn btn-p" onclick="book(\''+j.id+'\')"><i class="ti ti-calendar-check"></i> Book '+esc(j.assigned_to)+' &amp; tell '+esc((j.customer||"customer").split(" ")[0])+'</button></div>';
+  } else {
+    acts='<div class="acts" style="margin:0 16px 12px 67px"><span class="muted">Log '+esc(j.assigned_to||"their")+' reply:</span>'+
+      '<button class="btn" onclick="reply(\''+j.id+'\',\'yes\')"><i class="ti ti-check" style="color:var(--grn)"></i> They said yes</button>'+
+      '<button class="btn" onclick="reply(\''+j.id+'\',\'no\')"><i class="ti ti-x" style="color:var(--red)"></i> Can\'t make it</button>'+
+      '<button class="btn" onclick="var t=prompt(\'New time they offered?\');if(t)reply(\''+j.id+'\',\'reschedule\',t)"><i class="ti ti-clock"></i> New time</button></div>';
+  }
+  return '<div class="qitem" style="border-bottom:1px solid var(--line)">'+head+acts+'<div style="margin:0 16px 14px 67px">'+timeline(j.timeline)+'</div></div>';
+}
+function bookedCard(j){
+  var fergus=j.fergus_url?'<a class="btn" href="'+esc(j.fergus_url)+'" target="_blank" style="text-decoration:none"><i class="ti ti-external-link"></i> '+esc(j.fergus_job||"Fergus")+'</a>':(j.fergus_job?'<span class="pill p-blu">'+esc(j.fergus_job)+'</span>':'');
+  return '<div class="card" style="margin-bottom:14px;padding:16px 18px">'+
+    '<div style="display:flex;align-items:flex-start;gap:12px"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'+
+    '<div style="flex:1"><div style="font-weight:600;font-size:15px">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+    '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
+    timeline(j.timeline)+'</div>';
+}
+function assign(sid){
+  var sel=document.querySelector(".crew-"+sid), time=document.querySelector(".time-"+sid);
+  if(!sel||!time.value.trim())return alert("Pick a tradie and a time.");
+  var opt=sel.options[sel.selectedIndex];
+  var card=document.querySelector('[data-sid="'+sid+'"]');
+  var name=opt.getAttribute("data-name");
+  if(!confirm("Message "+name+" in your team chat to take this on "+time.value+"?"))return;
+  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:sel.value,tradie_name:name,time:time.value.trim(),
+    job:card?card.querySelector("div[style*='font-weight:600']").textContent.split(" — ").slice(1).join(" — "):"",
+    customer:card?card.querySelector("div[style*='font-weight:600']").textContent.split(" — ")[0]:""};
+  post(body);
+}
+function reply(id,r,nt){post({company:CO,action:"tradie_reply",job_id:id,reply:r,new_time:nt});}
+function book(id){if(!confirm("Mark as booked? Ava will finish the Fergus job + customer email via the confirmed flow."))return;post({company:CO,action:"book",job_id:id});}
+function post(body){fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(){load();}).catch(function(){alert("Something went wrong — try again.");});}
+
+function load(){
+  fetch(API+"/ava-schedule-list?company="+CO).then(function(r){return r.json();}).then(function(d){
+    CREW=d.crew||[];var c=d.counts||{};
+    document.getElementById("s_new").textContent=c.new||0;
+    document.getElementById("s_wait").textContent=c.wait||c.waiting||0;
+    document.getElementById("s_booked").textContent=c.booked||0;
+    document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
+    var jobs=d.jobs||[];
+    var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}));
+    var waits=jobs.filter(function(j){return j.lane==="waiting";});
+    var booked=jobs.filter(function(j){return j.lane==="booked";});
+    document.getElementById("lane_new").innerHTML=news.length?news.map(newCard).join(""):'<div class="row"><div style="flex:1" class="muted"><i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing waiting — Ava\'s watching your inbox.</div></div>';
+    var lw=document.getElementById("lane_wait");lw.innerHTML=waits.length?waits.map(waitCard).join(""):'<div class="row"><div style="flex:1" class="muted">No one waiting on a reply.</div></div>';
+    lw.parentNode.style.display="block";document.getElementById("wait_hint").textContent=waits.length?(waits.length+" out with the crew"):"";
+    document.getElementById("lane_booked").innerHTML=booked.length?booked.map(bookedCard).join(""):'<div class="card"><div class="row"><div style="flex:1" class="muted">No booked jobs yet.</div></div></div>';
+  }).catch(function(){document.getElementById("lane_new").innerHTML='<div class="row"><div style="flex:1" class="muted">Couldn\'t reach the server — try again shortly.</div></div>';});
+}
+load();
 </script>
 </body>
 </html>
