@@ -124,22 +124,36 @@ function crewOpts(sel){return CREW.map(function(c){return '<option value="'+esc(
 var ICO={mail:"ti-mail",user:"ti-user",send:"ti-send",message:"ti-message-2",check:"ti-check",x:"ti-x",clock:"ti-clock","calendar-check":"ti-calendar-check"};
 function timeline(tl){if(!tl||!tl.length)return"";return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(s.text)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
 
+function kindBadge(k){
+  if(k==="quote")return '<span class="pill p-warn"><i class="ti ti-file-dollar" style="font-size:11px;vertical-align:-1px"></i> quote first</span>';
+  if(k==="not_job")return '<span class="pill" style="background:var(--bg);color:var(--ink3)">not a job?</span>';
+  return '<span class="pill p-ind"><i class="ti ti-tool" style="font-size:11px;vertical-align:-1px"></i> job</span>';
+}
 function newCard(r){
-  var isJob=r.suggestion_id?false:false; // placeholder
   var sid=r.suggestion_id||r.id;
-  var conf=r.confidence!=null?'<span class="pill p-ind">'+Math.round(r.confidence*100)+'% job</span>':'';
+  var k=r.kind||"job";
   var title=(r.customer?esc(r.customer)+' — ':'')+esc(r.subject||r.job||'job request');
   var pick='<div class="acts" id="pick-'+sid+'" style="display:none">'+
       '<select class="crew-'+sid+'">'+crewOpts()+'</select>'+
-      '<input type="text" class="time-'+sid+'" placeholder="e.g. Fri 11 Jul, 8am" style="width:180px">'+
+      '<input type="text" class="time-'+sid+'" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
       '<button class="btn btn-p" onclick="assign(\''+sid+'\')"><i class="ti ti-send"></i> Ask them</button>'+
       '<button class="btn" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'none\'">Cancel</button></div>';
-  return '<div class="row" data-sid="'+sid+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
+  var buttons;
+  if(k==="not_job"){
+    buttons='<button class="btn" onclick="setKind(\''+sid+'\',\'job\')"><i class="ti ti-check"></i> It’s a job</button>'+
+            '<button class="btn" onclick="dismiss(\''+sid+'\')"><i class="ti ti-x"></i> Clear</button>';
+  } else {
+    buttons='<button class="btn" onclick="dismiss(\''+sid+'\')" title="Not a job — clear it"><i class="ti ti-x"></i></button>'+
+            '<button class="btn btn-p" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
+  }
+  return '<div class="row" data-sid="'+sid+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
     '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+pick+'</div>'+
-    conf+'<button class="btn btn-p" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'flex\';this.style.display=\'none\'"><i class="ti ti-user-plus"></i> Assign</button></div>';
+    '<div style="display:flex;flex-direction:column;gap:7px;align-items:flex-end;flex-shrink:0">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div></div></div>';
 }
+function dismiss(sid){post({company:CO,action:"dismiss",suggestion_id:sid});}
+function setKind(sid,kind){post({company:CO,action:"set_kind",suggestion_id:sid,kind:kind});}
 function waitCard(j){
   var stat=j.tradie_status;
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
@@ -190,7 +204,9 @@ function load(){
     document.getElementById("s_booked").textContent=c.booked||0;
     document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
     var jobs=d.jobs||[];
-    var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}));
+    var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
+    var ord={job:0,quote:1,not_job:2};
+    news.sort(function(a,b){return (ord[a.kind||"job"]||0)-(ord[b.kind||"job"]||0);});
     var waits=jobs.filter(function(j){return j.lane==="waiting";});
     var booked=jobs.filter(function(j){return j.lane==="booked";});
     document.getElementById("lane_new").innerHTML=news.length?news.map(newCard).join(""):'<div class="row"><div style="flex:1" class="muted"><i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing waiting — Ava\'s watching your inbox.</div></div>';
