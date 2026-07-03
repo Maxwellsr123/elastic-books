@@ -134,6 +134,14 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
           <h2 id="herohi">Good morning</h2>
           <p id="herosub">Ava does the heavy lifting. Here's anything that actually needs you.</p>
         </div>
+        <details style="margin:-6px 0 18px;">
+          <summary style="cursor:pointer;font-size:12.5px;color:var(--ink2);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-help-circle" style="font-size:15px"></i> How this works</summary>
+          <div class="card" style="padding:14px 16px;margin-top:9px;font-size:13px;color:var(--ink2);line-height:1.65">
+            Ava reads your <b style="color:var(--ink)">inbox, Slack chat and bank lines</b>, files every receipt against the right spend, and gets it ready for your bookkeeping team to reconcile in Xero.<br>
+            <b style="color:var(--ink)">Your only jobs:</b> ① confirm anything Ava's unsure about &nbsp;② send a receipt she can't find — snap a photo here or drop it in your Slack chat &nbsp;③ pay the bills she flags.<br>
+            Everything else — the matching, coding, chasing and reconciling — is handled for you.
+          </div>
+        </details>
         <div id="mywork" style="margin-bottom:22px"></div>
         <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
           <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
@@ -453,6 +461,9 @@ h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
   function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
   function whoName(cur){return cur.kind==="user"?esc(cur.name||cur.email||"someone"):"our looper";}
   function renderRoles(){
+    // first wedge is fully looper-run: owners just do their bits — no role juggling.
+    // The card only shows for loopers; roles data still loads (personalises "Your work").
+    var rc=document.getElementById("rolescard");if(rc)rc.style.display=(SESSION&&!SESSION.looper)?"none":"block";
     var box=document.getElementById("roleslist");if(!box||!ROLES)return;
     var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills — the most she can</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
     var rows=HUMAN.map(function(h){

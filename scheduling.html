@@ -126,8 +126,17 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
     <div class="wrap">
       <div class="hero"><div class="spark"></div>
         <h2>Morning, Max 👋</h2>
-        <p>A job lands in your inbox → you assign a tradie → Ava asks them in the team chat → once they say yes she books it in Fergus and emails the customer. Do it here, or straight from Slack — your plumbers just reply in the chat.</p>
+        <p>Jobs land in your inbox, Ava lines them up — you just say who and when.</p>
       </div>
+      <details style="margin:-6px 0 18px;">
+        <summary style="cursor:pointer;font-size:12.5px;color:var(--ink2);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-help-circle" style="font-size:15px"></i> How this works</summary>
+        <div class="card" style="padding:14px 16px;margin-top:9px;font-size:13px;color:var(--ink2);line-height:1.65">
+          ① A customer emails about a job — <b style="color:var(--ink)">Ava spots it</b> and puts it on this board (tagged job / quote-first / not-a-job).<br>
+          ② You hit <b style="color:var(--ink)">Assign</b>, pick a tradie and a time — <b style="color:var(--ink)">Ava asks them in your team Slack</b>. They just reply 👍 or 👎 in the chat.<br>
+          ③ They say yes → Ava <b style="color:var(--ink)">books it in Fergus and emails the customer</b> to confirm. Says no → it comes straight back to you for a new time or tradie.<br>
+          Works from here or entirely from Slack — your crew never needs this dashboard.
+        </div>
+      </details>
 
       <div class="grid g4">
         <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n" id="s_new">—</div><div class="d">needs a tradie</div></div>
