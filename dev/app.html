@@ -175,7 +175,7 @@ h1{letter-spacing:-.03em}
         <div id="mywork" style="margin-bottom:22px"></div>
         <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
           <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
-          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava does the most she can, automatically. The few human jobs default to your looper — hand any of them to someone you've added under Settings.</div>
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava does the most she can, automatically. The few human jobs default to Elastic — hand any of them to someone you've added under Settings.</div>
           <div id="roleslist"></div>
         </div>
         <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
@@ -197,7 +197,7 @@ h1{letter-spacing:-.03em}
             <span id="xproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
           </div>
         </div>
-        <div class="sec" style="color:var(--ink2)">The whole account <span style="font-weight:400;font-size:12px;color:var(--ink3)">· everything Ava, your looper and you are working</span></div>
+        <div class="sec" style="color:var(--ink2)">The whole account <span style="font-weight:400;font-size:12px;color:var(--ink3)">· everything Ava, Elastic and you are working</span></div>
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">incoming, unpaid</div></div>
           <div class="card stat ufilt" data-filter="pile" style="cursor:pointer"><div class="l"><i class="ti ti-paperclip" style="font-size:16px;color:var(--blu)"></i> Receipt pile</div><div class="n" id="u_pile">—</div><div class="d">receipts waiting for a bank line</div></div>
@@ -491,7 +491,7 @@ h1{letter-spacing:-.03em}
   // every user gets their own colour (deterministic from email) — avoids Ava's purple + looper's blue
   var UPAL=["#B5630F","#0E7A50","#B42318","#0E7490","#A21CAF","#C2410C","#4D7C0F","#BE123C"];
   function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
-  function whoName(cur){return cur.kind==="user"?esc(cur.name||cur.email||"someone"):"our looper";}
+  function whoName(cur){if(cur.kind!=="user")return "Elastic";if(/@elasticadmin\.com$/i.test(cur.email||""))return "Elastic";return esc(cur.name||cur.email||"someone");}
   function renderRoles(){
     // first wedge is fully looper-run: owners just do their bits — no role juggling.
     // The card only shows for loopers; roles data still loads (personalises "Your work").
@@ -500,7 +500,7 @@ h1{letter-spacing:-.03em}
     var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills — the most she can</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
     var rows=HUMAN.map(function(h){
       var cur=ROLES[h.k]||{kind:"looper"};var isU=cur.kind==="user";var c=isU?userColor(cur.email):RCOL.looper,bg=isU?(c+"1e"):RBG.looper;
-      var opts='<option value="looper"'+(!isU?" selected":"")+'>Our looper</option>'+RUSERS.map(function(u){return '<option value="user:'+esc(u.email)+'"'+(isU&&cur.email===u.email?" selected":"")+'>'+esc(u.name||u.email)+'</option>';}).join("");
+      var opts='<option value="looper"'+(!isU?" selected":"")+'>Elastic (our team)</option>'+RUSERS.map(function(u){return '<option value="user:'+esc(u.email)+'"'+(isU&&cur.email===u.email?" selected":"")+'>'+esc(u.name||u.email)+'</option>';}).join("");
       var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:3px;background:'+bg+';color:'+c+';font-weight:500;max-width:160px">'+opts+'</select>';
       var sub='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> · "+h.where+' <a class="rolego" data-go="'+h.go+'" style="color:'+c+';cursor:pointer;font-weight:500;white-space:nowrap">do it →</a>';
       return '<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+c+';background:'+bg+'"><i class="ti '+h.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">'+h.label+'</div><div style="font-size:12px;color:var(--ink2)">'+sub+'</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sel+'</div></div>';
@@ -553,8 +553,8 @@ h1{letter-spacing:-.03em}
     if(owner&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
     var sub=document.getElementById("herosub");
     if(!tasks.length){
-      if(sub)sub.textContent="You're all clear — Ava and your looper have it. We'll flag anything only you can answer.";
-      box.innerHTML='<div class="card" style="padding:17px 18px;display:flex;align-items:center;gap:12px"><div class="ic" style="width:36px;height:36px;color:var(--grn);background:var(--grnbg)"><i class="ti ti-circle-check" style="font-size:19px"></i></div><div><div style="font-weight:600;font-size:14px">Nothing needs you right now</div><div style="font-size:12.5px;color:var(--ink2)">Ava and your looper are on it — drop a receipt any time.</div></div></div>';
+      if(sub)sub.textContent="You're all clear — Ava and Elastic have it. We'll flag anything only you can answer.";
+      box.innerHTML='<div class="card" style="padding:17px 18px;display:flex;align-items:center;gap:12px"><div class="ic" style="width:36px;height:36px;color:var(--grn);background:var(--grnbg)"><i class="ti ti-circle-check" style="font-size:19px"></i></div><div><div style="font-weight:600;font-size:14px">Nothing needs you right now</div><div style="font-size:12.5px;color:var(--ink2)">Ava and Elastic are on it — drop a receipt any time.</div></div></div>';
       return;
     }
     if(sub)sub.textContent="Here's what needs you — tap one to jump in.";
