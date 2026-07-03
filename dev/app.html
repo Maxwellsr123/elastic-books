@@ -277,7 +277,7 @@ h1{letter-spacing:-.03em}
     var qgrid=jrow("Ava right?",'<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Yes</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> No</button>')
       +jrow("Type",'<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button><button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>')
       +jrow("Receipt",'<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs one</button><button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">Not needed</button><button class="tbtn'+cantCls+'" data-fb="cant_find" data-id="'+id+'">Can\'t find</button>')
-      +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button>')
+      +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button><input type="text" class="jref-in" data-id="'+id+'" value="'+esc(i.job_ref||"")+'" placeholder="Job #" title="Which job is this cost for? e.g. KPA-2711" style="width:96px;padding:6px 9px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12px">')
       +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>');
     // Ava's best read, stated once — the fast path is a single confirm, not a grid.
     var typeTxt=i.personal?"personal spend":"a business expense";
@@ -306,7 +306,7 @@ h1{letter-spacing:-.03em}
     var xeroLink=(!fl&&(i.reconcilable||i.reconciled))?'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" title="Open Xero to reconcile it / check it there" style="font-size:12px;color:#0E7C93;text-decoration:none;margin-right:10px;white-space:nowrap"><i class="ti ti-external-link" style="font-size:12px;vertical-align:-1px"></i> Xero</a>':'';
     var recon=i.reconciled?'<span class="pill p-ok" style="margin-right:2px" title="ticked off here — check Xero to confirm it reconciled">reconciled ✓</span>':((!fl&&i.reconcilable)?'<button class="tbtn" data-recon="'+i.id+'" title="Reconcile it in Xero, then tick it off here — Ava doesn\'t touch Xero" style="margin-right:8px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-checks"></i> Mark reconciled</button>':'');
     var reopen='<button class="tbtn draw" data-reopen="'+i.id+'" title="Send it back to the working queue" style="margin-right:8px"><i class="ti ti-arrow-back-up"></i> Send back</button>';
-    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+xeroLink+reopen+recon+(i.reconciled?'':pl)+'</div>';}
+    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(i.job_ref?(" · "+esc(i.job_ref)):"")+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+xeroLink+reopen+recon+(i.reconciled?'':pl)+'</div>';}
   function dueStatus(date){
     if(!date)return{txt:"to pay",col:"#b42318"};
     var days=Math.round((new Date(date)-new Date())/864e5);
@@ -420,6 +420,8 @@ h1{letter-spacing:-.03em}
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
   });
   document.addEventListener("change",function(e){
+    var j=e.target.closest(".jref-in");
+    if(j){fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:j.getAttribute("data-id"),action:"job_ref",job_ref:j.value.trim()})}).catch(function(){});return;}
     var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
     var id=f.getAttribute("data-id"),file=f.files[0];f.value="";
     readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(){loadList();}).catch(function(){});
