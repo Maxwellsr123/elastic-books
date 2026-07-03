@@ -716,8 +716,10 @@ h1{letter-spacing:-.03em}
   function showLooper(s){loginEl.style.display="none";appEl.style.display="none";lpEl.style.display="block";renderLooper(s);}
   function route(){
     var s=getS();
+    // DEV is open — no login needed; board defaults to the sandbox (?c= for a client)
+    if(window.IS_DEV && !s){showBoard();return;}
     if(!s){showLogin();return;}
-    if(s.looper && !hasC){showLooper(s);return;}  // loopers land on their cross-client pile
+    if(s.looper && !hasC){location.replace("admin.html");return;}  // loopers have their own surface
     if(hasC && !s.looper && s.companies && !s.companies.some(function(c){return c.id===hasC;})){clearS();showLogin("You don't have access to that client.");return;}
     if(!hasC && !s.looper && s.companies && s.companies.length){location.replace(location.pathname+"?c="+s.companies[0].id);return;}
     showBoard();

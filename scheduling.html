@@ -205,6 +205,7 @@ function gate(m){var g=document.getElementById("gate");g.style.display="flex";do
 function boot(){
   var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
   var qc=new URLSearchParams(location.search).get("c");
+  if(window.IS_DEV&&(!s||!s.email)){CO=qc||KPA_DEF;load();return;}  // dev is open
   if(!s||!s.email){gate("Tap your sign-in link (or sign in on your board) first — then Auto Scheduling opens right up.");return;}
   if(qc&&!s.looper&&s.companies&&s.companies.length&&!s.companies.some(function(x){return x.id===qc;})){gate("You don't have access to that client.");return;}
   CO=qc||(!s.looper&&s.companies&&s.companies.length?s.companies[0].id:KPA_DEF);
