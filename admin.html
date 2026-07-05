@@ -406,6 +406,16 @@ h1{letter-spacing:-.03em}
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
+  // action feedback: when something leaves the owner's list, SAY so + allow undo
+  function toast(msg, undoAction, undoId){
+    var t=document.getElementById("avatoast");
+    if(!t){t=document.createElement("div");t.id="avatoast";t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:300;background:#141418;color:#fff;border-radius:4px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw";document.body.appendChild(t);}
+    t.innerHTML='<span>'+msg+'</span>'+(undoAction?'<a id="avaundo" style="color:#A7A2F4;font-weight:700;cursor:pointer;white-space:nowrap">Undo</a>':'');
+    t.style.display="flex";
+    clearTimeout(t._h);t._h=setTimeout(function(){t.style.display="none";},9000);
+    if(undoAction){document.getElementById("avaundo").onclick=function(){t.style.display="none";
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:undoId,action:undoAction})}).then(function(){loadList();});};}
+  }
   var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
   document.addEventListener("click",function(e){
     var b=e.target.closest("[data-fb]");
@@ -416,6 +426,11 @@ h1{letter-spacing:-.03em}
         var card=b.closest(".qitem");if(card){card.style.transition="opacity .15s,transform .15s";card.style.opacity="0";card.style.transform="translateX(8px)";setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},150);}
         var cm={confirm:"u_confirm",send:"u_send",looper:"u_looper"},cel=document.getElementById(cm[U_FILTER]);if(cel){var n=parseInt(cel.textContent,10);if(!isNaN(n)&&n>0)cel.textContent=n-1;}
       } else { b.style.opacity=".5"; }
+      var doneMsg={personal:["Filed as personal (Drawings) — nothing more needed. Elastic reconciles it.","business"],
+        no_receipt:["Marked no-receipt-needed — off to Elastic to reconcile.","needs_receipt"],
+        cant_find:["Noted as can't-find — it reconciles anyway, flagged as missing.","needs_receipt"],
+        up:["Confirmed — Ava takes it from here.",null]};
+      var dm=doneMsg[act];if(dm)setTimeout(function(){toast(dm[0],dm[1],id);},400);
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
