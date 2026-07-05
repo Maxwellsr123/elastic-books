@@ -287,14 +287,23 @@ h1{letter-spacing:-.03em}
     var jobTxt=(i.is_job===true||(i.is_job!==false&&i.ava_job))?" for a job":"";
     var gstTxt=i.gst===true?", incl. GST":(i.gst===false?", no GST":"");
     var read='Looks like '+typeTxt+jobTxt+gstTxt+(i.account?' ('+esc(i.account)+')':'')+'.';
-    var box='<div class="think">'+head
-      +'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px">'+read+' <span style="color:var(--ink3)">— right?</span></div>'
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
-        +'<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
+    // already-confirmed items only owe their paperwork — no "spot on" re-ask
+    var confirmed=(i.feedback==="up"||i.lane==="await_receipt");
+    var lead=confirmed
+      ?'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed — just needs its receipt.</div>'
+      :'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px">'+read+' <span style="color:var(--ink3)">— right?</span></div>';
+    var fast=confirmed
+      ?('<button class="tbtn" data-attach="'+id+'" style="border-color:var(--ind);color:var(--indtx)"><i class="ti ti-paperclip"></i> Attach receipt</button>'
+        +'<button class="tbtn" data-fb="no_receipt" data-id="'+id+'">Not needed</button>'
+        +'<button class="tbtn" data-fb="cant_find" data-id="'+id+'">Can\'t find it</button>'
+        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
+      :('<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
         +'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>'
         +'<button class="tbtn" data-editrow="'+id+'"><i class="ti ti-adjustments-alt"></i> Not quite</button>'
-        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>'
-      +'</div>'
+        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>');
+    var box='<div class="think">'+head
+      +lead
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+fast+'</div>'
       +'<input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">'
       +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
         +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
