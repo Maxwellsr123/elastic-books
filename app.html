@@ -345,7 +345,7 @@ h1{letter-spacing:-.03em}
       htxt='Needs your attention <span style="font-weight:400;font-size:12px;color:var(--ink3)">· '+list.length+' item'+(list.length===1?'':'s')+' — after this, Ava and Elastic take it</span>';
       row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing needs you — Ava and Elastic have it all.';
     }
-    if(head)head.innerHTML=(U_FILTER==="need"?"":'<a class="backneed" style="color:var(--ind);cursor:pointer;font-weight:600;margin-right:8px">←</a>')+htxt;
+    if(head)head.innerHTML=(U_FILTER==="need"?"":'<a class="backneed" style="color:var(--ind);cursor:pointer;font-weight:700;margin-right:10px;white-space:nowrap">← Back to your list</a>')+htxt;
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
   }
@@ -392,7 +392,7 @@ h1{letter-spacing:-.03em}
       try{(document.scrollingElement||document.documentElement).scrollTop=_sy;}catch(_e){}
     }).catch(function(){});
   }
-  document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
+  document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});});});
   document.addEventListener("click",function(e){if(e.target.closest(".backneed")){U_FILTER="need";renderHome();}});
   // action feedback: when something leaves the owner's list, SAY so + allow undo
   function toast(msg, undoAction, undoId){
