@@ -3,778 +3,222 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Elastic — Team admin</title>
-<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
+<title>Elastic — The Desk</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;
+:root{--bg:#F7F7F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;
 --ind:#5B54E6;--ind2:#7B74EE;--indbg:#EEEDFB;--indtx:#3D36C4;
---grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;}
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
 body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
-h1,h2,h3,.sec,.stat .n{letter-spacing:-.02em}
-.app{display:flex;min-height:100vh}
-.side{width:236px;background:#100F15;color:#fff;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh;border-right:1px solid #1d1c24}
-.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
-.logo{width:30px;height:30px;border-radius:3px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
-.brand b{font-weight:600;font-size:16px}
-.nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
-.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:3px;color:#A7A7B4;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
-.nav a:hover{background:#1F1E26;color:#fff}
-.nav a.on{background:#262533;color:#fff}
-.nav a i{font-size:18px}
-.side .foot{margin-top:auto;background:#1F1E26;border-radius:4px;padding:12px}
-.side .foot .w{font-size:13px;font-weight:500}.side .foot .s{font-size:11.5px;color:#8B8B98;margin-top:2px}
-.main{flex:1;min-width:0}
-.top{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
-.top h1{font-size:18px;font-weight:600}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 11px;border-radius:2px;background:var(--grnbg);color:var(--grn)}
-.av{width:32px;height:32px;border-radius:50%;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
-.wrap{padding:26px 28px;max-width:920px}
-.hero{background:linear-gradient(120deg,#1c1b24,#2a2740);border-radius:6px;padding:22px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
-.hero h2{font-size:20px;font-weight:600;margin-bottom:5px}
-.hero p{color:#C9C8D6;font-size:13.5px}
-.hero .spark{position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 70%)}
-.grid{display:grid;gap:14px}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g2{grid-template-columns:repeat(2,1fr)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 2px rgba(20,20,24,.025),0 16px 34px rgba(20,20,24,.04)}
-.stat{padding:16px 18px}
-.stat .l{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
-.stat .n{font-size:27px;font-weight:600;margin-top:7px}
-.stat .d{font-size:12px;color:var(--ink3);margin-top:2px}
-.sec{font-size:14px;font-weight:600;margin:24px 0 12px}
-.row{display:flex;align-items:center;gap:13px;padding:13px 16px;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:0}
-.ic{width:38px;height:38px;border-radius:4px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:19px;flex-shrink:0}
-.pill{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:2px;white-space:nowrap}
-.p-warn{background:var(--ambbg);color:var(--amb)}.p-ok{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}
-.btn{font-family:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:4px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-bottom:1px solid var(--line);background:#131218;color:#fff;position:sticky;top:0;z-index:10}
+.top .brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:15px}
+.top .logo{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.top .sub{font-size:11px;font-weight:700;letter-spacing:1.4px;color:#7B74EE;text-transform:uppercase}
+.wrap{max-width:880px;margin:0 auto;padding:24px 20px 80px}
+.sec{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.sec .cnt{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;color:var(--ink3)}
+.co{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:10px;overflow:hidden}
+.cohead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.cohead:hover{background:#FCFCF9}
+.coname{font-weight:600;font-size:14.5px;flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.b-grn{background:var(--grnbg);color:var(--grn)}.b-amb{background:var(--ambbg);color:var(--amb)}.b-ind{background:var(--indbg);color:var(--indtx)}.b-red{background:var(--redbg);color:var(--red)}.b-mut{background:#EFEFE8;color:var(--ink3)}
+.panel{border-top:1px solid var(--line);padding:16px;display:none;background:#FBFBF8}
+.drop{border:2px dashed #C9C4F2;border-radius:6px;background:#fff;padding:16px;text-align:center;margin-bottom:16px}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:3px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
 .btn:hover{background:var(--bg)}
-.btn-p{background:var(--ind);color:#fff;border:0;box-shadow:0 1px 2px rgba(91,84,230,.25),0 6px 16px rgba(91,84,230,.22)}
-.btn-p:hover{background:#4a43d8}
-.intg{padding:20px;display:flex;flex-direction:column;gap:14px}
-.intg .top2{display:flex;align-items:flex-start;gap:14px}
-.intg .lg{width:46px;height:46px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
-.intg h3{font-size:15px;font-weight:600}.intg .sub{font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.5}
-.hidden{display:none}
-.chatw{max-width:560px}
-.bub{padding:11px 14px;border-radius:5px;font-size:13.5px;line-height:1.5;margin-bottom:10px;max-width:80%}
-.bub.ava{background:#fff;border:1px solid var(--line)}
-.bub.me{background:var(--indbg);color:var(--indtx);margin-left:auto}
-.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:3px}
-.seg button{border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:3px;cursor:pointer;color:var(--ink2)}
-.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
-.drop{border:2px dashed #D6D6E6;border-radius:6px;padding:22px;text-align:center;background:linear-gradient(180deg,#fff,#FAFAFE);transition:border-color .15s;cursor:pointer;margin-bottom:20px}
-.drop:hover{border-color:var(--ind)}
-.dz{width:50px;height:50px;border-radius:5px;margin:0 auto 11px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:25px}
-.qitem{border-bottom:1px solid var(--line)}.qitem:last-child{border-bottom:0}.qitem .row{border-bottom:0}
-.think{margin:0 16px 10px 67px;background:var(--indbg);border-radius:4px;padding:11px 13px}
-.think .g{font-size:13px;color:var(--indtx);font-weight:500;line-height:1.45}
-.think .g .conf{font-size:11px;font-weight:600;background:rgba(255,255,255,.6);color:var(--indtx);padding:1px 7px;border-radius:2px;margin-left:5px}
-.think .w{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
-.acts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
-.tbtn{font-family:inherit;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:3px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-.tbtn:hover{background:var(--bg)}.tbtn.on{background:var(--ind);color:#fff;border-color:var(--ind)}
-.tbtn.sug{background:var(--indbg);color:var(--indtx);border-color:#cbc8f6;border-style:dashed}
-.tbtn.sug::after{content:" · Ava";font-size:10px;opacity:.6;font-weight:600}
-.tbtn.draw{color:var(--ink2)}
-.sep{width:1px;height:20px;background:var(--line);margin:0 3px;align-self:center;display:inline-block}
-@media (max-width:680px){
-  .think{margin-left:16px;margin-right:16px}
-  html,body{overflow-x:hidden;max-width:100vw}
-  .app{flex-direction:column}
-  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;align-items:center;padding:5px 6px;border-right:0;border-top:1px solid #1d1c24;z-index:30}
-  .brand,.side .foot{display:none}
-  .nav{flex-direction:row;gap:2px;margin:0;flex:1;justify-content:space-around}
-  .nav a{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px;flex:1;justify-content:center;text-align:center;border-radius:4px}
-  .nav a i{font-size:22px}
-  .main{width:100%}
-  .top{padding:14px 18px}
-  .top .chip{display:none}
-  .wrap{padding:18px 16px 90px;max-width:100%}
-  .hero{padding:18px;border-radius:6px}.hero h2{font-size:18px}.hero p{font-size:13px}
-  .drop{padding:20px 16px}
-  .g3{gap:8px}
-  .stat{padding:13px 11px}.stat .n{font-size:22px}.stat .l{font-size:11px}.stat .d{font-size:11px}
-  .row{padding:12px 14px}
-}
-</style>
-
-<style id="sharpskin">
-/* ── sharp skin: less rounding, more edge ── */
-.card{border-radius:6px!important;box-shadow:none!important;border:1px solid #D9D9CC!important}
-a.card{transition:border-color .12s,box-shadow .12s,transform .12s}
-a.card:hover{transform:none!important;border-color:#5B54E6!important;box-shadow:0 0 0 1px #5B54E6,0 10px 28px rgba(91,84,230,.14)!important}
-.card.soon{border-style:dashed!important}
-.pill{border-radius:2px!important;text-transform:uppercase!important;font-size:10px!important;letter-spacing:.06em!important;font-weight:700!important;padding:3px 8px!important}
-.chip{border-radius:2px!important;text-transform:uppercase;font-size:10px!important;letter-spacing:.06em;font-weight:700!important}
-.btn,.tbtn,.seg,.seg button,input[type=text],select{border-radius:3px!important}
-.btn-p{border-radius:3px!important;box-shadow:none!important;font-weight:600!important}
-.ic,.ico,.logo,.dz,.side .foot,.think,.day{border-radius:4px!important}
-.nav a{border-radius:3px!important}
-.nav a.on{box-shadow:inset 2px 0 0 #7B74EE}
-.job{border-radius:2px!important}
-.sec{text-transform:uppercase;font-size:11px!important;letter-spacing:.1em;font-weight:700!important}
-.sec .cnt{text-transform:none;letter-spacing:0;font-weight:500!important}
-.stat{position:relative;overflow:hidden}
-.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#5B54E6,#7B74EE)}
-.stat .n{font-variant-numeric:tabular-nums}
-.hero{border-radius:6px!important;border:1px solid #262433;background:
- radial-gradient(720px 260px at 88% -30%,rgba(103,96,244,.4),transparent 62%),
- repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 26px),
- repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 26px),
- linear-gradient(120deg,#131218,#1c1a27)!important}
-.hero h2{letter-spacing:-.02em}
-.drop{border-radius:6px!important}
-h1{letter-spacing:-.03em}
-.open{text-transform:uppercase;font-size:12px!important;letter-spacing:.07em;font-weight:700!important}
+.btn-p{background:var(--ind);color:#fff;border-color:var(--ind)}
+.btn-g{border-color:var(--grn);color:var(--grn)}
+.list{background:#fff;border:1px solid var(--line);border-radius:4px}
+.row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-top:1px solid #ECECE4;flex-wrap:wrap}
+.row:first-child{border-top:0}
+.rmain{flex:1;min-width:180px}
+.rt{font-weight:600;font-size:13.5px}
+.rs{font-size:12px;color:var(--ink2);margin-top:1px}
+.muted{color:var(--ink3);font-size:12.5px}
+a{color:var(--indtx)}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+@media(max-width:640px){.wrap{padding:16px 10px 60px}.cohead{padding:12px 12px;flex-wrap:wrap}.row{padding:10px 11px}}
 </style>
 </head>
 <body>
-<div class="app" style="display:none">
-  <aside class="side">
-    <div class="brand"><div class="logo">A</div><b>Ava</b></div>
-    <nav class="nav" id="nav">
-      <a href="index.html"><i class="ti ti-arrow-left"></i> All features</a>
-      <a class="on" style="cursor:default"><i class="ti ti-book-2"></i> Auto Bookkeeping</a>
-    </nav>
-    <div class="foot"><div class="w">…</div><div class="s">Elastic Books</div></div>
-  </aside>
-
-  <main class="main">
-    <div class="top">
-      <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div>
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div id="clientpick" style="position:relative">
-          <button id="clientbtn" class="btn" style="border:1px solid var(--line);font-weight:600"><i class="ti ti-building-store" style="font-size:15px"></i> <span id="clientname">…</span> <i class="ti ti-chevron-down" style="font-size:14px"></i></button>
-          <div id="clientmenu" style="display:none;position:absolute;top:44px;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 12px 32px rgba(0,0,0,.16);min-width:230px;max-height:340px;overflow:auto;padding:6px"></div>
-        </div>
-        <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
-        <button id="settingsbtn" title="Settings" style="background:none;border:1px solid var(--line);border-radius:4px;width:36px;height:36px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center"><i class="ti ti-settings" style="font-size:18px"></i></button>
-        <div class="av">MR</div>
-      </div>
-    </div>
-
-    <div class="wrap">
-      <section id="home">
-        <div class="hero"><div class="spark"></div>
-          <h2 id="herohi">Good morning</h2>
-          <p id="herosub">Ava does the heavy lifting. Here's anything that actually needs you.</p>
-        </div>
-        <details style="margin:-6px 0 18px;">
-          <summary style="cursor:pointer;font-size:12.5px;color:var(--ink2);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-help-circle" style="font-size:15px"></i> How this works</summary>
-          <div class="card" style="padding:14px 16px;margin-top:9px;font-size:13px;color:var(--ink2);line-height:1.65">
-            Ava reads your <b style="color:var(--ink)">inbox, Slack chat and bank lines</b>, files every receipt against the right spend, and gets it ready for your bookkeeping team to reconcile in Xero.<br>
-            <b style="color:var(--ink)">Your only jobs:</b> ① confirm anything Ava's unsure about &nbsp;② send a receipt she can't find — snap a photo here or drop it in your Slack chat &nbsp;③ pay the bills she flags.<br>
-            Everything else — the matching, coding, chasing and reconciling — is handled for you.
-          </div>
-        </details>
-        <div id="mywork" style="margin-bottom:22px"></div>
-        <div class="card" id="rolescard" style="padding:15px 17px;margin-bottom:20px">
-          <div style="font-weight:600;font-size:14px;margin-bottom:3px">Who does what</div>
-          <div style="font-size:12px;color:var(--ink2);margin-bottom:4px">Ava does the most she can, automatically. The few human jobs default to Elastic — hand any of them to someone you've added under Settings.</div>
-          <div id="roleslist"></div>
-        </div>
-        <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:20px">
-          <div class="drop" id="udrop" style="margin-bottom:0">
-            <div class="dz"><i class="ti ti-camera-plus"></i></div>
-            <div style="font-weight:600;font-size:15px">Drop a receipt</div>
-            <div style="font-size:12.5px;color:var(--ink2);margin-top:4px">Snap a photo or drop a file — Ava reads it and files it against the right spend. Or just post it in your Ava Slack channel.</div>
-            <div style="margin-top:13px"><button class="btn btn-p" data-kind="receipt"><i class="ti ti-camera" style="font-size:14px;vertical-align:-2px"></i> Add a receipt</button></div>
-            <input type="file" id="ufile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
-            <span id="uproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
-          </div>
-          <div class="drop" id="xdrop" style="margin-bottom:0;border-style:solid;border-color:#175CD3;background:linear-gradient(180deg,#fff,#F5F8FF)">
-            <div class="dz" style="background:#175CD3"><i class="ti ti-file-spreadsheet"></i></div>
-            <div style="font-weight:600;font-size:15px">Drop the Xero bank lines</div>
-            <div style="font-size:12.5px;color:var(--ink2);margin-top:4px" id="xwho">The unreconciled export — screenshot, PDF, CSV or Excel.</div>
-            <div style="margin-top:13px"><button class="btn" id="bankup" style="border-color:#175CD3;color:#175CD3;font-weight:600"><i class="ti ti-upload" style="font-size:14px;vertical-align:-2px"></i> Upload bank lines</button></div>
-            <input type="file" id="bfile" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">
-            <span id="xproc" style="display:block;font-size:12.5px;color:var(--ink3);margin-top:11px;min-height:16px"></span>
-          </div>
-        </div>
-        <div class="sec" style="color:var(--ink2)">On the way in <span style="font-weight:400;font-size:12px;color:var(--ink3)">· not in your Xero feed yet</span></div>
-        <div class="grid" style="grid-template-columns:repeat(2,minmax(150px,1fr))">
-          <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">bills Ava found in your inbox</div></div>
-          <div class="card stat ufilt" data-filter="pile" style="cursor:pointer"><div class="l"><i class="ti ti-paperclip" style="font-size:16px;color:var(--blu)"></i> Receipt pile</div><div class="n" id="u_pile">—</div><div class="d">your receipts, waiting for their bank line</div></div>
-        </div>
-        <div class="sec" style="color:var(--ink2)">The whole account <span style="font-weight:400;font-size:12px;color:var(--ink3)">· everything Ava, Elastic and you are working</span></div>
-        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
-          <div class="card stat ufilt" data-filter="confirm" style="cursor:pointer"><div class="l"><i class="ti ti-help-circle" style="font-size:16px;color:var(--ind)"></i> Confirm</div><div class="n" id="u_confirm">—</div><div class="d">click through Ava's reads</div></div>
-          <div class="card stat ufilt" data-filter="send" style="cursor:pointer"><div class="l"><i class="ti ti-progress" style="font-size:16px;color:var(--amb)"></i> Needs work</div><div class="n" id="u_send">—</div><div class="d">receipt or action owed</div></div>
-          <div class="card stat ufilt" data-filter="looper" style="cursor:pointer"><div class="l"><i class="ti ti-user-search" style="font-size:16px;color:var(--blu)"></i> With Elastic</div><div class="n" id="u_looper">—</div><div class="d">Elastic is on it</div></div>
-          <div class="card stat ufilt" data-filter="ready" style="cursor:pointer"><div class="l"><i class="ti ti-checks" style="font-size:16px;color:var(--grn)"></i> To reconcile</div><div class="n" id="u_ready">—</div><div class="d">ready — tick off in Xero</div></div>
-          <div class="card stat ufilt" data-filter="reconciled" style="cursor:pointer"><div class="l"><i class="ti ti-circle-check" style="font-size:16px;color:var(--ink3)"></i> Reconciled</div><div class="n" id="u_recon">—</div><div class="d">no action needed</div></div>
-        </div>
-        <div class="sec" id="usechead">Receipts Ava needs from you</div>
-        <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
-      </section>
-
-
-    </div>
-  </main>
+<div class="top">
+  <div class="brand"><div class="logo">E</div><div><div>The Desk <span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:3px;vertical-align:middle">BETA</span></div><div class="sub">Elastic · every client, one screen</div></div></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="whoami" style="font-size:12px;color:#8B8B98"></span>
+    <a id="signout" style="font-size:12px;color:#A7A2F4;cursor:pointer;font-weight:600">Sign out</a>
+  </div>
 </div>
 
-<section id="looperview" style="display:none;max-width:720px;margin:0 auto;padding:26px 22px">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-    <div style="width:40px;height:40px;border-radius:50%;background:#175CD3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600" id="lpinit">A</div>
-    <div style="flex:1"><div style="font-size:19px;font-weight:600" id="lptitle">Your work</div><div style="font-size:13px;color:var(--ink2)" id="lpsum">Loading…</div></div>
-    <a id="lpout" style="font-size:12.5px;color:var(--ink3);cursor:pointer">Sign out</a>
-  </div>
-  <div id="lpchips" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 18px"></div>
-  <div id="lptasks" style="display:flex;flex-direction:column;gap:9px"></div>
-  <div id="lpempty" style="display:none;padding:24px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:5px;font-size:13px">✓ all clear across every client — nothing owed right now.</div>
-  <div style="font-size:12px;color:var(--ink3);margin-top:16px">only the jobs assigned to you show up, pooled from every client. tap one to open that client's board.</div>
-</section>
+<div class="wrap">
+  <div class="sec">Needs Elastic <span class="cnt" id="workhint">loading clients…</span></div>
+  <div id="worklist"></div>
+  <div class="sec" style="margin-top:28px">Quiet <span class="cnt">nothing owed right now</span></div>
+  <div id="quietlist"></div>
+</div>
 
-<div id="loginov" style="position:fixed;inset:0;z-index:200;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="gate">
   <div style="width:100%;max-width:380px;text-align:center">
-    <div style="width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--ind),var(--ind2));margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px">A</div>
-    <div style="font-size:19px;font-weight:600;margin-bottom:5px">Sign in to Ava</div>
-    <div id="logsub" style="font-size:13px;color:var(--ink2);margin-bottom:18px">Enter your email and we'll send you a sign-in link.</div>
-    <input id="logemail" type="email" placeholder="you@company.co.nz" style="width:100%;border:1px solid var(--line);border-radius:4px;padding:12px;font-family:inherit;font-size:14px;box-sizing:border-box;margin-bottom:10px">
-    <button id="logbtn" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Email me a link</button>
-    <div id="logmsg" style="font-size:12.5px;margin-top:10px;min-height:16px"></div>
+    <div style="width:52px;height:52px;border-radius:6px;background:linear-gradient(135deg,var(--ind),var(--ind2));margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px">E</div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:5px">Elastic team sign-in</div>
+    <div style="font-size:13px;color:var(--ink2);margin-bottom:18px">Enter your @elasticadmin email and we'll send a link.</div>
+    <input id="gemail" type="email" placeholder="you@elasticadmin.com" style="width:100%;border:1px solid var(--line);border-radius:3px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:10px">
+    <button id="gbtn" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Email me a link</button>
+    <div id="gmsg" style="font-size:12.5px;margin-top:10px;min-height:16px;color:var(--ink2)"></div>
   </div>
 </div>
+
 <script>
-(function(){
-  function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];});}
-  var FB="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-feedback";
+var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var APP="app.html";
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
+var SKEY="ava_session";
+function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
+var SESSION=getS();
+var CACHE={};
 
-  var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
-  // company comes from the private link (?c=<id>); falls back to KPA for the original demo
-  var KPA=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
-  function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
-  var U_ITEMS=[],U_FILTER="confirm";
-  function needRow(i){
-    var id=i.id;
-    var noR=i.receipt==="not_needed";
-    var head=i.insight?'<div class="g">💡 Ava thinks: '+esc(i.insight)+(i.confidence!=null?'<span class="conf">'+Math.round(i.confidence*100)+'% sure</span>':"")+'</div>'+(i.reasoning?'<div class="w">'+esc(i.reasoning)+'</div>':""):'';
-    // Ava SUGGESTS one side of each toggle (soft "·Ava" glow); a real click locks it SOLID.
-    var kc=i.kind_confirmed, avaP=i.ava_personal;          // kc = user explicitly picked business/personal
-    var bizCls=i.personal?"":(kc?" on":(!avaP?" sug":""));
-    var perCls=i.personal?" on":(kc?"":(avaP?" sug":""));
-    var rLocked=(i.receipt_required===true||i.receipt_required===false); // user set the receipt rule
-    var needsCls=i.receipt==="needed"?(rLocked?" on":" sug"):"";
-    var noCls=i.receipt==="not_needed"?(rLocked?" on":" sug"):"";
-    var cantCls=i.receipt==="cant_find"?" on":"";
-    // Jewel's asks: for-a-job tick (Ava soft-suggests for materials) + GST status
-    var jobSet=(i.is_job===true||i.is_job===false);
-    var jobY=i.is_job===true?" on":(!jobSet&&i.ava_job?" sug":"");
-    var jobN=i.is_job===false?" on":"";
-    var gstY=i.gst===true?" on":"";
-    var gstN=i.gst===false?" on":"";
-    var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:4px':'')+'"><b style="text-transform:capitalize;color:'+(a?'var(--indtx)':'var(--ink)')+'">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
-    var looperBtn=i.looper?'<span class="pill p-ind"><i class="ti ti-user-check" style="font-size:11px;vertical-align:-1px"></i> Our team is on it</span>':'<button class="tbtn" data-fb="looper" data-id="'+id+'"><i class="ti ti-user-search"></i> Get Elastic on it</button>';
-    var hasC=(i.comments||[]).length>0;
-    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div><div style="margin-top:7px">'+looperBtn+'</div></div>';
-    // one labelled row per decision so it's clear what you're answering
-    var jrow=function(label,inner){return '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-top:9px"><span style="font-size:11.5px;color:var(--ink3);width:76px;flex-shrink:0;padding-top:6px">'+label+'</span><div style="display:flex;gap:6px;flex-wrap:wrap">'+inner+'</div></div>';};
-    // The full question set — only needed when the receipt's missing and Ava can't
-    // read the answers herself. Tucked behind "Not quite" so the default is one tap.
-    var qgrid=jrow("Ava right?",'<button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Yes</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> No</button>')
-      +jrow("Type",'<button class="tbtn'+bizCls+'" data-fb="business" data-id="'+id+'">Business</button><button class="tbtn'+perCls+'" data-fb="personal" data-id="'+id+'">Personal</button>')
-      +jrow("Receipt",'<button class="tbtn'+needsCls+'" data-fb="needs_receipt" data-id="'+id+'">Needs one</button><button class="tbtn'+noCls+'" data-fb="no_receipt" data-id="'+id+'">Not needed</button><button class="tbtn'+cantCls+'" data-fb="cant_find" data-id="'+id+'">Can\'t find</button>')
-      +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button><input type="text" class="jref-in" data-id="'+id+'" value="'+esc(i.job_ref||"")+'" placeholder="Job #" title="Which job is this cost for? e.g. KPA-2711" style="width:96px;padding:6px 9px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12px">')
-      +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>');
-    // Ava's best read, stated once — the fast path is a single confirm, not a grid.
-    var typeTxt=i.personal?"personal spend":"a business expense";
-    var jobTxt=(i.is_job===true||(i.is_job!==false&&i.ava_job))?" for a job":"";
-    var gstTxt=i.gst===true?", incl. GST":(i.gst===false?", no GST":"");
-    var read='Looks like '+typeTxt+jobTxt+gstTxt+(i.account?' ('+esc(i.account)+')':'')+'.';
-    // already-confirmed items only owe their paperwork — no "spot on" re-ask
-    var confirmed=(i.feedback==="up"||i.lane==="await_receipt");
-    var lead=confirmed
-      ?(i.receipt_incoming
-        ?'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-mail-forward" style="color:var(--indtx);vertical-align:-2px"></i> Confirmed — this one\'s receipt arrives by email. Ava\'s watching for it; nothing needed from you yet.</div>'
-        :'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed — just needs its receipt.</div>')
-      :'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px">'+read+' <span style="color:var(--ink3)">— right?</span></div>';
-    var fast=confirmed
-      ?('<button class="tbtn" data-attach="'+id+'" style="border-color:var(--ind);color:var(--indtx)"><i class="ti ti-paperclip"></i> Attach receipt</button>'
-        +'<button class="tbtn" data-fb="no_receipt" data-id="'+id+'">Not needed</button>'
-        +'<button class="tbtn" data-fb="cant_find" data-id="'+id+'">Can\'t find it</button>'
-        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
-      :('<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
-        +'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>'
-        +'<button class="tbtn" data-editrow="'+id+'"><i class="ti ti-adjustments-alt"></i> Not quite</button>'
-        +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>');
-    var box='<div class="think">'+head
-      +lead
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+fast+'</div>'
-      +'<input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">'
-      +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
-        +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
-      +cwrap+'</div>';
-    var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.receipt_incoming?'<span class="pill p-ind">receipt on its way</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
-  }
-  function doneRow(i){
-    if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'" title="This is filed as personal (owner drawings). Click if it&#39;s actually a business expense and should go back on the books.">Not personal → business expense</button></div>';}
-    var fl=i.flagged;var lbl=fl?(i.note||"flagged — needs a look"):(i.receipt_url?"receipt attached":i.receipt==="cant_find"?"no receipt — couldn't find it":i.known?"coded · no receipt needed":"no receipt needed");if(i.reconciled)lbl="Reconciled · no action needed";var pl=fl?'<span class="pill p-warn">flagged</span>':'<span class="pill p-ok">ready</span>';var rc=(i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:10px;white-space:nowrap">View ↗</a>':'')+extraLinks(i);var ic=fl?'ti-alert-triangle':'ti-circle-check';var icc=fl?'#d98a00':'var(--grn)';
-    // Ava NEVER reconciles in Xero (safety) — the human does it there; this just tracks it.
-    var xeroLink=(!fl&&(i.reconcilable||i.reconciled))?'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" title="Open Xero to reconcile it / check it there" style="font-size:12px;color:#0E7C93;text-decoration:none;margin-right:10px;white-space:nowrap"><i class="ti ti-external-link" style="font-size:12px;vertical-align:-1px"></i> Xero</a>':'';
-    var recon=i.reconciled?'<span class="pill p-ok" style="margin-right:2px" title="ticked off here — check Xero to confirm it reconciled">reconciled ✓</span>':((!fl&&i.reconcilable)?'<button class="tbtn" data-recon="'+i.id+'" title="Reconcile it in Xero, then tick it off here — Ava doesn\'t touch Xero" style="margin-right:8px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-checks"></i> Mark reconciled</button>':'');
-    var reopen='<button class="tbtn draw" data-reopen="'+i.id+'" title="Send it back to the working queue" style="margin-right:8px"><i class="ti ti-arrow-back-up"></i> Send back</button>';
-    return '<div class="row"><div class="ic"><i class="ti '+ic+'" style="color:'+icc+'"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:'+(fl?'#9a6700':'var(--ink2)')+'">'+lbl+(i.job_ref?(" · "+esc(i.job_ref)):"")+(!fl&&i.account?(" · "+i.account):"")+'</div></div>'+rc+xeroLink+reopen+recon+(i.reconciled?'':pl)+'</div>';}
-  function dueStatus(date){
-    if(!date)return{txt:"to pay",col:"#b42318"};
-    var days=Math.round((new Date(date)-new Date())/864e5);
-    if(days<0)return{txt:"overdue",col:"#b42318"};
-    if(days===0)return{txt:"due today",col:"#b42318"};
-    if(days<=7)return{txt:"due in "+days+"d",col:"#b5630f"};
-    return{txt:"due "+date,col:"#67676e"};
-  }
-  function billRow(i){
-    var id=i.id;var ds=dueStatus(i.date);
-    var rc=i.receipt_url?'<a class="tbtn" href="'+i.receipt_url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-text"></i> View bill</a>':'';
-    var pay=i.pay_url?'<a class="tbtn" href="'+i.pay_url+'" target="_blank" style="text-decoration:none;background:#0e7a50;color:#fff;border-color:#0e7a50"><i class="ti ti-credit-card"></i> Pay this bill ↗</a>':'';
-    var payref=(!i.pay_url&&i.pay_ref)?'<div style="font-size:12px;color:var(--ink2);margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:3px;padding:8px 10px"><b>Pay to:</b> '+esc(i.pay_ref)+'</div>':'';
-    var cmts=(i.comments||[]).map(function(c){var a=c.author==="ava";return '<div style="font-size:12px;margin-top:5px;line-height:1.5;'+(a?'background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:4px':'')+'"><b style="color:'+(a?'var(--indtx)':'var(--ink)')+';text-transform:capitalize">'+(a?'💡 Ava':esc(c.author))+':</b> <span style="color:var(--ink2)">'+esc(c.text)+'</span></div>';}).join("");
-    var hasC=(i.comments||[]).length>0;
-    var cwrap='<div class="cmt-wrap" data-id="'+id+'" style="display:'+(hasC?'block':'none')+';margin-top:8px">'+(cmts?('<div style="margin-bottom:8px">'+cmts+'</div>'):'')+'<div style="display:flex;gap:6px"><input class="cmt-in" data-id="'+id+'" placeholder="Ask Ava about this bill…" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12.5px"><button class="tbtn cmt-send" data-id="'+id+'">Send</button></div></div>';
-    var box='<div class="think">'+(i.insight?'<div class="g">💡 '+esc(i.insight)+'</div>':'')+payref+
-      '<div class="acts">'+pay+'<button class="tbtn" data-fb="paid" data-id="'+id+'"><i class="ti ti-check"></i> Mark paid</button>'+rc+'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+(hasC?' ('+i.comments.length+')':'')+'</button></div>'+
-      '<div class="acts"><button class="tbtn'+(i.feedback==="up"?" on":"")+'" data-fb="up" data-id="'+id+'"><i class="ti ti-thumb-up"></i> Right</button><button class="tbtn'+(i.feedback==="down"?" on":"")+'" data-fb="down" data-id="'+id+'"><i class="ti ti-thumb-down"></i> Nope</button><span class="sep"></span><button class="tbtn draw" data-fb="ignore" data-id="'+id+'"><i class="ti ti-eye-off"></i> Ignore</button><button class="tbtn" data-fb="ignore_always" data-id="'+id+'">Always ignore</button></div>'+cwrap+'</div>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-file-invoice"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.insight||"bill to pay")+'</div></div><span class="pill" style="background:#fdecea;color:'+ds.col+'">'+ds.txt+'</span></div>'+box+'</div>';
-  }
-  function extraLinks(i){return (i.extra_receipts||[]).map(function(x){return '<a class="tbtn" href="'+x.url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-invoice"></i> '+esc(x.filename||"invoice")+'</a>';}).join("");}
-  function pileRow(i){
-    var rc=i.receipt_url?'<a class="tbtn" href="'+i.receipt_url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-text"></i> View receipt</a>':'';
-    var ex=extraLinks(i);
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.</div></div><span class="pill p-ind">waiting</span></div>'+((rc||ex)?('<div class="think"><div class="acts">'+rc+ex+'</div></div>'):'')+'</div>';
-  }
-  function renderHome(){
-    var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
-    var f=U_FILTER,list,htxt,row,empty;
-    if(f==="bills"){list=U_ITEMS.filter(function(i){return i.lane==="to_pay";});htxt="Bills to pay — incoming, not yet paid";row=billRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No bills waiting — Ava is watching your inbox.';}
-    else if(f==="pile"){list=U_ITEMS.filter(function(i){return i.lane==="pile";});htxt="Receipt pile — receipts in hand, waiting for the bank line";row=pileRow;empty='<i class="ti ti-paperclip" style="vertical-align:-2px"></i> Pile is empty — drop a receipt any time and it waits here until its bank line shows up.';}
-    else if(f==="ready"){list=U_ITEMS.filter(function(i){return i.lane==="ready";});htxt="To reconcile — do these in Xero, then tick them off (Ava never touches Xero herself)";row=doneRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing waiting to reconcile right now.';}
-    else if(f==="reconciled"){list=U_ITEMS.filter(function(i){return i.lane==="done";});htxt="Reconciled · no action needed — kept here for reference, clears after a week";row=doneRow;empty="Nothing reconciled in the last week.";}
-    else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With Elastic — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with Elastic right now.';}
-    else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
-    else{list=U_ITEMS.filter(function(i){return i.lane==="guess";});htxt="Confirm — is Ava right? 👍 / 👎 and set the tags";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> All confirmed — nice one.';}
-    if(head)head.textContent=htxt;
-    box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
-    document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
-  }
-  function renderIntg(g){
-    var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
-    box.style.display="block";
-    // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app
-    if(!g.gmail && !g.xero && !g.fergus){
-      box.innerHTML='<div style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link your inbox, Xero and Fergus right here and Ava gets to work.</div><button class="btn btn-p opensettings">Connect accounts</button></div>';
-      return;
-    }
-    function stat(name,ic,col,ok,detail,last){
-      return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
-    }
-    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a class="opensettings" style="font-size:12px;color:var(--ind);cursor:pointer;font-weight:500">Manage in settings</a></div>'+
-      stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
-      stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false)+
-      stat("Fergus","ti-tools","#C2410C",g.fergus,"",true);
-  }
-  document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
-  function loadList(){
-    fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+KPA).then(function(r){return r.json();}).then(function(d){
-      var c=d.counts||{};
-      // reflect the CURRENT client (?c=) everywhere — footer + switcher label. Never
-      // leave the hardcoded "KPA Plumbing" showing when a looper opens another client.
-      if(d.company){CN=d.company;var _cn=document.getElementById("clientname");if(_cn)_cn.textContent=d.company;var _fw=document.querySelector(".side .foot .w");if(_fw)_fw.textContent=d.company;document.title=(window.IS_DEV?"DEV · ":"")+d.company+" · Elastic Books";}
-      U_ITEMS=d.items||[];
-      var nf=function(test){return U_ITEMS.filter(test).length;};
-      var cf=document.getElementById("u_confirm"),sd=document.getElementById("u_send"),rd=document.getElementById("u_ready"),rcn=document.getElementById("u_recon"),lp=document.getElementById("u_looper"),bl=document.getElementById("u_bills"),bt=document.getElementById("u_billstot"),pl=document.getElementById("u_pile");
-      if(cf)cf.textContent=nf(function(i){return i.lane==="guess";});
-      if(pl)pl.textContent=nf(function(i){return i.lane==="pile";});
-      if(sd)sd.textContent=nf(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});
-      if(lp)lp.textContent=nf(function(i){return i.lane==="looper";});
-      if(bl)bl.textContent=nf(function(i){return i.lane==="to_pay";});
-      if(bt){var tot=U_ITEMS.filter(function(i){return i.lane==="to_pay";}).reduce(function(s,i){return s+Math.abs(Number(i.amount)||0);},0);bt.textContent=tot?(uMoney(tot)+" due"):"incoming, unpaid";}
-      if(rd)rd.textContent=nf(function(i){return i.lane==="ready";});
-      if(rcn)rcn.textContent=nf(function(i){return i.lane==="done";});
-      // keep the page still after an action: remember scroll + which edit-grids are open,
-      // then restore — no more jumping around when you tap a button.
-      var _sy=(document.scrollingElement||document.documentElement).scrollTop;
-      var _open=[];document.querySelectorAll(".editgrid").forEach(function(g){if(g.style.display!=="none")_open.push(g.getAttribute("data-id"));});
-      renderHome();renderIntg(d.integrations);renderMyWork();
-      _open.forEach(function(oid){var g=document.querySelector('.editgrid[data-id="'+oid+'"]');if(g)g.style.display="block";});
-      try{(document.scrollingElement||document.documentElement).scrollTop=_sy;}catch(_e){}
-    }).catch(function(){});
-  }
-  document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();});});
-  // action feedback: when something leaves the owner's list, SAY so + allow undo
-  function toast(msg, undoAction, undoId){
-    var t=document.getElementById("avatoast");
-    if(!t){t=document.createElement("div");t.id="avatoast";t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:300;background:#141418;color:#fff;border-radius:4px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw";document.body.appendChild(t);}
-    t.innerHTML='<span>'+msg+'</span>'+(undoAction?'<a id="avaundo" style="color:#A7A2F4;font-weight:700;cursor:pointer;white-space:nowrap">Undo</a>':'');
-    t.style.display="flex";
-    clearTimeout(t._h);t._h=setTimeout(function(){t.style.display="none";},9000);
-    if(undoAction){document.getElementById("avaundo").onclick=function(){t.style.display="none";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:undoId,action:undoAction})}).then(function(){loadList();});};}
-  }
-  var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
-  document.addEventListener("click",function(e){
-    var b=e.target.closest("[data-fb]");
-    if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
-      // 👍 confirm reliably moves the item out of this list — drop it instantly, sync after
-      if(act==="up"&&U_FILTER==="confirm"){
-        U_ITEMS=U_ITEMS.filter(function(i){return i.id!==id;});
-        var card=b.closest(".qitem");if(card){card.style.transition="opacity .15s,transform .15s";card.style.opacity="0";card.style.transform="translateX(8px)";setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},150);}
-        var cm={confirm:"u_confirm",send:"u_send",looper:"u_looper"},cel=document.getElementById(cm[U_FILTER]);if(cel){var n=parseInt(cel.textContent,10);if(!isNaN(n)&&n>0)cel.textContent=n-1;}
-      } else { b.style.opacity=".5"; }
-      var doneMsg={personal:["Filed as personal (Drawings) — nothing more needed. Elastic reconciles it.","business"],
-        no_receipt:["Marked no-receipt-needed — off to Elastic to reconcile.","needs_receipt"],
-        cant_find:["Noted as can't-find — it reconciles anyway, flagged as missing.","needs_receipt"],
-        up:["Confirmed — Ava takes it from here.",null]};
-      var dm=doneMsg[act];if(dm)setTimeout(function(){toast(dm[0],dm[1],id);},400);
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
-    var ct=e.target.closest("[data-cmt]");
-    if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
-    var cs=e.target.closest(".cmt-send");
-    if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";cs.textContent="Ava…";if(inp)inp.value="";
-      fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
-    var er=e.target.closest("[data-editrow]");
-    if(er){var g=document.querySelector('.editgrid[data-id="'+er.getAttribute("data-editrow")+'"]');if(g)g.style.display=g.style.display==="none"?"block":"none";return;}
-    var at=e.target.closest("[data-attach]");
-    if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
-    var rk=e.target.closest("[data-recon]");
-    if(rk){var rid=rk.getAttribute("data-recon");rk.style.opacity=".5";rk.textContent="…";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:rid,action:"reconciled"})}).then(function(r){return r.json();}).then(function(m){if(m&&m.error){rk.style.opacity="1";alert(m.error);}else loadList();}).catch(function(){rk.style.opacity="1";});return;}
-    var rp=e.target.closest("[data-reopen]");
-    if(rp){var pid=rp.getAttribute("data-reopen");rp.style.opacity=".5";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
-  });
-  document.addEventListener("change",function(e){
-    var j=e.target.closest(".jref-in");
-    if(j){fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:j.getAttribute("data-id"),action:"job_ref",job_ref:j.value.trim()})}).catch(function(){});return;}
-    var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
-    var id=f.getAttribute("data-id"),file=f.files[0];f.value="";
-    readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(){loadList();}).catch(function(){});
-  });
-  loadList();
-  var ukind="receipt";
-  document.querySelectorAll("[data-kind]").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();ukind=this.getAttribute("data-kind");document.getElementById("ufile").click();});});
-  function readB64(f){return new Promise(function(res,rej){var rd=new FileReader();rd.onload=function(){res(String(rd.result).split(",")[1]);};rd.onerror=rej;rd.readAsDataURL(f);});}
-  document.getElementById("ufile").addEventListener("change",function(){
-    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;
-    var p=document.getElementById("uproc");this.value="";
-    // process one at a time — a matched line flips to "proposed", so the next
-    // receipt in the batch won't grab the same line.
-    var done=0,matched=0,added=0,fail=0;
-    (function next(idx){
-      if(idx>=files.length){
-        p.style.color="var(--grn)";
-        p.textContent="✓ "+files.length+" file"+(files.length>1?"s":"")+" — "+matched+" matched to a spend, "+added+" filed"+(fail?(", "+fail+" couldn't read"):"");
-        loadList();return;
-      }
-      var f=files[idx];
-      p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+" ("+(idx+1)+"/"+files.length+")…";
-      readB64(f).then(function(b64){
-        return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:ukind,filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});
-      }).then(function(d){
-        if(d&&d.error){fail++;}
-        else{done++;matched+=(d.matched||0);added+=((d.count||0)-(d.matched||0));}
-        next(idx+1);
-      }).catch(function(){fail++;next(idx+1);});
-    })(0);
-  });
+// ── auth: loopers only; dev is open ──
+function boot(){
+  var t=new URLSearchParams(location.search).get("t");
+  if(t){fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
+    .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){localStorage.setItem(SKEY,JSON.stringify({email:d.email,name:d.name,looper:d.looper,companies:d.companies}));}history.replaceState({},"",location.pathname);SESSION=getS();boot();})
+    .catch(function(){history.replaceState({},"",location.pathname);boot();});return;}
+  if(window.IS_DEV&&!SESSION){SESSION={email:"max@elasticadmin.com",name:"Dev looper",looper:true};start();return;}
+  if(!SESSION){document.getElementById("gate").style.display="flex";return;}
+  if(!SESSION.looper){location.replace(APP);return;}
+  start();
+}
+document.getElementById("gbtn").addEventListener("click",function(){
+  var v=(document.getElementById("gemail").value||"").trim().toLowerCase(),m=document.getElementById("gmsg");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.textContent="Enter a valid email.";return;}
+  this.disabled=true;this.textContent="Sending…";var b=this;
+  fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:v,redirect:location.origin+location.pathname.replace(/admin\.html$/,"app.html")})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Email me a link";m.textContent=d&&d.error?d.error:"Check your email — link sent.";})
+    .catch(function(){b.disabled=false;b.textContent="Email me a link";m.textContent="Couldn't send — try again.";});
+});
+document.getElementById("signout").addEventListener("click",function(){localStorage.removeItem(SKEY);location.reload();});
 
-  // ── one board: switch client (open in dev), reconcile, and upload bank lines ──
-  function postJ(u,b){return fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/"+u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json();});}
-  var ACLIENTS="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/admin-clients";
-  var clientBtn=document.getElementById("clientbtn"),clientMenu=document.getElementById("clientmenu"),clientName=document.getElementById("clientname");
-  if(clientBtn){
-    // The switcher lists every client, so it only runs where that's safe. Until real
-    // login lands it's DEV-only; on prod each board stays scoped to its own ?c= link
-    // and we never fetch the client list from a client's browser.
-    if(!window.IS_DEV){var cp=document.getElementById("clientpick");if(cp)cp.style.display="none";}
-    else{
-      clientBtn.addEventListener("click",function(e){e.stopPropagation();clientMenu.style.display=clientMenu.style.display==="none"?"block":"none";});
-      document.addEventListener("click",function(){clientMenu.style.display="none";});
-      fetch(ACLIENTS).then(function(r){return r.json();}).then(function(d){
-        var cs=(d.clients||[]);var cur=cs.filter(function(c){return c.id===KPA;})[0];
-        if(cur){if(clientName)clientName.textContent=cur.name;var fw=document.querySelector(".side .foot .w");if(fw)fw.textContent=cur.name;}
-        clientMenu.innerHTML=cs.map(function(c){var on=c.id===KPA;
-          return '<a href="?c='+c.id+'" style="display:block;padding:8px 11px;border-radius:3px;text-decoration:none;font-size:13px;color:var(--ink);'+(on?'background:var(--indbg);font-weight:600':'')+'">'+esc(c.name)+'</a>';
-        }).join("")||'<div style="padding:10px;font-size:12.5px;color:var(--ink3)">No clients yet.</div>';
-      }).catch(function(){});
-    }
-  }
-
-  // ── who does what: Ava fixed; each human job goes to our looper or a named user ──
-  var ROLES_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/roles";
-  var RUSERS_URL="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/users";
-  var ROLES=null, RUSERS=[];
-  var HUMAN=[
-    {k:"upload",icon:"ti-file-spreadsheet",label:"Drop the Xero reconciliation export",go:"upload",where:"in the drop box below"},
-    {k:"confirm",icon:"ti-checkbox",label:"Confirm Ava's reads",go:"confirm",where:"the Confirm column"},
-    {k:"reconcile",icon:"ti-checks",label:"Reconcile in Xero",go:"ready",where:"the To reconcile column"}
-  ];
-  // colour = who does it: Ava purple, our looper blue, a named user amber
-  var RCOL={ava:"#5B54E6",looper:"#175CD3",user:"#B5630F"};
-  var RBG={ava:"#EEEDFB",looper:"#EFF6FF",user:"#FBF1E2"};
-  // every user gets their own colour (deterministic from email) — avoids Ava's purple + looper's blue
-  var UPAL=["#B5630F","#0E7A50","#B42318","#0E7490","#A21CAF","#C2410C","#4D7C0F","#BE123C"];
-  function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
-  function whoName(cur){if(cur.kind!=="user")return "Elastic";if(/@elasticadmin\.com$/i.test(cur.email||""))return "Elastic";return esc(cur.name||cur.email||"someone");}
-  function renderRoles(){
-    // first wedge is fully looper-run: owners just do their bits — no role juggling.
-    // The card only shows for loopers; roles data still loads (personalises "Your work").
-    var rc=document.getElementById("rolescard");if(rc)rc.style.display=(SESSION&&!SESSION.looper)?"none":"block";
-    var box=document.getElementById("roleslist");if(!box||!ROLES)return;
-    var ava='<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+RCOL.ava+';background:'+RBG.ava+'"><i class="ti ti-sparkles"></i></div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Ava</div><div style="font-size:12px;color:var(--ink2)">reads, matches, codes, checks Gmail, scouts bills — the most she can</div></div><span class="pill" style="background:'+RBG.ava+';color:'+RCOL.ava+'">automatic</span></div>';
-    var rows=HUMAN.map(function(h){
-      var cur=ROLES[h.k]||{kind:"looper"};var isU=cur.kind==="user";var c=isU?userColor(cur.email):RCOL.looper,bg=isU?(c+"1e"):RBG.looper;
-      var opts='<option value="looper"'+(!isU?" selected":"")+'>Elastic (our team)</option>'+RUSERS.map(function(u){return '<option value="user:'+esc(u.email)+'"'+(isU&&cur.email===u.email?" selected":"")+'>'+esc(u.name||u.email)+'</option>';}).join("");
-      var sel='<select class="roleset" data-role="'+h.k+'" style="font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid '+c+';border-radius:3px;background:'+bg+';color:'+c+';font-weight:500;max-width:160px">'+opts+'</select>';
-      var sub='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> · "+h.where+' <a class="rolego" data-go="'+h.go+'" style="color:'+c+';cursor:pointer;font-weight:500;white-space:nowrap">do it →</a>';
-      return '<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)"><div class="ic" style="width:34px;height:34px;font-size:18px;color:'+c+';background:'+bg+'"><i class="ti '+h.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">'+h.label+'</div><div style="font-size:12px;color:var(--ink2)">'+sub+'</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sel+'</div></div>';
-    }).join("");
-    box.innerHTML=ava+rows;
-  }
-  function updateXeroBox(){
-    var cur=(ROLES&&ROLES.upload)||{kind:"looper"};var c=cur.kind==="user"?userColor(cur.email):RCOL.looper;
-    var xd=document.getElementById("xdrop"),dz=xd&&xd.querySelector(".dz"),bu=document.getElementById("bankup"),xw=document.getElementById("xwho");
-    if(xd)xd.style.borderColor=c;if(dz)dz.style.background=c;
-    if(bu){bu.style.borderColor=c;bu.style.color=c;}
-    if(xw)xw.innerHTML='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> — the unreconciled export, screenshot, PDF, CSV or Excel.";
-  }
-  function loadRoles(){
-    Promise.all([
-      fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};}),
-      fetch(RUSERS_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};})
-    ]).then(function(res){ROLES=(res[0]&&res[0].roles)||{};RUSERS=(res[1]&&res[1].users)||[];renderRoles();updateXeroBox();renderMyWork();});
-  }
-  function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
-  loadRoles();
-  document.addEventListener("change",function(e){
-    var s=e.target.closest(".roleset");if(!s)return;var k=s.getAttribute("data-role"),v=s.value;
-    if(v==="looper"){ROLES[k]={kind:"looper"};}
-    else{var em=v.slice(5);var u=RUSERS.filter(function(x){return x.email===em;})[0];ROLES[k]={kind:"user",email:em,name:(u&&u.name)||em};}
-    renderRoles();updateXeroBox();saveRoles();
-  });
-  document.addEventListener("click",function(e){
-    var g=e.target.closest(".rolego,.mwgo");if(!g)return;e.preventDefault();var to=g.getAttribute("data-go");
-    if(to==="upload"){var bf=document.getElementById("bfile");if(bf)bf.click();return;}
-    U_FILTER=to;renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});
-  });
-
-  // ── "your work": just the jobs that need THIS logged-in person ──
-  var SESSION=(function(){try{return JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){return null;}})();
-  function firstName(){var n=(SESSION&&SESSION.name)||((SESSION&&SESSION.email)||"").split("@")[0]||"";n=String(n).split(/[ .]+/)[0];return n?n.charAt(0).toUpperCase()+n.slice(1):"there";}
-  function jobMine(k){if(!SESSION)return true;var r=(ROLES&&ROLES[k])||{kind:"looper"};if(SESSION.looper)return r.kind!=="user";return r.kind==="user"&&r.email===SESSION.email;}
-  function renderMyWork(){
-    var box=document.getElementById("mywork");if(!box||!ROLES)return;
-    var hh=new Date().getHours(),hi=document.getElementById("herohi");if(hi)hi.textContent="Good "+(hh<12?"morning":hh<18?"afternoon":"evening")+", "+firstName();
-    var cnt=function(t){return U_ITEMS.filter(t).length;};
-    var pile=cnt(function(i){return i.lane==="pile";}),conf=cnt(function(i){return i.lane==="guess";}),ready=cnt(function(i){return i.lane==="ready";}),bills=cnt(function(i){return i.lane==="to_pay";});
-    var missing=cnt(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});
-    var owner=!(SESSION&&SESSION.looper);   // the business owner — only they have the receipts Ava can't find
-    var tasks=[];
-    if(owner&&missing>0)tasks.push({c:"#9A5B12",icon:"ti-file-upload",label:"Send the receipts Ava's chasing",sub:missing+" she couldn't find in your inbox — only you have these",go:"send"});
-    if(jobMine("upload")&&pile>0)tasks.push({c:"#175CD3",icon:"ti-file-spreadsheet",label:"Drop the Xero bank lines",sub:pile+" receipt"+(pile>1?"s":"")+" waiting on a bank line",go:"upload"});
-    if(jobMine("confirm")&&conf>0)tasks.push({c:"#B5630F",icon:"ti-checkbox",label:"Confirm Ava's reads",sub:conf+" to check — 👍 or tag them",go:"confirm"});
-    if(jobMine("reconcile")&&ready>0)tasks.push({c:"#0E7A50",icon:"ti-checks",label:"Reconcile payments",sub:ready+" ready to reconcile",go:"ready"});
-    if(owner&&bills>0)tasks.push({c:"#b42318",icon:"ti-file-invoice",label:"Pay bills",sub:bills+" incoming — pay & mark off",go:"bills"});
-    var sub=document.getElementById("herosub");
-    if(!tasks.length){
-      if(sub)sub.textContent="You're all clear — Ava and Elastic have it. We'll flag anything only you can answer.";
-      box.innerHTML='<div class="card" style="padding:17px 18px;display:flex;align-items:center;gap:12px"><div class="ic" style="width:36px;height:36px;color:var(--grn);background:var(--grnbg)"><i class="ti ti-circle-check" style="font-size:19px"></i></div><div><div style="font-weight:600;font-size:14px">Nothing needs you right now</div><div style="font-size:12.5px;color:var(--ink2)">Ava and Elastic are on it — drop a receipt any time.</div></div></div>';
-      return;
-    }
-    if(sub)sub.textContent="Here's what needs you — tap one to jump in.";
-    box.innerHTML='<div class="sec" style="margin:0 0 10px">'+firstName()+'’s work</div><div style="display:flex;flex-direction:column;gap:9px">'+tasks.map(function(t){
-      return '<a class="mwgo" data-go="'+t.go+'" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-left:3px solid '+t.c+';border-radius:4px;padding:13px 15px;cursor:pointer;text-decoration:none"><div class="ic" style="width:36px;height:36px;color:'+t.c+';background:'+t.c+'14"><i class="ti '+t.icon+'" style="font-size:18px"></i></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px;color:var(--ink)">'+t.label+'</div><div style="font-size:12.5px;color:var(--ink2)">'+t.sub+'</div></div><i class="ti ti-chevron-right" style="color:var(--ink3);font-size:18px"></i></a>';
-    }).join("")+'</div>';
-  }
-
-  // Upload the Xero unreconciled export → same read/hunt/code/bills pipeline the desk ran
-  var bankup=document.getElementById("bankup"),bfile=document.getElementById("bfile");
-  if(bankup)bankup.addEventListener("click",function(){bfile.click();});
-  if(bfile)bfile.addEventListener("change",function(){
-    var files=Array.prototype.slice.call(this.files||[]);if(!files.length)return;var p=document.getElementById("xproc");this.value="";
-    var done=0,fail=0,keep=function(){return{};};
-    (function next(idx){
-      if(idx>=files.length){
-        p.style.color="var(--ink3)";p.textContent="Ava is checking the inbox and coding these up…";
-        postJ("chase-code",{company_id:KPA}).catch(keep)
-          .then(function(){return postJ("chase-hunt",{company_id:KPA});}).catch(keep)
-          .then(function(){return postJ("chase-insight",{company_id:KPA});}).catch(keep)
-          .then(function(){return postJ("chase-bills",{company_id:KPA});}).catch(keep)
-          .then(function(){p.style.color="var(--grn)";p.textContent="✓ "+done+" bank line"+(done===1?"":"s")+" read"+(fail?(", "+fail+" couldn't read"):"")+" — see the columns below.";loadList();});
-        return;
-      }
-      var f=files[idx];p.style.color="var(--ink3)";p.textContent="Ava is reading "+f.name+" ("+(idx+1)+"/"+files.length+")…";
-      readB64(f).then(function(b64){return postJ("chase-drop",{company_id:KPA,kind:"bankline",filename:f.name,mime:f.type||"application/octet-stream",file_base64:b64});})
-        .then(function(d){if(d&&d.error)fail++;else done++;next(idx+1);}).catch(function(){fail++;next(idx+1);});
-    })(0);
-  });
-})();
-</script>
-<div id="settingsov" style="position:fixed;inset:0;z-index:80;background:rgba(15,15,20,.45);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:28px 12px">
-  <div style="width:100%;max-width:520px;background:#fff;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)">
-      <div><div style="font-weight:700;font-size:17px">Settings</div><div style="font-size:12.5px;color:var(--ink2)" id="settingsco">Users on this board</div></div>
-      <button id="settingsx" style="background:none;border:none;cursor:pointer;color:var(--ink2);font-size:24px;line-height:1">&times;</button>
-    </div>
-    <div style="padding:16px 20px">
-      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Connections</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">Connect the inboxes Ava scans and your Xero. Add as many inboxes as you like.</div>
-      <div id="intglist"></div>
-      <div style="border-bottom:1px solid var(--line);margin:18px 0"></div>
-      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Users</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone you add can open this board — one login for everyone. Who does which job is set in “Who does what”.</div>
-      <div id="userlist"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-        <input id="uName" placeholder="name" style="flex:1 1 100px;min-width:90px;border:1px solid var(--line);border-radius:3px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
-        <input id="uEmail" placeholder="email" style="flex:1.6 1 150px;min-width:140px;border:1px solid var(--line);border-radius:3px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
-        <button id="uAdd" class="btn btn-p">Add</button>
-      </div>
-      <div id="uMsg" style="font-size:12.5px;color:var(--grn);margin-top:8px;min-height:15px"></div>
-      <div style="font-size:11.5px;color:var(--ink3);margin-top:16px;border-top:1px solid var(--line);padding-top:12px"><i class="ti ti-eye" style="font-size:13px;vertical-align:-2px"></i> Watching every client and how it's tracking lives in <b style="font-weight:600">super admin</b>.</div>
-    </div>
-  </div>
-</div>
-<script>
-(function(){
-  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
-  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
-  var UPAL=["#B5630F","#0E7A50","#B42318","#0E7490","#A21CAF","#C2410C","#4D7C0F","#BE123C"];
-  function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
-  var ov=document.getElementById("settingsov"),list=document.getElementById("userlist"),msg=document.getElementById("uMsg");
-  var sb=document.getElementById("settingsbtn");
-  function seen(ts){
-    if(!ts)return '<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">not signed in yet</span>';
-    var m=Math.round((Date.now()-new Date(ts).getTime())/60000);
-    if(m<5)return '<span style="font-size:11.5px;color:var(--grn);font-weight:500;white-space:nowrap"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--grn);vertical-align:1px;margin-right:4px"></span>online</span>';
-    var lbl=m<60?(m+"m ago"):m<1440?(Math.round(m/60)+"h ago"):(Math.round(m/1440)+"d ago");
-    return '<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">seen '+lbl+'</span>';
-  }
-  function render(us){
-    list.innerHTML=us.length?us.map(function(u){
-      var uc=userColor(u.email);
-      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:'+uc+';background:'+uc+'1e">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div>'+seen(u.last_seen)+'<button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
-    }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
-  }
-  function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
-  function renderIntg(){
-    var g=window.__INTG||{};var box=document.getElementById("intglist");if(!box)return;
-    var inboxes=g.inboxes||[];
-    var inHtml=inboxes.length?inboxes.map(function(e){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><i class="ti ti-mail" style="font-size:16px;color:#EA4335"></i><div style="flex:1;font-size:13.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(e)+'</div><span class="pill p-ok">connected</span></div>';}).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No inbox connected yet — Ava needs at least one to scan.</div>';
-    var addGmail=g.gmail_url?'<a href="'+esc(g.gmail_url)+'" class="btn" style="margin-top:11px;border:1px dashed var(--border-stronger,#c9c9c2)"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Add an inbox</a>':'';
-    var xero='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-calculator" style="font-size:18px;color:#13B5EA"></i><div style="flex:1;font-size:13.5px;font-weight:500">Xero</div>'+(g.xero?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.xero_url?'<a href="'+esc(g.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Xero</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload.</div>';
-    var fergus='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-tools" style="font-size:18px;color:#C2410C"></i><div style="flex:1;font-size:13.5px;font-weight:500">Fergus</div>'+(g.fergus?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.fergus_url?'<a href="'+esc(g.fergus_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Fergus</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">Jobs, quotes and scheduling.</div>';
-    box.innerHTML='<div style="font-size:12px;color:var(--ink2);margin-bottom:2px">Inboxes Ava scans</div>'+inHtml+addGmail+xero+fergus;
-  }
-  if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();renderIntg();});
-  document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
-  ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});
-  document.getElementById("uAdd").addEventListener("click",function(){
-    var name=document.getElementById("uName"),email=document.getElementById("uEmail");
-    var v=(email.value||"").trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){email.style.borderColor="var(--amb)";return;}
-    var b=this;b.disabled=true;b.textContent="…";
-    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,name:name.value,email:v})})
-      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Add";if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;return;}name.value="";email.value="";email.style.borderColor="var(--line)";msg.style.color="var(--grn)";msg.textContent="Added ✓";setTimeout(function(){msg.textContent="";},1500);load();})
-      .catch(function(){b.disabled=false;b.textContent="Add";msg.style.color="var(--amb)";msg.textContent="Couldn't add — try again.";});
-  });
-  list.addEventListener("click",function(e){var r=e.target.closest(".urm");if(!r)return;var id=r.getAttribute("data-id");r.style.opacity=".4";
-    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"remove",id:id})}).then(function(){load();}).catch(function(){r.style.opacity="1";});
-  });
-})();
-</script>
-<div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:2px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>
-<div id="fbpanel" style="position:fixed;right:18px;bottom:124px;z-index:61;width:300px;max-width:calc(100vw - 36px);background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 16px 40px rgba(0,0,0,.22);padding:14px;display:none">
-  <div style="font-weight:600;font-size:14px;margin-bottom:3px">Tell Ava what you think</div>
-  <div style="font-size:12px;color:var(--ink2);margin-bottom:9px">Early beta — what's broken, what's missing, what's shit, what you love. Brutal is welcome.</div>
-  <textarea id="fbtext" rows="4" style="width:100%;border:1px solid var(--line);border-radius:4px;padding:9px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Type away…"></textarea>
-  <button id="fbsend" class="btn btn-p" style="width:100%;margin-top:8px;justify-content:center">Send to the team</button>
-  <div id="fbmsg" style="font-size:12px;color:var(--grn);margin-top:7px;min-height:14px"></div>
-</div>
-<script>
-(function(){
-  var U="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/app-feedback";
-  var ROLE="owner",CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d"),CN="",PG="owner app";
-  var btn=document.getElementById("fbbtn"),panel=document.getElementById("fbpanel"),msg=document.getElementById("fbmsg");
-  btn.addEventListener("click",function(){panel.style.display=panel.style.display==="none"?"block":"none";});
-  document.getElementById("fbsend").addEventListener("click",function(){
-    var t=document.getElementById("fbtext").value.trim();if(!t)return;var b=this;b.disabled=true;b.textContent="Sending…";msg.style.color="var(--grn)";
-    fetch(U,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:CO,company_name:CN,role:ROLE,page:PG,text:t})})
-      .then(function(r){return r.json();}).then(function(){document.getElementById("fbtext").value="";msg.textContent="Thanks — got it. 🙏";b.disabled=false;b.textContent="Send to the team";setTimeout(function(){panel.style.display="none";msg.textContent="";},1600);})
-      .catch(function(){b.disabled=false;b.textContent="Send to the team";msg.style.color="var(--amb)";msg.textContent="Couldn't send — try again.";});
-  });
-})();
-</script>
-<script>
-(function(){
-  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-  var SKEY="ava_session";
-  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
-  function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
-  function setS(s){localStorage.setItem(SKEY,JSON.stringify(s));}
-  function clearS(){localStorage.removeItem(SKEY);}
-  var qs=new URLSearchParams(location.search), hasC=qs.get("c");
-  var appEl=document.querySelector(".app"),loginEl=document.getElementById("loginov"),lpEl=document.getElementById("looperview");
-
-  var TMETA={
-    upload:{c:"#175CD3",icon:"ti-file-spreadsheet",verb:"Drop the Xero export",tail:function(n){return n+" receipt"+(n===1?"":"s")+" waiting on a bank line";}},
-    reconcile:{c:"#0E7A50",icon:"ti-checks",verb:"Reconcile",tail:function(n){return n+" payment"+(n===1?"":"s")+" ready";}},
-    confirm:{c:"#B5630F",icon:"ti-checkbox",verb:"Confirm reads",tail:function(n){return n+" of Ava's reads";}},
-    onboard:{c:"#5B54E6",icon:"ti-plug-connected",verb:"New client — get them started",tail:function(){return "just joined · help them connect their accounts";}}
+// ── the desk ──
+function start(){
+  document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
+  fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
+    var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
+    if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});
+    Promise.all(cs.map(function(c){return fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).then(function(cl){CACHE[c.id]=cl;return {c:c,cl:cl};}).catch(function(){return {c:c,cl:null};});}))
+      .then(renderClients);
+  }).catch(function(){document.getElementById("workhint").textContent="couldn't load clients";});
+}
+function laneCounts(cl){
+  var it=(cl&&cl.items)||[];
+  var n=function(f){return it.filter(f).length;};
+  return {
+    ready:n(function(i){return i.lane==="ready";}),
+    review:n(function(i){return i.lane==="review"||i.lane==="looper";}),
+    owner:n(function(i){return i.lane==="guess"||(i.needs_receipt&&!i.receipt_incoming&&!i.reconciled&&!i.bill&&i.lane!=="review"&&i.lane!=="looper");}),
+    hunting:n(function(i){return i.receipt_incoming;}),
+    pile:n(function(i){return i.lane==="pile";})
   };
-  function tint(hex){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+",.12)";}
-  function renderLooper(sess){
-    document.getElementById("lpinit").textContent=(sess.email||"A")[0].toUpperCase();
-    fetch(API+"/looper-tasks?email="+encodeURIComponent(sess.email)).then(function(r){return r.json();}).then(function(d){
-      var tasks=(d&&d.tasks)||[];
-      var sum=document.getElementById("lpsum"),box=document.getElementById("lptasks"),empty=document.getElementById("lpempty"),chips=document.getElementById("lpchips");
-      var clients={};tasks.forEach(function(t){clients[t.company]=1;});var nc=Object.keys(clients).length;
-      sum.innerHTML=tasks.length?('<b style="font-weight:600;color:var(--ink)">'+tasks.length+'</b> job'+(tasks.length>1?'s':'')+' across <b style="font-weight:600;color:var(--ink)">'+nc+'</b> client'+(nc>1?'s':'')):'nothing owed right now';
-      chips.innerHTML=Object.keys(clients).map(function(c){return '<span style="font-size:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px;color:var(--ink2)">'+esc(c)+'</span>';}).join("");
-      empty.style.display=tasks.length?"none":"block";
-      box.innerHTML=tasks.map(function(t){var m=TMETA[t.type]||TMETA.reconcile;
-        return '<a href="?c='+esc(t.company_id)+'" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 14px;text-decoration:none"><div class="ic" style="width:34px;height:34px;font-size:17px;color:'+m.c+';background:'+tint(m.c)+'"><i class="ti '+m.icon+'"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;color:var(--ink)"><b style="font-weight:600">'+esc(t.company)+'</b> · '+m.verb+'</div><div style="font-size:12px;color:var(--ink2)">'+m.tail(t.count)+'</div></div><i class="ti ti-chevron-right" style="color:var(--ink3);font-size:18px"></i></a>';
-      }).join("");
-    }).catch(function(){document.getElementById("lpsum").textContent="Couldn't load your work.";});
-  }
-
-  function showLogin(m){appEl.style.display="none";lpEl.style.display="none";loginEl.style.display="flex";if(m){var lm=document.getElementById("logmsg");lm.style.color="var(--amb)";lm.textContent=m;}}
-  function showBoard(){loginEl.style.display="none";lpEl.style.display="none";appEl.style.display="";}
-  function showLooper(s){loginEl.style.display="none";appEl.style.display="none";lpEl.style.display="block";renderLooper(s);}
-  function route(){
-    var s=getS();
-    // DEV is open — no login; act as the team looper
-    if(window.IS_DEV && !s){showLooper({email:"max@elasticadmin.com",name:"Dev looper",looper:true});return;}
-    if(!s){showLogin();return;}
-    if(!s.looper){location.replace("app.html"+(location.search||""));return;}  // owners belong on the user app
-    if(!hasC){showLooper(s);return;}   // looper home = the cross-client pile
-    showBoard();                        // looper working one client (?c=)
-  }
-
-  document.getElementById("lpout").addEventListener("click",function(){clearS();location.replace(location.pathname);});
-  document.getElementById("logbtn").addEventListener("click",function(){
-    var i=document.getElementById("logemail"),v=(i.value||"").trim().toLowerCase(),lm=document.getElementById("logmsg"),b=this;
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){lm.style.color="var(--amb)";lm.textContent="Enter a valid email.";return;}
-    b.disabled=true;b.textContent="Sending…";
-    fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:v,redirect:location.origin+location.pathname})})
-      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Email me a link";if(d&&d.error){lm.style.color="var(--amb)";lm.textContent=d.error;return;}lm.style.color="var(--grn)";lm.textContent="Check your email — link sent to "+v+".";})
-      .catch(function(){b.disabled=false;b.textContent="Email me a link";lm.style.color="var(--amb)";lm.textContent="Couldn't send — try again.";});
+}
+function renderClients(rows){
+  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl);return (cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
+  var work="",quiet="",working=0;
+  rows.forEach(function(r){
+    var c=laneCounts(r.cl),name=r.c.name;
+    var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
+    var badges="";
+    if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
+    if(c.review)badges+='<span class="badge b-amb">'+c.review+' check</span> ';
+    if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
+    if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
+    if(!badges)badges='<span class="badge b-mut">all quiet</span>';
+    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
+    if(c.ready||c.review||c.owner||c.pile){work+=html;working++;}else quiet+=html;
   });
+  document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
+  document.getElementById("quietlist").innerHTML=quiet;
+  document.getElementById("workhint").textContent=working+" client"+(working===1?"":"s")+" with work";
+}
+document.addEventListener("click",function(e){
+  var h=e.target.closest(".cohead");
+  if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
+    var open=p.style.display==="block";
+    document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
+    if(!open){p.style.display="block";renderPanel(id);}
+    return;}
+  var b=e.target.closest(".bdrop");
+  if(b){var f=document.querySelector('.bfile[data-id="'+b.getAttribute("data-id")+'"]');if(f)f.click();return;}
+  var r=e.target.closest(".brec");
+  if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");r.disabled=true;r.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
+      .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else refresh(rco);}).catch(function(){r.disabled=false;});
+    return;}
+  var bb=e.target.closest(".bback");
+  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");bb.disabled=true;
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
+      .then(function(){refresh(bco);}).catch(function(){bb.disabled=false;});
+    return;}
+});
+function itemRow(i,actions){
+  var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>':'';
+  var extra=(i.extra_receipts||[]).map(function(x){return '<a href="'+x.url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">'+esc(x.filename)+'</a>';}).join(" ");
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+(i.job_ref?' · <b>'+esc(i.job_ref)+'</b>':"")+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div></div>'+rc+extra+actions+'</div>';
+}
+function renderPanel(id){
+  var p=document.getElementById("p-"+id),cl=CACHE[id];
+  if(!cl){p.innerHTML='<div class="muted">Couldn\'t load this client.</div>';return;}
+  var it=cl.items||[];
+  var ready=it.filter(function(i){return i.lane==="ready";});
+  var review=it.filter(function(i){return i.lane==="review"||i.lane==="looper";});
+  var owner=it.filter(function(i){return i.lane==="guess"||(i.needs_receipt&&!i.receipt_incoming&&!i.reconciled&&!i.bill&&i.lane!=="review"&&i.lane!=="looper");});
+  var hunting=it.filter(function(i){return i.receipt_incoming;}).length;
+  var pile=it.filter(function(i){return i.lane==="pile";}).length;
 
-  var t=qs.get("t");
-  if(t){
-    fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
-      .then(function(r){return r.json();}).then(function(d){
-        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,companies:d.companies});
-        history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
-        route();
-      }).catch(function(){route();});
-  } else { route(); }
-})();
+  var html='<div class="drop"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
+    +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Ava reads every line, matches receipts, and asks the owner the rest.</div>'
+    +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
+    +'<input type="file" class="bfile" data-id="'+id+'" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">'
+    +'<div class="bproc muted" style="margin-top:9px;min-height:15px"></div></div>';
+
+  if(ready.length){html+='<div class="sec" style="margin-top:4px;color:var(--grn)">Ready to reconcile <span class="cnt">do these in Xero, tick off here</span></div><div class="list">'
+    +ready.map(function(i){return itemRow(i,'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" style="font-size:12px;text-decoration:none">Xero ↗</a><button class="btn btn-g brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-checks"></i> Reconciled</button>');}).join("")+'</div>';}
+  if(review.length){html+='<div class="sec" style="color:var(--amb)">Check these <span class="cnt">Ava\'s flagged something off — your call</span></div><div class="list">'
+    +review.map(function(i){return itemRow(i,'<button class="btn brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Looks right — reconciled</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
+  if(owner.length){html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Nothing for you.</span></div><div class="list">'
+    +owner.slice(0,8).map(function(i){return itemRow(i,'');}).join("")
+    +(owner.length>8?'<div class="row muted">…and '+(owner.length-8)+' more</div>':"")+'</div>';}
+  if(hunting||pile){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+(hunting?hunting+' receipt'+(hunting===1?"":"s")+' arriving by email':'')+(hunting&&pile?' · ':'')+(pile?pile+' receipt'+(pile===1?"":"s")+' in the pile waiting for bank lines':'')+'</div>';}
+  html+='<div style="margin-top:14px"><a href="'+APP+'?c='+id+'" style="font-size:12.5px;font-weight:600;text-decoration:none">Open the owner\'s board →</a></div>';
+  p.innerHTML=html;
+}
+document.addEventListener("change",function(e){
+  var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
+  var co=f.getAttribute("data-id"),proc=f.closest(".drop").querySelector(".bproc");
+  var files=Array.prototype.slice.call(f.files);f.value="";
+  var done=0;
+  (function next(idx){
+    if(idx>=files.length){proc.textContent="Ava is hunting Gmail for receipts…";
+      fetch(API+"/chase-hunt",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co})})
+        .then(function(){proc.textContent="Done — "+done+" file"+(done===1?"":"s")+" read.";refresh(co);})
+        .catch(function(){refresh(co);});
+      return;}
+    var file=files[idx];proc.textContent="Ava is reading "+file.name+" ("+(idx+1)+"/"+files.length+")…";
+    var rd=new FileReader();
+    rd.onload=function(){var b64=String(rd.result).split(",")[1];
+      fetch(API+"/chase-drop",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co,kind:"bankline",file_base64:b64,mime:file.type||"application/octet-stream",filename:file.name})})
+        .then(function(){done++;next(idx+1);}).catch(function(){next(idx+1);});};
+    rd.readAsDataURL(file);
+  })(0);
+});
+function refresh(co){
+  fetch(API+"/chase-list?company="+co).then(function(r){return r.json();}).then(function(cl){CACHE[co]=cl;renderPanel(co);});
+}
+boot();
 </script>
 </body>
 </html>
