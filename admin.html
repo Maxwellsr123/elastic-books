@@ -290,7 +290,9 @@ h1{letter-spacing:-.03em}
     // already-confirmed items only owe their paperwork — no "spot on" re-ask
     var confirmed=(i.feedback==="up"||i.lane==="await_receipt");
     var lead=confirmed
-      ?'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed — just needs its receipt.</div>'
+      ?(i.receipt_incoming
+        ?'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-mail-forward" style="color:var(--indtx);vertical-align:-2px"></i> Confirmed — this one\'s receipt arrives by email. Ava\'s watching for it; nothing needed from you yet.</div>'
+        :'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed — just needs its receipt.</div>')
       :'<div style="font-size:13px;color:var(--ink);margin:1px 0 9px">'+read+' <span style="color:var(--ink3)">— right?</span></div>';
     var fast=confirmed
       ?('<button class="tbtn" data-attach="'+id+'" style="border-color:var(--ind);color:var(--indtx)"><i class="ti ti-paperclip"></i> Attach receipt</button>'
@@ -308,7 +310,7 @@ h1{letter-spacing:-.03em}
       +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
         +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
       +cwrap+'</div>';
-    var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
+    var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.receipt_incoming?'<span class="pill p-ind">receipt on its way</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
   }
   function doneRow(i){
