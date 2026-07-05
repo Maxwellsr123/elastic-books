@@ -409,7 +409,7 @@ h1{letter-spacing:-.03em}
     var b=e.target.closest("[data-fb]");
     if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
       // 👍 confirm reliably moves the item out of this list — drop it instantly, sync after
-      if(act==="up"){
+      if(act==="up"&&U_FILTER==="confirm"){
         U_ITEMS=U_ITEMS.filter(function(i){return i.id!==id;});
         var card=b.closest(".qitem");if(card){card.style.transition="opacity .15s,transform .15s";card.style.opacity="0";card.style.transform="translateX(8px)";setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},150);}
         var cm={confirm:"u_confirm",send:"u_send",looper:"u_looper"},cel=document.getElementById(cm[U_FILTER]);if(cel){var n=parseInt(cel.textContent,10);if(!isNaN(n)&&n>0)cel.textContent=n-1;}
