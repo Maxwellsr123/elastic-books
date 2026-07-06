@@ -105,6 +105,14 @@ document.getElementById("gbtn").addEventListener("click",function(){
 document.getElementById("signout").addEventListener("click",function(){localStorage.removeItem(SKEY);location.reload();});
 
 // ── the desk ──
+function toast(msg,undoFn){
+  var t=document.getElementById("dtoast");if(t)t.remove();
+  t=document.createElement("div");t.id="dtoast";
+  t.style.cssText="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#101311;color:#F4F2EA;padding:11px 16px;font-size:13.5px;display:flex;gap:14px;align-items:center;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25)";
+  t.innerHTML="<span>"+msg+"</span>";
+  if(undoFn){var u=document.createElement("a");u.textContent="Undo";u.style.cssText="color:#7FD1A8;font-weight:700;cursor:pointer";u.addEventListener("click",function(){t.remove();undoFn();});t.appendChild(u);}
+  document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},8000);
+}
 function start(){
   document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
   fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
@@ -156,7 +164,8 @@ document.addEventListener("click",function(e){
   var r=e.target.closest(".brec");
   if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");r.disabled=true;r.textContent="…";
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
-      .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else refresh(rco);}).catch(function(){r.disabled=false;});
+      .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else{refresh(rco);
+        toast("Ticked off as reconciled",function(){fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"unreconcile"})}).then(function(){refresh(rco);});});}}).catch(function(){r.disabled=false;});
     return;}
   var sm=e.target.closest(".showmore");
   if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
