@@ -105,6 +105,10 @@ document.getElementById("gbtn").addEventListener("click",function(){
 document.getElementById("signout").addEventListener("click",function(){localStorage.removeItem(SKEY);location.reload();});
 
 // ── the desk ──
+function track(co,act){
+  if(window.IS_DEV||!SESSION||!SESSION.email)return;
+  try{fetch(API+"/desk-track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co,email:SESSION.email,action:act})});}catch(e){}
+}
 function toast(msg,undoFn){
   var t=document.getElementById("dtoast");if(t)t.remove();
   t=document.createElement("div");t.id="dtoast";
@@ -157,12 +161,12 @@ document.addEventListener("click",function(e){
   if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
     var open=p.style.display==="block";
     document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
-    if(!open){p.style.display="block";renderPanel(id);}
+    if(!open){p.style.display="block";renderPanel(id);track(id,"panel_open");}
     return;}
   var b=e.target.closest(".bdrop");
   if(b){var f=document.querySelector('.bfile[data-id="'+b.getAttribute("data-id")+'"]');if(f)f.click();return;}
   var r=e.target.closest(".brec");
-  if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");r.disabled=true;r.textContent="…";
+  if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");track(rco,"reconcile");r.disabled=true;r.textContent="…";
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
       .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else{refresh(rco);
         toast("Ticked off as reconciled",function(){fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"unreconcile"})}).then(function(){refresh(rco);});});}}).catch(function(){r.disabled=false;});
@@ -170,7 +174,7 @@ document.addEventListener("click",function(e){
   var sm=e.target.closest(".showmore");
   if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
   var bb=e.target.closest(".bback");
-  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");bb.disabled=true;
+  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");track(bco,"send_back");bb.disabled=true;
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
       .then(function(){refresh(bco);}).catch(function(){bb.disabled=false;});
     return;}
@@ -216,7 +220,7 @@ function renderPanel(id){
 document.addEventListener("change",function(e){
   var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
   var co=f.getAttribute("data-id"),proc=f.closest(".drop").querySelector(".bproc");
-  var files=Array.prototype.slice.call(f.files);f.value="";
+  var files=Array.prototype.slice.call(f.files);f.value="";track(co,"report_drop");
   var done=0;
   (function next(idx){
     if(idx>=files.length){proc.textContent="Ava is hunting Gmail for receipts…";
