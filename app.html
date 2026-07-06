@@ -154,7 +154,7 @@ h1{letter-spacing:-.03em}
         </div>
         <span class="chip"><i class="ti ti-refresh" style="font-size:14px"></i> Ava sweeps Gmail hourly</span>
         <button id="settingsbtn" title="Settings" style="background:none;border:1px solid var(--line);border-radius:4px;width:36px;height:36px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center"><i class="ti ti-settings" style="font-size:18px"></i></button>
-        <div class="av">MR</div>
+        <div class="av" id="avbtn" title="Sign out" style="cursor:pointer">MR</div>
       </div>
     </div>
 
@@ -553,6 +553,9 @@ h1{letter-spacing:-.03em}
 
   // ── "your work": just the jobs that need THIS logged-in person ──
   var SESSION=(function(){try{return JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){return null;}})();
+  (function(){var a=document.getElementById("avbtn");if(!a)return;
+    if(SESSION&&(SESSION.name||SESSION.email))a.textContent=String(SESSION.name||SESSION.email).trim().split(/[ @]/).map(function(w){return w[0]||"";}).join("").slice(0,2).toUpperCase();
+    a.addEventListener("click",function(){if(confirm("Sign out of Ava on this device?")){localStorage.removeItem("ava_session");location.reload();}});})();
   function firstName(){var n=(SESSION&&SESSION.name)||((SESSION&&SESSION.email)||"").split("@")[0]||"";n=String(n).split(/[ .]+/)[0];return n?n.charAt(0).toUpperCase()+n.slice(1):"there";}
   function jobMine(k){if(!SESSION)return true;var r=(ROLES&&ROLES[k])||{kind:"looper"};if(SESSION.looper)return r.kind!=="user";return r.kind==="user"&&r.email===SESSION.email;}
   function renderMyWork(){if(!document.getElementById("mywork"))return;
