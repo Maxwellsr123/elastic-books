@@ -441,7 +441,7 @@ h1{letter-spacing:-.03em}
     if(j){fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:j.getAttribute("data-id"),action:"job_ref",job_ref:j.value.trim()})}).catch(function(){});return;}
     var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
     var id=f.getAttribute("data-id"),file=f.files[0];f.value="";
-    readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(){loadList();}).catch(function(){});
+    readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(d){if(d&&d.error)alert(d.error);loadList();}).catch(function(){});
   });
   loadList();
   var ukind="receipt";
