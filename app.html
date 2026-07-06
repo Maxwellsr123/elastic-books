@@ -352,18 +352,19 @@ h1{letter-spacing:-.03em}
   function renderIntg(g){
     var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
     box.style.display="block";
-    // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app
+    // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app.
+    // Direct one-click buttons — don't make a brand-new owner find Settings first.
     if(!g.gmail && !g.xero && !g.fergus){
-      box.innerHTML='<div style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link your inbox, Xero and Fergus right here and Ava gets to work.</div><button class="btn btn-p opensettings">Connect accounts</button></div>';
+      box.innerHTML='<div style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link your Xero and inbox right here and Ava gets to work.</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+(g.xero_url?'<a href="'+esc(g.xero_url)+'" class="btn btn-p">Connect Xero</a>':'')+(g.gmail_url?'<a href="'+esc(g.gmail_url)+'" class="btn btn-p">Connect Gmail</a>':'')+'</div><div style="margin-top:11px"><a class="opensettings" style="font-size:12px;color:var(--ind);cursor:pointer;font-weight:500">More options in settings</a></div></div>';
       return;
     }
-    function stat(name,ic,col,ok,detail,last){
-      return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
+    function stat(name,ic,col,ok,detail,last,url){
+      return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(url?'<a href="'+esc(url)+'" class="btn btn-p" style="font-size:12px;padding:6px 13px">Connect</a>':'<span class="pill p-warn">not connected</span>'))+'</div>';
     }
     box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a class="opensettings" style="font-size:12px;color:var(--ind);cursor:pointer;font-weight:500">Manage in settings</a></div>'+
-      stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
-      stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false)+
-      stat("Fergus","ti-tools","#C2410C",g.fergus,"",true);
+      stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false,g.gmail_url)+
+      stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false,g.xero_url)+
+      stat("Fergus","ti-tools","#C2410C",g.fergus,"",true,g.fergus_url);
   }
   document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
   function loadList(){
