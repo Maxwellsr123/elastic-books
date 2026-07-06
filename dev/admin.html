@@ -158,6 +158,8 @@ document.addEventListener("click",function(e){
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
       .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else refresh(rco);}).catch(function(){r.disabled=false;});
     return;}
+  var sm=e.target.closest(".showmore");
+  if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
   var bb=e.target.closest(".bback");
   if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");bb.disabled=true;
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
@@ -190,9 +192,11 @@ function renderPanel(id){
     +ready.map(function(i){return itemRow(i,'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" style="font-size:12px;text-decoration:none">Xero ↗</a><button class="btn btn-g brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-checks"></i> Reconciled</button>');}).join("")+'</div>';}
   if(review.length){html+='<div class="sec" style="color:var(--amb)">Check these <span class="cnt">Ava\'s flagged something off — your call</span></div><div class="list">'
     +review.map(function(i){return itemRow(i,'<button class="btn brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Looks right — reconciled</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
-  if(owner.length){html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Nothing for you.</span></div><div class="list">'
-    +owner.slice(0,8).map(function(i){return itemRow(i,'');}).join("")
-    +(owner.length>8?'<div class="row muted">…and '+(owner.length-8)+' more</div>':"")+'</div>';}
+  if(owner.length){
+    var oRow=function(i){var j={};for(var k in i)j[k]=i[k];if(/low confidence|no candidate|no confident/i.test(String(j.note||"")))j.note="";return itemRow(j,'');};
+    html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Nothing for you.</span></div><div class="list">'
+      +owner.slice(0,8).map(oRow).join("")
+      +(owner.length>8?'<div class="ownermore" id="om-'+id+'" style="display:none">'+owner.slice(8).map(oRow).join("")+'</div><div class="row"><a class="showmore" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+owner.length+' →</a></div>':"")+'</div>';}
   if(hunting||pile){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+(hunting?hunting+' receipt'+(hunting===1?"":"s")+' arriving by email':'')+(hunting&&pile?' · ':'')+(pile?pile+' receipt'+(pile===1?"":"s")+' in the pile waiting for bank lines':'')+'</div>';}
   html+='<div style="margin-top:14px"><a href="'+APP+'?c='+id+'" style="font-size:12.5px;font-weight:600;text-decoration:none">Open the owner\'s board →</a></div>';
   p.innerHTML=html;
