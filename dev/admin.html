@@ -198,6 +198,9 @@ function renderPanel(id){
       +owner.slice(0,8).map(oRow).join("")
       +(owner.length>8?'<div class="ownermore" id="om-'+id+'" style="display:none">'+owner.slice(8).map(oRow).join("")+'</div><div class="row"><a class="showmore" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+owner.length+' →</a></div>':"")+'</div>';}
   if(hunting||pile){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+(hunting?hunting+' receipt'+(hunting===1?"":"s")+' arriving by email':'')+(hunting&&pile?' · ':'')+(pile?pile+' receipt'+(pile===1?"":"s")+' in the pile waiting for bank lines':'')+'</div>';}
+  var ints=cl.integrations||{},ib=ints.inboxes||[];
+  html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
+    +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
   html+='<div style="margin-top:14px"><a href="'+APP+'?c='+id+'" style="font-size:12.5px;font-weight:600;text-decoration:none">Open the owner\'s board →</a></div>';
   p.innerHTML=html;
 }
