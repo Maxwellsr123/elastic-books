@@ -221,7 +221,40 @@ function renderPanel(id){
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
   html+='<div style="margin-top:14px"><a href="'+APP+'?c='+id+'" style="font-size:12.5px;font-weight:600;text-decoration:none">Open the owner\'s board →</a></div>';
+  html+='<div id="feat-'+id+'" class="muted" style="margin-top:12px;padding-top:12px;border-top:1px solid #ECECE4">Checking the other boards…</div>';
   p.innerHTML=html;
+  loadFeatures(id);
+}
+// ── other Ava features for this client (scheduling + reminders) ──
+// Fetched lazily when a panel opens so the desk boot stays 1 request/client.
+var FCACHE={};
+function headBadge(id,cls,label){
+  var head=document.querySelector('.co[data-id="'+id+'"] .cohead');
+  if(!head||head.querySelector('[data-feat="'+cls+'"]'))return;
+  var chev=head.querySelector(".ti-chevron-down");
+  var s=document.createElement("span");s.className="badge "+cls;s.setAttribute("data-feat",cls);s.textContent=label;
+  head.insertBefore(s,chev);head.insertBefore(document.createTextNode(" "),chev);
+}
+function loadFeatures(id){
+  var el=document.getElementById("feat-"+id);
+  var render=function(f){
+    if(!el)return;
+    var bits=[];
+    var sc=f.sched;
+    if(sc&&sc.ok){var open=(sc.counts&&sc.counts.new||0)+(sc.counts&&(sc.counts.wait||sc.counts.waiting)||0);
+      bits.push('<i class="ti ti-calendar-event" style="vertical-align:-2px"></i> Auto Scheduling: '+(open?('<b>'+open+' open</b>'):'quiet')+' &nbsp;<a href="scheduling.html?c='+id+'" style="font-weight:600;text-decoration:none">Open board →</a>');
+      if(open)headBadge(id,"b-amb",open+" to schedule");}
+    var rm=f.rem;
+    if(rm&&rm.ok){var up=rm.counts&&rm.counts.upcoming||0;
+      bits.push('<i class="ti ti-bell" style="vertical-align:-2px"></i> Reminders: '+(up?('<b>'+up+' queued</b>'):'none queued')+' &nbsp;<a href="reminders.html?c='+id+'" style="font-weight:600;text-decoration:none">Open →</a>');}
+    el.innerHTML=bits.length?bits.join(" &nbsp;·&nbsp; "):"";
+    if(!bits.length)el.style.display="none";
+  };
+  if(FCACHE[id])return render(FCACHE[id]);
+  Promise.all([
+    fetch(API+"/ava-schedule-list?company="+id).then(function(r){return r.json();}).catch(function(){return null;}),
+    fetch(API+"/reminders-list?company="+id).then(function(r){return r.json();}).catch(function(){return null;})
+  ]).then(function(rs){FCACHE[id]={sched:rs[0],rem:rs[1]};render(FCACHE[id]);});
 }
 document.addEventListener("change",function(e){
   var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
