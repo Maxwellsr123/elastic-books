@@ -174,9 +174,14 @@ document.addEventListener("click",function(e){
   var sm=e.target.closest(".showmore");
   if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
   var bb=e.target.closest(".bback");
-  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");track(bco,"send_back");bb.disabled=true;
+  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");track(bco,"send_back");bb.disabled=true;bb.textContent="…";
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
-      .then(function(){refresh(bco);}).catch(function(){bb.disabled=false;});
+      .then(function(){refresh(bco);toast("Sent back to the working queue — the owner gets asked again");}).catch(function(){bb.disabled=false;bb.textContent="Send back";});
+    return;}
+  var bc=e.target.closest(".bconf");
+  if(bc){var cid=bc.getAttribute("data-id"),cco=bc.getAttribute("data-co");track(cco,"owner_confirmed");bc.disabled=true;bc.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:cco,id:cid,action:"owner_confirmed"})})
+      .then(function(){refresh(cco);toast("Owner-confirmed — moved to Ready to reconcile");}).catch(function(){bc.disabled=false;bc.textContent="Owner confirmed";});
     return;}
 });
 function itemRow(i,actions){
@@ -202,12 +207,13 @@ function renderPanel(id){
     +'<div class="bproc muted" style="margin-top:9px;min-height:15px"></div></div>';
 
   if(ready.length){html+='<div class="sec" style="margin-top:4px;color:var(--grn)">Ready to reconcile <span class="cnt">do these in Xero, tick off here</span></div><div class="list">'
-    +ready.map(function(i){return itemRow(i,'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" style="font-size:12px;text-decoration:none">Xero ↗</a><button class="btn btn-g brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-checks"></i> Reconciled</button>');}).join("")+'</div>';}
+    +ready.map(function(i){return itemRow(i,'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" style="font-size:12px;text-decoration:none">Xero ↗</a><button class="btn btn-g brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-checks"></i> Reconciled</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" title="Wrong receipt or not actually ready? Send it back to the working queue — the owner gets asked again" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
   if(review.length){html+='<div class="sec" style="color:var(--amb)">Check these <span class="cnt">Ava\'s flagged something off — your call</span></div><div class="list">'
     +review.map(function(i){return itemRow(i,'<button class="btn brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Looks right — reconciled</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
   if(owner.length){
-    var oRow=function(i){var j={};for(var k in i)j[k]=i[k];if(/low confidence|no candidate|no confident/i.test(String(j.note||"")))j.note="";return itemRow(j,'');};
-    html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Nothing for you.</span></div><div class="list">'
+    var oRow=function(i){var j={};for(var k in i)j[k]=i[k];if(/low confidence|no candidate|no confident/i.test(String(j.note||"")))j.note="";
+      return itemRow(j,'<button class="btn bconf" data-id="'+i.id+'" data-co="'+id+'" title="The owner confirmed this outside the app (Slack/phone) and no receipt is coming — moves it to Ready to reconcile" style="padding:6px 11px;font-size:12px"><i class="ti ti-user-check"></i> Owner confirmed</button>');};
+    html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Owner said yes elsewhere? Use the button.</span></div><div class="list">'
       +owner.slice(0,8).map(oRow).join("")
       +(owner.length>8?'<div class="ownermore" id="om-'+id+'" style="display:none">'+owner.slice(8).map(oRow).join("")+'</div><div class="row"><a class="showmore" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+owner.length+' →</a></div>':"")+'</div>';}
   if(hunting||pile){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+(hunting?hunting+' receipt'+(hunting===1?"":"s")+' arriving by email':'')+(hunting&&pile?' · ':'')+(pile?pile+' receipt'+(pile===1?"":"s")+' in the pile waiting for bank lines':'')+'</div>';}
