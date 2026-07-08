@@ -532,9 +532,11 @@ h1{letter-spacing:-.03em}
     if(xw)xw.innerHTML='<span style="color:'+c+';font-weight:500">'+whoName(cur)+"’s job</span> — the unreconciled export, screenshot, PDF, CSV or Excel.";
   }
   function loadRoles(){
+    // users is gated now — send the sign-in token (only owners/loopers get the list back)
+    var tk=(function(){try{return (JSON.parse(localStorage.getItem("ava_session")||"null")||{}).token||"";}catch(e){return "";}})();
     Promise.all([
       fetch(ROLES_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};}),
-      fetch(RUSERS_URL+"?company="+KPA).then(function(r){return r.json();}).catch(function(){return{};})
+      fetch(RUSERS_URL+"?company="+KPA+"&t="+encodeURIComponent(tk)).then(function(r){return r.json();}).catch(function(){return{};})
     ]).then(function(res){ROLES=(res[0]&&res[0].roles)||{};RUSERS=(res[1]&&res[1].users)||[];renderRoles();updateXeroBox();renderMyWork();});
   }
   function saveRoles(){postJ("roles",{company:KPA,roles:ROLES});}
@@ -616,16 +618,19 @@ h1{letter-spacing:-.03em}
       <div style="font-weight:600;font-size:14px;margin-bottom:3px">Connections</div>
       <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">Connect the inboxes Ava scans and your Xero. Add as many inboxes as you like.</div>
       <div id="intglist"></div>
+      <div id="usection">
       <div style="border-bottom:1px solid var(--line);margin:18px 0"></div>
-      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Users</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone you add can open this board — one login for everyone. Who does which job is set in “Who does what”.</div>
+      <div style="font-weight:600;font-size:14px;margin-bottom:3px">Team</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Anyone you add can open this board — they get their sign-in link by email automatically. Who does which job is set in “Who does what”.</div>
       <div id="userlist"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <input id="uName" placeholder="name" style="flex:1 1 100px;min-width:90px;border:1px solid var(--line);border-radius:3px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
         <input id="uEmail" placeholder="email" style="flex:1.6 1 150px;min-width:140px;border:1px solid var(--line);border-radius:3px;padding:9px;font-family:inherit;font-size:13px;box-sizing:border-box">
+        <select id="uRole" style="flex:0 1 auto;border:1px solid var(--line);border-radius:3px;padding:9px;font-family:inherit;font-size:13px;background:#fff;color:var(--ink)"><option value="team" selected>Team</option><option value="bookkeeper">Bookkeeper</option><option value="owner">Owner</option></select>
         <button id="uAdd" class="btn btn-p">Add</button>
       </div>
       <div id="uMsg" style="font-size:12.5px;color:var(--grn);margin-top:8px;min-height:15px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -638,6 +643,13 @@ h1{letter-spacing:-.03em}
   function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
   var ov=document.getElementById("settingsov"),list=document.getElementById("userlist"),msg=document.getElementById("uMsg");
   var sb=document.getElementById("settingsbtn");
+  // team management is owner-only (loopers manage everywhere; dev board stays open)
+  var SESS=(function(){try{return JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){return null;}})();
+  var TK=(SESS&&SESS.token)||"";
+  var MYROLE=SESS?(SESS.looper?"looper":(((SESS.companies||[]).filter(function(c){return c.id===CO;})[0]||{}).role||"")):(window.IS_DEV?"owner":"");
+  var CANMANAGE=window.IS_DEV||MYROLE==="looper"||MYROLE==="owner";
+  var us=document.getElementById("usection");if(us&&!CANMANAGE)us.style.display="none";
+  var ROLELBL={owner:"Owner",bookkeeper:"Bookkeeper",team:"Team",looper:"Elastic"};
   function seen(ts){
     if(!ts)return '<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">not signed in yet</span>';
     var m=Math.round((Date.now()-new Date(ts).getTime())/60000);
@@ -648,10 +660,19 @@ h1{letter-spacing:-.03em}
   function render(us){
     list.innerHTML=us.length?us.map(function(u){
       var uc=userColor(u.email);
-      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:'+uc+';background:'+uc+'1e">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div>'+seen(u.last_seen)+'<button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
+      var rsel=u.role==="looper"
+        ?'<span style="font-size:11.5px;color:var(--ink3);white-space:nowrap">Elastic</span>'
+        :'<select class="uroleset" data-email="'+esc(u.email)+'" data-name="'+esc(u.name||"")+'" style="border:1px solid var(--line);border-radius:3px;padding:4px 6px;font-family:inherit;font-size:12px;background:#fff;color:var(--ink2)">'+["team","bookkeeper","owner"].map(function(r){return '<option value="'+r+'"'+(u.role===r?" selected":"")+'>'+ROLELBL[r]+'</option>';}).join("")+'</select>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><div class="ic" style="width:32px;height:32px;font-size:13px;font-weight:600;color:'+uc+';background:'+uc+'1e">'+esc((u.name||u.email)[0].toUpperCase())+'</div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">'+esc(u.name||u.email)+'</div><div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis">'+esc(u.email)+'</div></div>'+rsel+seen(u.last_seen)+'<button class="urm" data-id="'+u.id+'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1" title="remove">&times;</button></div>';
     }).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one added yet — add the first person below.</div>';
   }
-  function load(){fetch(API+"/users?company="+CO).then(function(r){return r.json();}).then(function(d){render(d.users||[]);}).catch(function(){});}
+  function load(){
+    if(!CANMANAGE)return;
+    fetch(API+"/users?company="+CO+"&t="+encodeURIComponent(TK)).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.error){list.innerHTML='<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">'+esc(d.error)+'</div>';return;}
+      render(d.users||[]);
+    }).catch(function(){});
+  }
   function renderIntg(){
     var g=window.__INTG||{};var box=document.getElementById("intglist");if(!box)return;
     var inboxes=g.inboxes||[];
@@ -665,15 +686,23 @@ h1{letter-spacing:-.03em}
   document.getElementById("settingsx").addEventListener("click",function(){ov.style.display="none";});
   ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});
   document.getElementById("uAdd").addEventListener("click",function(){
-    var name=document.getElementById("uName"),email=document.getElementById("uEmail");
+    var name=document.getElementById("uName"),email=document.getElementById("uEmail"),role=document.getElementById("uRole");
     var v=(email.value||"").trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){email.style.borderColor="var(--amb)";return;}
     var b=this;b.disabled=true;b.textContent="…";
-    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,name:name.value,email:v})})
-      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Add";if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;return;}name.value="";email.value="";email.style.borderColor="var(--line)";msg.style.color="var(--grn)";msg.textContent="Added ✓";setTimeout(function(){msg.textContent="";},1500);load();})
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:TK,company:CO,name:name.value,email:v,role:role.value,redirect:location.origin+location.pathname})})
+      .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Add";if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;return;}name.value="";email.value="";role.value="team";email.style.borderColor="var(--line)";msg.style.color="var(--grn)";msg.textContent=d.invited?"Added ✓ — sign-in link emailed to "+v:"Added ✓";setTimeout(function(){msg.textContent="";},2600);load();})
       .catch(function(){b.disabled=false;b.textContent="Add";msg.style.color="var(--amb)";msg.textContent="Couldn't add — try again.";});
   });
+  list.addEventListener("change",function(e){
+    var s=e.target.closest(".uroleset");if(!s)return;
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:TK,company:CO,name:s.getAttribute("data-name"),email:s.getAttribute("data-email"),role:s.value})})
+      .then(function(r){return r.json();}).then(function(d){if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;}else{msg.style.color="var(--grn)";msg.textContent="Saved ✓";setTimeout(function(){msg.textContent="";},1500);}load();})
+      .catch(function(){msg.style.color="var(--amb)";msg.textContent="Couldn't save — try again.";load();});
+  });
   list.addEventListener("click",function(e){var r=e.target.closest(".urm");if(!r)return;var id=r.getAttribute("data-id");r.style.opacity=".4";
-    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"remove",id:id})}).then(function(){load();}).catch(function(){r.style.opacity="1";});
+    fetch(API+"/users",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:TK,company:CO,action:"remove",id:id})})
+      .then(function(x){return x.json();}).then(function(d){if(d&&d.error){msg.style.color="var(--amb)";msg.textContent=d.error;r.style.opacity="1";return;}load();})
+      .catch(function(){r.style.opacity="1";});
   });
 })();
 </script>
@@ -760,7 +789,7 @@ h1{letter-spacing:-.03em}
   if(t){
     fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
       .then(function(r){return r.json();}).then(function(d){
-        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,companies:d.companies});
+        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,companies:d.companies,token:d.token||t});
         history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
         route();
       }).catch(function(){route();});
