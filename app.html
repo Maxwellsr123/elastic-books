@@ -669,7 +669,18 @@ h1{letter-spacing:-.03em}
   function load(){
     if(!CANMANAGE)return;
     fetch(API+"/users?company="+CO+"&t="+encodeURIComponent(TK)).then(function(r){return r.json();}).then(function(d){
-      if(d&&d.error){list.innerHTML='<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">'+esc(d.error)+'</div>';return;}
+      if(d&&d.error){
+        // pre-token sessions can't see the list — offer the fix right here
+        var can=SESS&&SESS.email;
+        list.innerHTML='<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No-one’s gone anywhere — your sign-in just needs a refresh to show the team.'+(can?' <a id="ulinkfix" style="color:var(--ind);cursor:pointer;font-weight:500">Email me a fresh sign-in link</a>':' Sign in again from your email link.')+'</div>';
+        var a=document.getElementById("ulinkfix");
+        if(a)a.addEventListener("click",function(){a.textContent="Sending…";
+          fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:SESS.email,redirect:location.origin+location.pathname})})
+            .then(function(r){return r.json();}).then(function(){a.textContent="Sent — check "+SESS.email+" ✓";})
+            .catch(function(){a.textContent="Couldn’t send — try again";});
+        });
+        return;
+      }
       render(d.users||[]);
     }).catch(function(){});
   }
