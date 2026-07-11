@@ -323,12 +323,16 @@ h1{letter-spacing:-.03em}
   function extraLinks(i){return (i.extra_receipts||[]).map(function(x){return '<a class="tbtn" href="'+x.url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-invoice"></i> '+esc(x.filename||"invoice")+'</a>';}).join("");}
   function pileRow(i){
     var id=i.id;
-    var rc=i.receipt_url?'<a class="tbtn" href="'+i.receipt_url+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-text"></i> View receipt</a>':'';
-    var ex=extraLinks(i);
+    // ONE proof-of-payment button. Some senders (e.g. Resend) attach both a receipt
+    // AND an invoice for the same charge — both still stored + attached in Xero, but
+    // on the pile card two buttons for the same $ just read as duplicates. Show the
+    // receipt if we have it, else fall back to the first attached doc.
+    var doc=i.receipt_url||((i.extra_receipts||[])[0]||{}).url;
+    var rc=doc?'<a class="tbtn" href="'+doc+'" target="_blank" style="text-decoration:none"><i class="ti ti-file-text"></i> View receipt</a>':'';
     // Ava's inbox scan can occasionally pile a personal/non-business receipt — one
     // click drops it from the pile (chase-feedback → ignored=true, filtered out).
     var ig='<button class="tbtn draw" data-fb="ignore" data-id="'+id+'" title="Not a business expense — remove it from the pile"><i class="ti ti-eye-off"></i> Ignore</button>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.</div></div><span class="pill p-ind">waiting</span></div>'+'<div class="think"><div class="acts">'+rc+ex+ig+'</div></div>'+'</div>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.</div></div><span class="pill p-ind">waiting</span></div>'+'<div class="think"><div class="acts">'+rc+ig+'</div></div>'+'</div>';
   }
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
