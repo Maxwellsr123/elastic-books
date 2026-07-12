@@ -214,7 +214,7 @@ function boot(){
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
 function ago(t){try{var h=Math.round((Date.now()-new Date(t).getTime())/3.6e6);if(h<1)return"just now";if(h<24)return h+"h ago";return Math.round(h/24)+"d ago";}catch(e){return"";}}
 function clock(t){try{var d=new Date(t);return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+", "+d.toLocaleTimeString("en-NZ",{hour:"numeric",minute:"2-digit"}).replace(" ","").toLowerCase();}catch(e){return"";}}
-function crewOpts(sel){return CREW.map(function(c){return '<option value="'+esc(c.slack_id)+'" data-name="'+esc(c.name)+'"'+(sel===c.slack_id?" selected":"")+'>'+esc(c.name)+'</option>';}).join("");}
+function crewOpts(sel){return CREW.map(function(c){var v=c.slack_id||("fergus:"+(c.fergus_id||c.name));return '<option value="'+esc(v)+'" data-name="'+esc(c.name)+'" data-slack="'+esc(c.slack_id||"")+'"'+(sel===v?" selected":"")+'>'+esc(c.name)+(c.slack_id?"":" · not on Slack")+'</option>';}).join("");}
 var ICO={mail:"ti-mail",user:"ti-user",send:"ti-send",message:"ti-message-2",check:"ti-check",x:"ti-x",clock:"ti-clock","calendar-check":"ti-calendar-check"};
 function timeline(tl){if(!tl||!tl.length)return"";return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(s.text)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
 
@@ -227,10 +227,13 @@ function newCard(r){
   var sid=r.suggestion_id||r.id;
   var k=r.kind||"job";
   var title=(r.customer?esc(r.customer)+' — ':'')+esc(r.subject||r.job||'job request');
-  var pick='<div class="acts" id="pick-'+sid+'" style="display:none">'+
+  var rt=esc(r.requested_time||"");
+  var pick='<div class="acts" id="pick-'+sid+'" style="display:none;flex-wrap:wrap">'+
+      (rt?'<div style="flex-basis:100%;font-size:11.5px;color:var(--ink3);margin-bottom:2px"><i class="ti ti-user" style="font-size:11px;vertical-align:-1px"></i> Client asked for <b style="color:var(--ink2)">'+rt+'</b> — seeded below, edit if it doesn’t suit.</div>':'')+
       '<select class="crew-'+sid+'">'+crewOpts()+'</select>'+
-      '<input type="text" class="time-'+sid+'" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
+      '<input type="text" class="time-'+sid+'" value="'+rt+'" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
       '<button class="btn btn-p" onclick="assign(\''+sid+'\')"><i class="ti ti-send"></i> Ask them</button>'+
+      '<button class="btn" onclick="assignAsk(\''+sid+'\')" title="No set time — ask the tradie when they’re free and let their reply set it"><i class="ti ti-clock"></i> Ask when free</button>'+
       '<button class="btn" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'none\'">Cancel</button></div>';
   var buttons;
   if(k==="not_job"){
@@ -253,14 +256,18 @@ function fbRow(r){var sid=r.suggestion_id||r.id;return '<div style="margin-top:7
 function fbk(sid,dir){var c=(dir==="down")?prompt("What should it be? (optional note for Ava)"):null;post({company:CO,action:"feedback",suggestion_id:sid,feedback:dir,comment:c||undefined});}
 function cmt(sid){var c=prompt("Note for Ava:");if(c)post({company:CO,action:"comment",suggestion_id:sid,comment:c});}
 function waitCard(j){
-  var stat=j.tradie_status;
+  var avail=!j.proposed_time; // assigned with no set time — waiting on the tradie's availability
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
     '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
-    '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
-    (j.stage==="confirmed"?'<span class="pill p-ok">confirmed</span>':'<span class="pill p-warn">asked · waiting</span>')+'</div>';
+    '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+(avail?'<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px"></i> asking when they’re free':esc(j.proposed_time||""))+(j.location?' · '+esc(j.location):'')+'</div></div>'+
+    (j.stage==="confirmed"?'<span class="pill p-ok">confirmed</span>':'<span class="pill p-warn">asked · '+(avail?'availability':'waiting')+'</span>')+'</div>';
   var acts;
   if(j.stage==="confirmed"){
     acts='<div class="acts sub"><button class="btn btn-p" onclick="book(\''+j.id+'\')"><i class="ti ti-calendar-check"></i> Book '+esc(j.assigned_to)+' &amp; tell '+esc((j.customer||"customer").split(" ")[0])+'</button></div>';
+  } else if(avail){
+    acts='<div class="acts sub"><span class="muted">Log '+esc(j.assigned_to||"their")+' reply:</span>'+
+      '<button class="btn btn-p" onclick="var t=prompt(\'When are they free?\');if(t)reply(\''+j.id+'\',\'available\',t)"><i class="ti ti-clock-check"></i> They’re free at…</button>'+
+      '<button class="btn" onclick="reply(\''+j.id+'\',\'no\')"><i class="ti ti-x" style="color:var(--red)"></i> Can’t do it</button></div>';
   } else {
     acts='<div class="acts sub"><span class="muted">Log '+esc(j.assigned_to||"their")+' reply:</span>'+
       '<button class="btn" onclick="reply(\''+j.id+'\',\'yes\')"><i class="ti ti-check" style="color:var(--grn)"></i> They said yes</button>'+
@@ -280,14 +287,33 @@ function bookedCard(j){
 }
 function assign(sid){
   var sel=document.querySelector(".crew-"+sid), time=document.querySelector(".time-"+sid);
-  if(!sel||!time.value.trim())return alert("Pick a tradie and a time.");
+  if(!sel||!sel.value)return alert("Pick a tradie.");
+  if(!time.value.trim())return alert("Add a time, or use “Ask when free”.");
   var opt=sel.options[sel.selectedIndex];
-  var card=document.querySelector('[data-sid="'+sid+'"]');
+  var slack=opt.getAttribute("data-slack")||"";
   var name=opt.getAttribute("data-name");
-  if(!confirm("Message "+name+" in your team chat to take this on "+time.value+"?"))return;
-  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:sel.value,tradie_name:name,time:time.value.trim(),
-    job:card?card.querySelector("div[style*='font-weight:600']").textContent.split(" — ").slice(1).join(" — "):"",
-    customer:card?card.querySelector("div[style*='font-weight:600']").textContent.split(" — ")[0]:""};
+  var q=slack?("Message "+name+" in your team chat to take this on "+time.value+"?"):(name+" isn’t on Slack — assign them for "+time.value+" and let them know directly?");
+  if(!confirm(q))return;
+  var card=document.querySelector('[data-sid="'+sid+'"]');
+  var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
+  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:time.value.trim(),
+    job:title?title.split(" — ").slice(1).join(" — "):"",
+    customer:title?title.split(" — ")[0]:""};
+  post(body);
+}
+function assignAsk(sid){
+  var sel=document.querySelector(".crew-"+sid);
+  if(!sel||!sel.value)return alert("Pick a tradie first.");
+  var opt=sel.options[sel.selectedIndex];
+  var slack=opt.getAttribute("data-slack")||"";
+  var name=opt.getAttribute("data-name");
+  var q=slack?("Ask "+name+" in your team chat when they’re free for this? They reply with a time and Ava locks it in."):(name+" isn’t on Slack — assign them and check their availability directly?");
+  if(!confirm(q))return;
+  var card=document.querySelector('[data-sid="'+sid+'"]');
+  var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
+  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,ask_availability:true,
+    job:title?title.split(" — ").slice(1).join(" — "):"",
+    customer:title?title.split(" — ")[0]:""};
   post(body);
 }
 function reply(id,r,nt){post({company:CO,action:"tradie_reply",job_id:id,reply:r,new_time:nt});}
