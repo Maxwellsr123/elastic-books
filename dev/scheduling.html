@@ -261,6 +261,8 @@ function crewOpts(sel){return CREW.map(function(c){var v=c.slack_id||("fergus:"+
 var ICO={mail:"ti-mail",user:"ti-user",send:"ti-send",message:"ti-message-2",check:"ti-check",x:"ti-x",clock:"ti-clock","calendar-check":"ti-calendar-check"};
 function timeline(tl){if(!tl||!tl.length)return"";return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(s.text)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
 
+// Direct link to the Gmail thread the card came from — evidence one click away.
+function mailLink(u){return u?' · <a href="'+esc(u)+'" target="_blank" rel="noopener" style="color:var(--ind);text-decoration:none;white-space:nowrap"><i class="ti ti-mail-share" style="font-size:11px;vertical-align:-1px"></i> email</a>':'';}
 function kindBadge(k){
   if(k==="quote")return '<span class="pill p-warn"><i class="ti ti-file-dollar" style="font-size:11px;vertical-align:-1px"></i> quote first</span>';
   if(k==="not_job")return '<span class="pill" style="background:var(--bg);color:var(--ink3)">not a job?</span>';
@@ -294,7 +296,7 @@ function newCard(r){
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
     (r.availability?'<div style="font-size:11.5px;color:var(--amb,#9a6a12);margin-top:3px"><i class="ti ti-calendar-exclamation" style="font-size:12px;vertical-align:-2px"></i> Client says: <b>'+esc(r.availability)+'</b></div>':'')+
-    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+fbRow(r)+pick+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+mailLink(r.email_link)+'</div>'+fbRow(r)+pick+'</div>'+
     '<div class="rside">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div></div></div>';
 }
 function dismiss(sid){post({company:CO,action:"dismiss",suggestion_id:sid});}
@@ -315,6 +317,7 @@ function updateStrip(j){
     '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
       '<button class="btn btn-p" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'add\')"><i class="ti ti-plus"></i> Add to this job</button>'+
       '<button class="btn" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'dismiss\')">Not related</button>'+
+      ((u.email_link||j.email_link)?'<a class="btn" href="'+esc(u.email_link||j.email_link)+'" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-mail-share"></i> Open email</a>':'')+
     '</div></div>';
 }
 function ackUpdate(jid,sid,mode){post({company:CO,action:"ack_update",job_id:jid,suggestion_id:sid,mode:mode});}
@@ -324,7 +327,7 @@ function waitCard(j){
     var sent=j.stage==="quote_sent";
     var qhead='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-file-dollar"></i></div>'+
       '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
-      '<div class="muted">'+(j.fergus_job?esc(j.fergus_job)+' · ':'')+(sent?'quote sent — Ava\'s watching for their reply':'draft in Fergus — price it, send it, then mark it sent')+'</div></div>'+
+      '<div class="muted">'+(j.fergus_job?esc(j.fergus_job)+' · ':'')+(sent?'quote sent — Ava\'s watching for their reply':'draft in Fergus — price it, send it, then mark it sent')+mailLink(j.email_link)+'</div></div>'+
       (sent?'<span class="pill p-blu">quote · sent</span>':'<span class="pill p-warn">quote · drafted</span>')+'</div>';
     var qacts=sent
       ? '<div class="acts sub"><button class="btn btn-p" onclick="quoteAccepted(\''+j.id+'\')" title="Customer said yes — Ava picks who\'s free and lines up the work"><i class="ti ti-check"></i> Accepted — Ava sort it</button>'+
@@ -336,7 +339,7 @@ function waitCard(j){
   var avail=!j.proposed_time; // assigned with no set time — waiting on the tradie's availability
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
     '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
-    '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+(avail?'<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px"></i> asking when they’re free':esc(j.proposed_time||""))+(j.location?' · '+esc(j.location):'')+'</div></div>'+
+    '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+(avail?'<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px"></i> asking when they’re free':esc(j.proposed_time||""))+(j.location?' · '+esc(j.location):'')+mailLink(j.email_link)+'</div></div>'+
     (j.stage==="confirmed"?'<span class="pill p-ok">confirmed</span>':'<span class="pill p-warn">asked · '+(avail?'availability':'waiting')+'</span>')+'</div>';
   var acts;
   if(j.stage==="confirmed"){
@@ -358,7 +361,7 @@ function bookedCard(j){
   return '<div class="card" style="margin-bottom:14px;padding:16px 18px">'+
     '<div class="bh"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
-    '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
+    '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+mailLink(j.email_link)+'</div></div>'+
     '<div class="bs"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
     updateStrip(j)+timeline(j.timeline)+'</div>';
 }
