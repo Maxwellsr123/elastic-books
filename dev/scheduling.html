@@ -210,7 +210,7 @@ h1{letter-spacing:-.03em}
 // same one-login as the rest of Elastic: the session app.html stores unlocks this page too
 var KPA_DEF="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
 var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-var CO=null,CREW=[],JOBS=[],FERGUS=[],CALWEEK=0;
+var CO=null,CREW=[],JOBS=[],FERGUS=[],CALEVENTS=[],CALWEEK=0;
 // In-app modal + toast — replaces native prompt()/confirm()/alert() (which render
 // as jarring "app.elasticadmin.com says" browser chrome in an odd spot).
 (function(){
@@ -443,6 +443,7 @@ function crewColor(name){var pal=["#5B54E6","#0E7A50","#B4530A","#B42318","#7A5A
 function tint(hex,a){var m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);if(!m)return hex;return "rgba("+parseInt(m[1],16)+","+parseInt(m[2],16)+","+parseInt(m[3],16)+","+a+")";}
 function renderCal(){
   var el=document.getElementById("cal");if(!el)return;
+  closeCalPop();
   var mon=weekMonday(CALWEEK), days=[];
   for(var i=0;i<7;i++){days.push(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i));}
   var weekEnd=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+7);
@@ -451,47 +452,70 @@ function renderCal(){
   var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var h=document.getElementById("cal_hint");
   if(h)h.textContent=days[0].getDate()+"–"+days[6].getDate()+" "+MON[days[6].getMonth()]+(CALWEEK===0?" · this week":"");
-  // Merge Ava's schedule + Fergus's diary. Fergus = source of truth for booked
-  // work (solid); Ava's not-yet-booked jobs show as proposed (dashed). Booked
-  // Ava jobs are hidden when Fergus supplies them, to avoid doubling.
-  var fergusOn=!!(FERGUS&&FERGUS.length), all=[];
-  (JOBS||[]).forEach(function(j){if(!j.start_at)return;if(j.lane==="booked"&&fergusOn)return;all.push({start:new Date(j.start_at),dur:(j.duration_mins||120),who:j.assigned_to,title:String(j.customer||j.job||"job"),tentative:(j.lane!=="booked")});});
-  (FERGUS||[]).forEach(function(e){if(!e.start_at)return;var s=new Date(e.start_at);var du=e.end_at?(new Date(e.end_at)-s)/6e4:60;all.push({start:s,dur:du>0?du:60,who:e.assigned_to,title:String(e.title||"job"),tentative:false});});
-  var evs=all.filter(function(e){return e.start>=mon&&e.start<weekEnd;});
-  var bodyH=(CAL_END_H-CAL_START_H)*CAL_ROW, cols="52px repeat(7,minmax(92px,1fr))";
-  var head='<div style="display:grid;grid-template-columns:'+cols+';border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card,#fff);z-index:2"><div></div>';
-  days.forEach(function(d){var isT=d.getTime()===today.getTime();head+='<div style="text-align:center;padding:7px 4px;font-size:11px;color:'+(isT?"var(--ind)":"var(--ink3)")+';font-weight:'+(isT?"700":"500")+'">'+DOW[d.getDay()===0?6:d.getDay()-1]+' <b style="font-size:13px;color:'+(isT?"var(--ind)":"var(--ink)")+'">'+d.getDate()+'</b></div>';});
+  // Fergus = source of truth (solid); Ava's not-yet-booked jobs = proposed
+  // (dashed). Agenda-per-day: chips stack full-width, no time-grid cramming;
+  // tap a chip for the full detail popover.
+  var fergusOn=!!(FERGUS&&FERGUS.length);
+  CALEVENTS=[];
+  (JOBS||[]).forEach(function(j){if(!j.start_at)return;if(j.lane==="booked"&&fergusOn)return;CALEVENTS.push({start:new Date(j.start_at),dur:(j.duration_mins||120),who:j.assigned_to,title:String(j.customer||j.job||"job"),tentative:(j.lane!=="booked")});});
+  (FERGUS||[]).forEach(function(e){if(!e.start_at)return;var s=new Date(e.start_at);var du=e.end_at?(new Date(e.end_at)-s)/6e4:60;CALEVENTS.push({start:s,dur:du>0?du:60,who:e.assigned_to,title:String(e.title||"job"),tentative:false});});
+  var cols="repeat(7,minmax(112px,1fr))";
+  var head='<div style="display:grid;grid-template-columns:'+cols+';border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card,#fff);z-index:2">';
+  days.forEach(function(d){var isT=d.getTime()===today.getTime();head+='<div style="text-align:center;padding:8px 4px;font-size:11px;color:'+(isT?"var(--ind)":"var(--ink3)")+';font-weight:'+(isT?"700":"500")+'">'+DOW[d.getDay()===0?6:d.getDay()-1]+' <b style="font-size:13px;color:'+(isT?"var(--ind)":"var(--ink)")+'">'+d.getDate()+'</b></div>';});
   head+='</div>';
-  var body='<div style="display:grid;grid-template-columns:'+cols+'">';
-  var gutter='<div style="position:relative;height:'+bodyH+'px">';
-  for(var hr=CAL_START_H;hr<CAL_END_H;hr++){var label=(hr%12||12)+(hr<12?"am":"pm");gutter+='<div style="position:absolute;top:'+((hr-CAL_START_H)*CAL_ROW-6)+'px;right:6px;font-size:10px;color:var(--ink3)">'+label+'</div>';}
-  gutter+='</div>';body+=gutter;
+  var body='<div style="display:grid;grid-template-columns:'+cols+';min-height:96px">';
   days.forEach(function(d){
-    var dayStart=new Date(d.getFullYear(),d.getMonth(),d.getDate()),dayEnd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
-    var col='<div style="position:relative;height:'+bodyH+'px;border-left:1px solid var(--line)'+(d.getTime()===today.getTime()?';background:var(--indbg,#eef2ff)':'')+'">';
-    for(var hr2=CAL_START_H;hr2<CAL_END_H;hr2++)col+='<div style="height:'+CAL_ROW+'px;border-bottom:1px solid var(--line)"></div>';
-    var de=evs.filter(function(e){return e.start>=dayStart&&e.start<dayEnd;}).sort(function(a,b){return a.start-b.start;});
-    var lanes=[];de.forEach(function(e){var em=e.start.getTime()+e.dur*6e4,pl=false;for(var i=0;i<lanes.length;i++){if(e.start.getTime()>=lanes[i]){e._l=i;lanes[i]=em;pl=true;break;}}if(!pl){e._l=lanes.length;lanes.push(em);}});
-    var n=Math.max(1,lanes.length);
-    de.forEach(function(e){
-      var t=e.start,mins=(t.getHours()+t.getMinutes()/60-CAL_START_H)*CAL_ROW;
-      var top=Math.max(0,mins),ht=Math.max(16,Math.min(e.dur/60*CAL_ROW,bodyH-top));
-      var c=crewColor(e.who),tm=(t.getHours()%12||12)+(t.getMinutes()?":"+("0"+t.getMinutes()).slice(-2):"")+(t.getHours()<12?"a":"p");
+    var ds=new Date(d.getFullYear(),d.getMonth(),d.getDate()),de=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+    var col='<div style="padding:7px 6px;border-left:1px solid var(--line)'+(d.getTime()===today.getTime()?';background:var(--indbg,#eef2ff)':'')+'">';
+    var idxs=[];CALEVENTS.forEach(function(e,i){if(e.start>=ds&&e.start<de)idxs.push(i);});
+    idxs.sort(function(a,b){return CALEVENTS[a].start-CALEVENTS[b].start;});
+    idxs.forEach(function(i){
+      var e=CALEVENTS[i],c=crewColor(e.who),t=e.start;
+      var tm=(t.getHours()%12||12)+(t.getMinutes()?":"+("0"+t.getMinutes()).slice(-2):"")+(t.getHours()<12?"am":"pm");
       var who=String(e.who||"").split(" ")[0];
-      var left='calc(3px + '+e._l+' * (100% - 6px)/'+n+')',w='calc((100% - 6px)/'+n+' - 2px)';
-      var bord=e.tentative?'border:1px dashed '+c:'border-left:3px solid '+c;
-      col+='<div title="'+esc(e.title+" · "+who+" · "+tm+(e.tentative?" (proposed)":""))+'" style="position:absolute;top:'+top+'px;height:'+ht+'px;left:'+left+';width:'+w+';background:'+tint(c,e.tentative?0.08:0.16)+';'+bord+';border-radius:4px;padding:1px 4px;font-size:10px;line-height:1.2;color:var(--ink);overflow:hidden;box-sizing:border-box;cursor:default">'
-        +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(tm+" "+e.title)+'</div>'
-        +'<div style="color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(who)+(e.tentative?" · proposed":"")+'</div></div>';
+      var st=e.tentative?"border:1px dashed "+c:"border-left:3px solid "+c;
+      col+='<div class="calchip" data-idx="'+i+'" style="background:'+tint(c,e.tentative?0.08:0.16)+';'+st+';border-radius:5px;padding:4px 7px;margin-bottom:5px;cursor:pointer;box-sizing:border-box">'
+        +'<div style="font-weight:600;font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(tm+" · "+e.title)+'</div>'
+        +'<div style="font-size:10px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(who)+(e.tentative?" · proposed":"")+'</div></div>';
     });
+    if(!idxs.length)col+='<div style="font-size:11px;color:var(--line);text-align:center;padding-top:10px">·</div>';
     col+='</div>';body+=col;
   });
   body+='</div>';
-  el.innerHTML='<div style="min-width:720px">'+head+body+'</div>';
-  var legend=fergusOn?'<div style="padding:8px 14px;font-size:11px;color:var(--ink3);border-top:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ink3);vertical-align:-1px"></span> in Fergus</span><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;border:1px dashed var(--ink3);vertical-align:-1px"></span> proposed — not booked yet</span></div>':'';
-  if(!evs.length)el.innerHTML+='<div style="padding:11px 14px;font-size:12px;color:var(--ink3);border-top:1px solid var(--line)"><i class="ti ti-calendar-off" style="vertical-align:-2px"></i> Nothing on the calendar this week.</div>';
+  el.innerHTML='<div style="min-width:784px">'+head+body+'</div>';
+  var anyEvs=CALEVENTS.some(function(e){return e.start>=mon&&e.start<weekEnd;});
+  var legend=fergusOn?'<div style="padding:8px 14px;font-size:11px;color:var(--ink3);border-top:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ink3);vertical-align:-1px"></span> in Fergus</span><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;border:1px dashed var(--ink3);vertical-align:-1px"></span> proposed — not booked yet</span><span style="color:var(--ink3)">· tap a job for detail</span></div>':'';
+  if(!anyEvs)el.innerHTML+='<div style="padding:11px 14px;font-size:12px;color:var(--ink3);border-top:1px solid var(--line)"><i class="ti ti-calendar-off" style="vertical-align:-2px"></i> Nothing on the calendar this week.</div>';
   else el.innerHTML+=legend;
 }
+function calFmtRange(e){
+  var s=e.start,en=new Date(s.getTime()+e.dur*6e4);
+  var fD=s.toLocaleDateString("en-NZ",{weekday:"short",day:"numeric",month:"short"});
+  var f=function(t){return (t.getHours()%12||12)+(t.getMinutes()?":"+("0"+t.getMinutes()).slice(-2):"")+(t.getHours()<12?"am":"pm");};
+  return fD+" · "+f(s)+"–"+f(en);
+}
+function closeCalPop(){var p=document.getElementById("calpop");if(p&&p.parentNode)p.parentNode.removeChild(p);}
+function showCalPop(chip){
+  closeCalPop();
+  var e=CALEVENTS[+chip.getAttribute("data-idx")];if(!e)return;
+  var c=crewColor(e.who),r=chip.getBoundingClientRect();
+  var pop=document.createElement("div");pop.id="calpop";
+  pop.style.cssText="position:fixed;z-index:1002;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 34px rgba(20,20,24,.18);padding:13px 15px;width:262px;box-sizing:border-box";
+  pop.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:2px;background:'+c+';margin-top:3px;flex:none"></span><div style="font-weight:600;font-size:13px;line-height:1.3;color:var(--ink)">'+esc(e.title)+'</div></div>'
+    +'<div style="font-size:12px;color:var(--ink2);margin-bottom:4px"><i class="ti ti-user" style="font-size:13px;vertical-align:-2px"></i> '+esc(e.who||"Unassigned")+'</div>'
+    +'<div style="font-size:12px;color:var(--ink2);margin-bottom:9px"><i class="ti ti-clock" style="font-size:13px;vertical-align:-2px"></i> '+esc(calFmtRange(e))+'</div>'
+    +'<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;'+(e.tentative?"background:var(--ambbg,#fdf1e3);color:var(--amb,#9a6a12)":"background:var(--grnbg,#e7f6ee);color:var(--grn,#0e7a50)")+'">'+(e.tentative?"Proposed — not booked":"In Fergus")+'</span>';
+  document.body.appendChild(pop);
+  var pw=262,ph=pop.offsetHeight,top=r.bottom+6,left=r.left;
+  if(left+pw>window.innerWidth-8)left=window.innerWidth-pw-8;
+  if(top+ph>window.innerHeight-8)top=r.top-ph-6;
+  pop.style.top=Math.max(8,top)+"px";pop.style.left=Math.max(8,left)+"px";
+}
+document.addEventListener("click",function(ev){
+  var chip=ev.target.closest?ev.target.closest(".calchip"):null;
+  if(chip){ev.stopPropagation();showCalPop(chip);return;}
+  if(!ev.target.closest||!ev.target.closest("#calpop"))closeCalPop();
+});
 boot();
 </script>
 </body>
