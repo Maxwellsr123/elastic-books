@@ -809,6 +809,13 @@ h1{letter-spacing:-.03em}
   function setS(s){localStorage.setItem(SKEY,JSON.stringify(s));}
   function clearS(){localStorage.removeItem(SKEY);}
   var qs=new URLSearchParams(location.search), hasC=qs.get("c");
+  // Gmail OAuth bounces back here with ?gmail=<status> (see gmail-oauth-callback).
+  // Show a confirmation and strip the param so a refresh doesn't repeat it.
+  (function(){var g=qs.get("gmail");if(!g)return;
+    var m=g==="connected"?"✓ Gmail connected — Ava can read this inbox now.":g==="readonly"?"Gmail connected read-only — reconnect and tick every box to let Ava send.":g==="notread"?"Gmail didn't connect properly — reconnect and tick the read box on Google's screen.":"";
+    if(m)setTimeout(function(){try{toast(m);}catch(e){}},900);
+    try{qs.delete("gmail");history.replaceState(null,"",location.pathname+(qs.toString()?"?"+qs.toString():""));}catch(e){}
+  })();
   var appEl=document.querySelector(".app"),loginEl=document.getElementById("loginov"),lpEl=document.getElementById("looperview");
 
   var TMETA={
