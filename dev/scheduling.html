@@ -210,7 +210,7 @@ h1{letter-spacing:-.03em}
 // same one-login as the rest of Elastic: the session app.html stores unlocks this page too
 var KPA_DEF="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
 var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-var CO=null,CREW=[],JOBS=[],FERGUS=[],CALEVENTS=[],CALWEEK=0;
+var CO=null,CREW=[],JOBS=[],FERGUS=[],CALEVENTS=[],CALWEEK=0,OFFICE=null;
 // In-app modal + toast — replaces native prompt()/confirm()/alert() (which render
 // as jarring "app.elasticadmin.com says" browser chrome in an odd spot).
 (function(){
@@ -384,17 +384,42 @@ function renderConns(cn){
     return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px"><span style="width:6px;height:6px;border-radius:50%;background:var(--grn);display:inline-block"></span><i class="ti '+d.icon+'" style="font-size:14px"></i> '+d.name+'</span>';
   }).join("");
 }
+function ohBlock(){
+  var oh=OFFICE||{start:"08:00",end:"17:00",days:[1,2,3,4,5]};
+  var LBL=["Su","Mo","Tu","We","Th","Fr","Sa"];
+  var btns=[1,2,3,4,5,6,0].map(function(d){
+    var on=(oh.days||[]).indexOf(d)>=0;
+    return '<button type="button" class="ohday" data-day="'+d+'" data-on="'+(on?1:0)+'" onclick="ohToggle(this)" style="width:30px;height:28px;border:1px solid '+(on?"var(--ind)":"var(--line)")+';background:'+(on?"var(--ind)":"#fff")+';color:'+(on?"#fff":"var(--ink2)")+';border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">'+LBL[d]+'</button>';
+  }).join("");
+  return '<div style="padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:6px">'+
+    '<div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:8px"><i class="ti ti-clock" style="vertical-align:-2px"></i> Calling hours <span class="muted" style="font-weight:400">— Ava only rings the crew during these hours, never after</span></div>'+
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+      '<input type="time" id="oh-start" value="'+esc(oh.start)+'" style="width:118px">'+
+      '<span class="muted">to</span>'+
+      '<input type="time" id="oh-end" value="'+esc(oh.end)+'" style="width:118px">'+
+      '<span style="display:inline-flex;gap:4px;margin:0 4px">'+btns+'</span>'+
+      '<button class="btn" onclick="saveHours()"><i class="ti ti-device-floppy"></i> Save</button>'+
+    '</div></div>';
+}
+function ohToggle(b){var on=b.getAttribute("data-on")!=="1";b.setAttribute("data-on",on?"1":"0");b.style.background=on?"var(--ind)":"#fff";b.style.color=on?"#fff":"var(--ink2)";b.style.borderColor=on?"var(--ind)":"var(--line)";}
+function saveHours(){
+  var s=(document.getElementById("oh-start")||{}).value||"08:00",e=(document.getElementById("oh-end")||{}).value||"17:00";
+  var days=[];document.querySelectorAll(".ohday").forEach(function(b){if(b.getAttribute("data-on")==="1")days.push(+b.getAttribute("data-day"));});
+  if(!days.length)return avaToast("Pick at least one day.");
+  fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"set_hours",start:s,end:e,days:days})})
+    .then(function(r){return r.json();}).then(function(d){OFFICE=d.office_hours||OFFICE;avaToast("Calling hours saved.");}).catch(function(){avaToast("Couldn't save — try again.");});
+}
 function renderCrew(){
   var el=document.getElementById("crewphones");if(!el)return;
-  if(!CREW.length){el.innerHTML='<div class="muted" style="padding:8px 0">No crew synced yet.</div>';return;}
-  el.innerHTML=CREW.map(function(c){
+  var crew=CREW.length?CREW.map(function(c){
     var noS=c.slack_id?"":' <span class="muted" style="font-size:11px">· not on Slack</span>';
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">'+
       '<div style="flex:1;min-width:0"><div style="font-weight:500">'+esc(c.name)+noS+'</div>'+
       (c.role?'<div class="muted" style="font-size:11.5px">'+esc(String(c.role).replace(/_/g," "))+'</div>':'')+'</div>'+
       '<input type="text" id="ph-'+c.id+'" value="'+esc(c.phone||"")+'" placeholder="021 234 5678" style="width:150px" onkeydown="if(event.key===\'Enter\')savePhone(\''+c.id+'\')">'+
       '<button class="btn" onclick="savePhone(\''+c.id+'\')"><i class="ti ti-device-floppy"></i> Save</button></div>';
-  }).join("");
+  }).join(""):'<div class="muted" style="padding:8px 0">No crew synced yet.</div>';
+  el.innerHTML=ohBlock()+crew;
 }
 function savePhone(id){
   var inp=document.getElementById("ph-"+id);if(!inp)return;
@@ -418,7 +443,7 @@ function load(){
     document.getElementById("s_wait").textContent=c.wait||c.waiting||0;
     document.getElementById("s_booked").textContent=c.booked||0;
     document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
-    renderConns(d.connections);renderCrew();
+    OFFICE=d.office_hours||OFFICE;renderConns(d.connections);renderCrew();
     var jobs=d.jobs||[];
     JOBS=jobs;FERGUS=d.fergus_events||[];renderCal();
     var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
