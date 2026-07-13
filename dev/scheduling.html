@@ -175,6 +175,11 @@ h1{letter-spacing:-.03em}
         <div class="card stat"><div class="l"><i class="ti ti-users" style="color:var(--blu)"></i> Your crew</div><div class="n" id="s_crew" style="font-size:19px">—</div><div class="d">from your team</div></div>
       </div>
 
+      <details class="card" style="margin:14px 0 0;padding:0">
+        <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink2)"><i class="ti ti-phone" style="font-size:16px;color:var(--blu)"></i> Crew &amp; phone numbers <span class="muted" style="font-weight:400">— so Ava can call them if they don’t reply</span></summary>
+        <div id="crewphones" style="border-top:1px solid var(--line);padding:2px 16px 12px"></div>
+      </details>
+
       <div class="sec"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — assign a tradie <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
       <div class="card" id="lane_new"><div class="row"><div style="flex:1" class="muted">Reading your inbox…</div></div></div>
 
@@ -352,6 +357,26 @@ function assignAsk(sid){
   var q=slack?("Ask "+name+" in your team chat when they’re free for this? They reply with a time and Ava locks it in."):(name+" isn’t on Slack — assign them and check their availability directly?");
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
+function renderCrew(){
+  var el=document.getElementById("crewphones");if(!el)return;
+  if(!CREW.length){el.innerHTML='<div class="muted" style="padding:8px 0">No crew synced yet.</div>';return;}
+  el.innerHTML=CREW.map(function(c){
+    var noS=c.slack_id?"":' <span class="muted" style="font-size:11px">· not on Slack</span>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:500">'+esc(c.name)+noS+'</div>'+
+      (c.role?'<div class="muted" style="font-size:11.5px">'+esc(String(c.role).replace(/_/g," "))+'</div>':'')+'</div>'+
+      '<input type="text" id="ph-'+c.id+'" value="'+esc(c.phone||"")+'" placeholder="021 234 5678" style="width:150px" onkeydown="if(event.key===\'Enter\')savePhone(\''+c.id+'\')">'+
+      '<button class="btn" onclick="savePhone(\''+c.id+'\')"><i class="ti ti-device-floppy"></i> Save</button></div>';
+  }).join("");
+}
+function savePhone(id){
+  var inp=document.getElementById("ph-"+id);if(!inp)return;
+  fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"set_phone",member_id:id,phone:inp.value.trim()})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){if(d.phone)inp.value=d.phone;var m=CREW.filter(function(x){return x.id===id;})[0];if(m)m.phone=d.phone||null;avaToast(d.phone?("Saved · "+d.phone):"Number cleared");}
+      else avaToast((d&&d.error)||"Couldn’t save");
+    }).catch(function(){avaToast("Couldn’t save — try again.");});
+}
 function freeAt(id){avaPrompt("When are they free?",function(t){if(t)reply(id,"available",t);},{placeholder:"e.g. Thu 2pm"});}
 function askNewTime(id){avaPrompt("New time they offered?",function(t){if(t)reply(id,"reschedule",t);},{placeholder:"e.g. Fri 8am"});}
 function reply(id,r,nt){post({company:CO,action:"tradie_reply",job_id:id,reply:r,new_time:nt});}
@@ -366,6 +391,7 @@ function load(){
     document.getElementById("s_wait").textContent=c.wait||c.waiting||0;
     document.getElementById("s_booked").textContent=c.booked||0;
     document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
+    renderCrew();
     var jobs=d.jobs||[];
     var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
     var ord={job:0,quote:1,not_job:2};
