@@ -297,7 +297,9 @@ function newCard(r){
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
     (r.availability?'<div style="font-size:11.5px;color:var(--amb,#9a6a12);margin-top:3px"><i class="ti ti-calendar-exclamation" style="font-size:12px;vertical-align:-2px"></i> Client says: <b>'+esc(r.availability)+'</b></div>':'')+
     '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+mailLink(r.email_link)+'</div>'+fbRow(r)+pick+'</div>'+
-    '<div class="rside">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div></div></div>';
+    '<div class="rside">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div>'+
+    ((k==="quote"||k==="job")?'<a onclick="setKind(\''+sid+'\',\''+(k==="quote"?"job":"quote")+'\')" title="Ava learns from this — that sender will classify right next time" style="font-size:11px;color:var(--ink3);cursor:pointer;text-decoration:underline dotted;text-align:right">wrong? it\'s a '+(k==="quote"?"booking":"quote")+'</a>':'')+
+    '</div></div>';
 }
 function dismiss(sid){post({company:CO,action:"dismiss",suggestion_id:sid});}
 function setKind(sid,kind){post({company:CO,action:"set_kind",suggestion_id:sid,kind:kind});}
