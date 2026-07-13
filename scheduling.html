@@ -285,7 +285,7 @@ function newCard(r){
     buttons='<button class="btn" onclick="dismiss(\''+sid+'\')" title="Not a job — clear it"><i class="ti ti-x"></i></button>'+
             '<button class="btn btn-p" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
   }
-  return '<div class="row" data-sid="'+sid+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
+  return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
     '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+fbRow(r)+pick+'</div>'+
@@ -352,11 +352,12 @@ function assign(sid){
   var slack=opt.getAttribute("data-slack")||"";
   var name=opt.getAttribute("data-name"), t=time.value.trim();
   var card=document.querySelector('[data-sid="'+sid+'"]');
+  var kind=card?card.getAttribute("data-kind"):"";
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
-  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:t,
+  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:t,kind:kind,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
-  var q=slack?("Message "+name+" in your team chat to take this on "+t+"?"):(name+" isn’t on Slack — assign them for "+t+" and let them know directly?");
+  var q=slack?("Message "+name+" in your team chat to "+(kind==="quote"?"quote this":"take this on")+" "+t+"?"):(name+" isn’t on Slack — assign them "+(kind==="quote"?"to quote this":"for "+t)+" and let them know directly?");
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
 function assignAsk(sid){
@@ -366,11 +367,12 @@ function assignAsk(sid){
   var slack=opt.getAttribute("data-slack")||"";
   var name=opt.getAttribute("data-name");
   var card=document.querySelector('[data-sid="'+sid+'"]');
+  var kind=card?card.getAttribute("data-kind"):"";
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
-  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,ask_availability:true,
+  var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,ask_availability:true,kind:kind,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
-  var q=slack?("Ask "+name+" in your team chat when they’re free for this? They reply with a time and Ava locks it in."):(name+" isn’t on Slack — assign them and check their availability directly?");
+  var q=slack?("Ask "+name+" in your team chat when they can "+(kind==="quote"?"fit in a quote visit":"do this")+"? They reply with a time and Ava "+(kind==="quote"?"sets up the quote.":"locks it in.")):(name+" isn’t on Slack — assign them and check their availability directly?");
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
 function renderConns(cn){
