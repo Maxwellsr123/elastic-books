@@ -231,9 +231,8 @@ function newCard(r){
   var pick='<div class="acts" id="pick-'+sid+'" style="display:none;flex-wrap:wrap">'+
       (rt?'<div style="flex-basis:100%;font-size:11.5px;color:var(--ink3);margin-bottom:2px"><i class="ti ti-user" style="font-size:11px;vertical-align:-1px"></i> Client asked for <b style="color:var(--ink2)">'+rt+'</b> — seeded below, edit if it doesn’t suit.</div>':'')+
       '<select class="crew-'+sid+'">'+crewOpts()+'</select>'+
-      '<input type="text" class="time-'+sid+'" value="'+rt+'" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
-      '<button class="btn btn-p" onclick="assign(\''+sid+'\')"><i class="ti ti-send"></i> Ask them</button>'+
-      '<button class="btn" onclick="assignAsk(\''+sid+'\')" title="No set time — ask the tradie when they’re free and let their reply set it"><i class="ti ti-clock"></i> Ask when free</button>'+
+      '<input type="text" class="time-'+sid+'" value="'+rt+'" oninput="schedBtn(\''+sid+'\')" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
+      '<button class="btn btn-p" id="askbtn-'+sid+'" onclick="schedGo(\''+sid+'\')" title="With a time, asks them to confirm it. Clear it to ask when they’re free.">'+(rt?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free')+'</button>'+
       '<button class="btn" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'none\'">Cancel</button></div>';
   var buttons;
   if(k==="not_job"){
@@ -285,6 +284,8 @@ function bookedCard(j){
     '<div class="bs"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
     timeline(j.timeline)+'</div>';
 }
+function schedBtn(sid){var t=document.querySelector(".time-"+sid),b=document.getElementById("askbtn-"+sid);if(!t||!b)return;b.innerHTML=t.value.trim()?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free';}
+function schedGo(sid){var t=document.querySelector(".time-"+sid);if(t&&t.value.trim())assign(sid);else assignAsk(sid);}
 function assign(sid){
   var sel=document.querySelector(".crew-"+sid), time=document.querySelector(".time-"+sid);
   if(!sel||!sel.value)return alert("Pick a tradie.");
