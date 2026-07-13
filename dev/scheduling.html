@@ -286,7 +286,8 @@ function newCard(r){
             '<button class="btn" onclick="dismiss(\''+sid+'\')"><i class="ti ti-x"></i> Clear</button>';
   } else {
     buttons='<button class="btn" onclick="dismiss(\''+sid+'\')" title="Not a job — clear it"><i class="ti ti-x"></i></button>'+
-            '<button class="btn btn-p" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
+            (k==="job"?'<button class="btn btn-p" id="avasort-'+sid+'" onclick="avaSort(\''+sid+'\')" title="Ava picks who\'s free next, asks them in the team chat, and books it on their 👍 — no more clicks"><i class="ti ti-sparkles"></i> Ava sort it</button>':'')+
+            '<button class="btn'+(k==="quote"?' btn-p':'')+'" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
   }
   return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" data-avoid="'+esc((r.avoid_days||[]).join(","))+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
@@ -345,6 +346,19 @@ function bookedCard(j){
     '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
     '<div class="bs"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
     updateStrip(j)+timeline(j.timeline)+'</div>';
+}
+// The zero-touch button: Ava confirms the triage, picks who's free next off the
+// merged calendar (honouring the client's time + avoid-days + duration), and
+// fires the ask — the tradie's 👍 books it. Max's only touch was this click.
+function avaSort(sid){
+  var btn=document.getElementById("avasort-"+sid);
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Ava’s picking…';}
+  fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"auto_assign",suggestion_id:sid})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok&&d.picked){avaToast("Ava asked "+String(d.picked.name||"the crew").split(" ")[0]+" — "+(d.picked.phrase||"")+". Their 👍 books it.");}
+      else avaToast((d&&d.error)||"Couldn’t auto-assign — pick manually.");
+      load();
+    }).catch(function(){avaToast("Couldn’t auto-assign — try again.");load();});
 }
 function schedBtn(sid){var t=document.querySelector(".time-"+sid),b=document.getElementById("askbtn-"+sid);if(!t||!b)return;b.innerHTML=t.value.trim()?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free';}
 function schedGo(sid){var t=document.querySelector(".time-"+sid);if(t&&t.value.trim())assign(sid);else assignAsk(sid);}
