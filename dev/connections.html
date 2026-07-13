@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connections — Elastic AI</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){document.title="DEV · "+document.title;});</script>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;--ind:#5B54E6;--indbg:#EEEDFB;--indtx:#3D36C4;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#5B54E6,#7B74EE);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.brand{font-weight:600}.brand span{color:var(--ink3);font-weight:400}
+.back{margin-left:auto;font-size:13px;color:var(--ink2);text-decoration:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:5px}
+h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
+.lede{color:var(--ink2);font-size:14px;line-height:1.55;margin-bottom:22px;max-width:560px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-bottom:14px}
+.hd{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.hd .ic{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.hd .t{font-weight:600;font-size:15.5px}
+.sub{color:var(--ink2);font-size:12.5px;line-height:1.5;margin:0 0 4px 45px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:.02em}
+.p-ok{background:var(--grnbg);color:var(--grn)}
+.p-off{background:#f1f1ec;color:var(--ink3)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 13px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn-p{background:var(--ind);color:#fff;border-color:var(--ind)}
+.ti{font-style:normal}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="logo">E</div><div class="brand">Elastic AI <span>· back office</span></div><a class="back" href="index.html"><i class="ti ti-arrow-left"></i> Home</a></div>
+  <h1>Connections</h1>
+  <p class="lede">Connect the tools Ava works with. You set these up once here — they power every feature: Auto Bookkeeping, Auto Scheduling and more.</p>
+  <div id="conn"><div class="card"><div class="sub" style="margin-left:0">Loading your connections…</div></div></div>
+</div>
+
+<div id="gate" style="display:none;position:fixed;inset:0;background:rgba(247,247,244,.98);z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="max-width:360px;text-align:center">
+    <div class="logo" style="width:52px;height:52px;font-size:24px;margin:0 auto 14px"></div>
+    <div style="font-weight:600;font-size:16px;margin-bottom:6px">Sign in to manage connections</div>
+    <div id="gatemsg" style="font-size:13px;color:var(--ink2);line-height:1.55;margin-bottom:16px"></div>
+    <a href="app.html" class="btn btn-p" style="padding:10px 16px">Open your board →</a>
+  </div>
+</div>
+
+<script>
+var KPA_DEF="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var CO=null;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function gate(m){document.getElementById("gate").style.display="flex";document.getElementById("gatemsg").textContent=m;}
+function toast(msg){var t=document.getElementById("ctoast");if(!t){t=document.createElement("div");t.id="ctoast";t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#141418;color:#fff;font-size:13px;font-weight:500;padding:11px 16px;border-radius:6px;box-shadow:0 6px 24px rgba(20,20,24,.25);z-index:1001;opacity:0;transition:opacity .18s;max-width:90vw;text-align:center";document.body.appendChild(t);}t.textContent=msg;t.style.opacity="1";clearTimeout(t._h);t._h=setTimeout(function(){t.style.opacity="0";},3200);}
+
+// Gmail OAuth bounces back here (or to app.html) with ?gmail=<status>.
+(function(){var g=new URLSearchParams(location.search).get("gmail");if(!g)return;
+  var m=g==="connected"?"✓ Gmail connected — Ava can read this inbox now.":g==="readonly"?"Gmail connected read-only — reconnect and tick every box to let Ava send.":g==="notread"?"Gmail didn't connect properly — reconnect and tick the read box on Google's screen.":"";
+  if(m)setTimeout(function(){toast(m);},700);
+  try{var qs=new URLSearchParams(location.search);qs.delete("gmail");history.replaceState(null,"",location.pathname+(qs.toString()?"?"+qs.toString():""));}catch(e){}
+})();
+
+function render(g){
+  g=g||{};window.__INTG=g;
+  var box=document.getElementById("conn");
+  // ── Inboxes ──
+  var inboxes=(g.inboxes||[]).map(function(e){
+    return '<div class="row"><i class="ti ti-mail" style="color:#EA4335;font-size:17px"></i><div style="flex:1;font-weight:500">'+esc(e)+'</div><span class="pill p-ok">CONNECTED</span></div>';
+  }).join("");
+  var addGmail='<button type="button" class="btn gmailconnect" data-gmailurl="'+esc(g.gmail_url||"")+'" data-dwdid="'+esc(g.gmail_dwd_client_id||"")+'" data-dwdscope="'+esc(g.gmail_dwd_scope||"")+'" data-dwdurl="'+esc(g.gmail_dwd_admin_url||"")+'" style="margin-top:12px;border:1px dashed var(--border-stronger)"><i class="ti ti-plus"></i> Add an inbox</button>';
+  var gmailCard='<div class="card"><div class="hd"><div class="ic" style="background:#FDECEA;color:#EA4335"><i class="ti ti-mail"></i></div><div class="t">Inboxes Ava scans</div></div>'
+    +'<div class="sub">Ava reads these for bills and receipts — and hunts the ones you\'re missing. Read + send only, never edits or deletes. Add as many as you like.</div>'
+    +(inboxes||'<div class="row" style="color:var(--ink3);font-size:13px">No inbox connected yet.</div>')+addGmail+'</div>';
+  // ── Xero ──
+  var xeroBtn=g.xero?'<span class="pill p-ok">CONNECTED</span>':(g.xero_url?'<a class="btn btn-p" href="'+esc(g.xero_url)+'">Connect Xero</a>':'<span style="font-size:12px;color:var(--ink3)">Ask Elastic to connect Xero</span>');
+  var xeroCard='<div class="card"><div class="hd"><div class="ic" style="background:#E7F6FB;color:#13B5EA"><i class="ti ti-calculator"></i></div><div class="t" style="flex:1">Xero</div>'+xeroBtn+'</div>'
+    +'<div class="sub">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload — Ava never reconciles for you.</div></div>';
+  // ── Fergus ──
+  var fergusBtn=g.fergus?'<span class="pill p-ok">CONNECTED</span>':(g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
+  var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusBtn+'</div>'
+    +'<div class="sub">Jobs, quotes and scheduling. Powers Auto Scheduling — assign a tradie and Ava books it here.</div></div>';
+  box.innerHTML=gmailCard+xeroCard+fergusCard;
+}
+
+function load(){
+  fetch(API+"/chase-list?company="+CO).then(function(r){return r.json();}).then(function(d){
+    render(d.integrations||{});
+  }).catch(function(){document.getElementById("conn").innerHTML='<div class="card"><div class="sub" style="margin-left:0">Couldn\'t reach the server — try again shortly.</div></div>';});
+}
+
+function boot(){
+  var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
+  var qc=new URLSearchParams(location.search).get("c");
+  if(window.IS_DEV&&(!s||!s.email)){CO=qc||KPA_DEF;load();return;}
+  if(!s||!s.email){gate("Tap your sign-in link (or sign in on your board) first — then connections open right up.");return;}
+  if(qc&&!s.looper&&s.companies&&s.companies.length&&!s.companies.some(function(x){return x.id===qc;})){gate("You don't have access to that client.");return;}
+  CO=qc||(!s.looper&&s.companies&&s.companies.length?s.companies[0].id:KPA_DEF);
+  load();
+}
+
+</script>
+<script id="gmodal">
+// Gmail connect modal — OAuth-primary + Domain-Wide Delegation toggle. Verbatim
+// from app.html so the connect experience is identical everywhere.
+(function(){
+  var GM='<div id="gmov" style="position:fixed;inset:0;z-index:210;background:rgba(20,20,24,.55);display:none;align-items:center;justify-content:center;padding:20px">'
+   +'<div style="background:var(--bg,#fff);border:1px solid var(--line);border-radius:8px;max-width:470px;width:100%;padding:24px;max-height:90vh;overflow:auto">'
+   +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px"><div class="ic" style="width:34px;height:34px;font-size:18px;color:#EA4335"><i class="ti ti-mail"></i></div><div style="font-size:17px;font-weight:600">Connect your inbox to Ava</div></div>'
+   +'<div style="font-size:13px;color:var(--ink2);margin-bottom:16px">Ava reads your inbox to pull out bills and receipts, and can send replies from it when you ask — like confirming a booking or chasing a supplier. Ava never edits or deletes anything: <b>read and send only</b>. You’ll pick the mailbox and tick the boxes on Google’s screen.</div>'
+   +'<a id="gm-oauth" href="#" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Connect with Google</a>'
+   +'<div style="font-size:11.5px;color:var(--ink3);margin:10px 0 16px;line-height:1.5">Read and send only — never edits or deletes. Revoke anytime from your Google account.</div>'
+   +'<div style="border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink2);line-height:1.5">On a <b>Google Workspace</b> domain and want your admin to switch it on once for everyone? <a id="gm-admintoggle" style="color:var(--ind);font-weight:500;cursor:pointer">Set it up in the admin console instead</a></div>'
+   +'<div id="gm-dwd" style="display:none;margin-top:14px">'
+   +'<div style="border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:14px;background:var(--indbg,#eef2ff)">'
+   +'<div style="font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px">Paste these into the admin console</div>'
+   +'<div style="font-size:11px;color:var(--ink3);margin-bottom:2px">Client ID</div>'
+   +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:9px"><code id="gm-clientid" style="flex:1;min-width:0;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:7px 9px;overflow:auto;white-space:nowrap">—</code><button type="button" id="gm-copyid" class="btn" style="padding:7px 11px;font-size:12px">Copy</button></div>'
+   +'<div style="font-size:11px;color:var(--ink3);margin-bottom:2px">OAuth scopes</div>'
+   +'<div style="display:flex;gap:8px;align-items:center"><code id="gm-scope" style="flex:1;min-width:0;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:7px 9px;overflow:auto;white-space:nowrap">—</code><button type="button" id="gm-copyscope" class="btn" style="padding:7px 11px;font-size:12px">Copy</button></div>'
+   +'</div>'
+   +'<a id="gm-adminlink" href="#" target="_blank" rel="noopener" class="btn btn-p" style="width:100%;justify-content:center;padding:11px;margin-bottom:14px">Open Google Admin — Domain-Wide Delegation <i class="ti ti-external-link" style="font-size:14px;vertical-align:-2px"></i></a>'
+   +'<ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.5;color:var(--ink)">'
+   +'<li style="margin-bottom:9px">Sign in at <b>admin.google.com</b> as a super-admin, then tap the button above.</li>'
+   +'<li style="margin-bottom:9px"><b>Didn’t land on the right page?</b> In admin.google.com go to <b>Security → Access and data control → API controls</b>, then <b>Manage Domain-Wide Delegation</b> at the bottom.</li>'
+   +'<li style="margin-bottom:9px">Click <b>Add new</b>, paste the <b>Client ID</b>, and paste <b>both scopes</b> (they’re comma-separated) into the OAuth scopes box.</li>'
+   +'<li>Click <b>Authorise</b>. Ava starts reading within a few minutes — nothing else to do.</li>'
+   +'</ol>'
+   +'<div style="font-size:11.5px;color:var(--ink3);margin-top:13px;line-height:1.5">Super-admin only, and you can revoke anytime from the same screen.</div>'
+   +'</div>'
+   +'<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" id="gmcancel" class="btn" style="padding:10px 16px">Done</button></div>'
+   +'</div></div>';
+  document.body.insertAdjacentHTML("beforeend",GM);
+  var ov=document.getElementById("gmov");
+  function copy(el,btn){var t=(el&&el.textContent)||"";if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){var o=btn.textContent;btn.textContent="Copied";setTimeout(function(){btn.textContent=o;},1200);});}}
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".gmailconnect");
+    if(b){e.preventDefault();
+      document.getElementById("gm-clientid").textContent=b.getAttribute("data-dwdid")||"—";
+      document.getElementById("gm-scope").textContent=b.getAttribute("data-dwdscope")||"—";
+      document.getElementById("gm-adminlink").setAttribute("href",b.getAttribute("data-dwdurl")||"#");
+      document.getElementById("gm-oauth").setAttribute("href",b.getAttribute("data-gmailurl")||"#");
+      document.getElementById("gm-dwd").style.display="none";
+      ov.style.display="flex";return;}
+    var tg=e.target.closest("#gm-admintoggle");
+    if(tg){e.preventDefault();var d=document.getElementById("gm-dwd");var open=d.style.display==="none";d.style.display=open?"block":"none";if(open)d.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
+    var ci=e.target.closest("#gm-copyid");if(ci){copy(document.getElementById("gm-clientid"),ci);return;}
+    var cs=e.target.closest("#gm-copyscope");if(cs){copy(document.getElementById("gm-scope"),cs);return;}
+    if(e.target===ov||e.target.closest("#gmcancel")){ov.style.display="none";}
+  });
+  boot();
+})();
+</script>
+</body>
+</html>
