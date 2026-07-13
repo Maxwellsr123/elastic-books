@@ -285,9 +285,10 @@ function newCard(r){
     buttons='<button class="btn" onclick="dismiss(\''+sid+'\')" title="Not a job — clear it"><i class="ti ti-x"></i></button>'+
             '<button class="btn btn-p" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
   }
-  return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
+  return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" data-avoid="'+esc((r.avoid_days||[]).join(","))+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
+    (r.availability?'<div style="font-size:11.5px;color:var(--amb,#9a6a12);margin-top:3px"><i class="ti ti-calendar-exclamation" style="font-size:12px;vertical-align:-2px"></i> Client says: <b>'+esc(r.availability)+'</b></div>':'')+
     '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">spotted '+ago(r.when)+'</div>'+fbRow(r)+pick+'</div>'+
     '<div class="rside">'+kindBadge(k)+'<div style="display:flex;gap:6px">'+buttons+'</div></div></div>';
 }
@@ -357,7 +358,10 @@ function assign(sid){
   var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:t,kind:kind,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
-  var q=slack?("Message "+name+" in your team chat to "+(kind==="quote"?"quote this":"take this on")+" "+t+"?"):(name+" isn’t on Slack — assign them "+(kind==="quote"?"to quote this":"for "+t)+" and let them know directly?");
+  // heads-up if the picked time lands on a day the client said they can't do
+  var avoid=card?(card.getAttribute("data-avoid")||""):"",warn="";
+  if(avoid){var tlc=t.toLowerCase();avoid.split(",").forEach(function(d){if(d&&tlc.indexOf(d.toLowerCase())>=0)warn="⚠️ The client said they can’t do "+d+" — sure about "+t+"?\n\n";});}
+  var q=warn+(slack?("Message "+name+" in your team chat to "+(kind==="quote"?"quote this":"take this on")+" "+t+"?"):(name+" isn’t on Slack — assign them "+(kind==="quote"?"to quote this":"for "+t)+" and let them know directly?"));
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
 function assignAsk(sid){
