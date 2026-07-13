@@ -287,9 +287,10 @@ function newCard(r){
   } else {
     buttons='<button class="btn" onclick="dismiss(\''+sid+'\')" title="Not a job — clear it"><i class="ti ti-x"></i></button>'+
             (k==="job"?'<button class="btn btn-p" id="avasort-'+sid+'" onclick="avaSort(\''+sid+'\')" title="Ava picks who\'s free next, asks them in the team chat, and books it on their 👍 — no more clicks"><i class="ti ti-sparkles"></i> Ava sort it</button>':'')+
-            '<button class="btn'+(k==="quote"?' btn-p':'')+'" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign quote":"Assign")+'</button>';
+            (k==="quote"?'<button class="btn btn-p" id="avaquote-'+sid+'" onclick="avaQuote(\''+sid+'\')" title="Ava drafts the quote in Fergus (customer matched first) — you price it and send it"><i class="ti ti-file-dollar"></i> Draft quote in Fergus</button>':'')+
+            '<button class="btn" onclick="var p=document.getElementById(\'pick-'+sid+'\');p.style.display=p.style.display===\'flex\'?\'none\':\'flex\'"><i class="ti ti-user-plus"></i> '+(k==="quote"?"Assign visit":"Assign")+'</button>';
   }
-  return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" data-avoid="'+esc((r.avoid_days||[]).join(","))+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
+  return '<div class="row" data-sid="'+sid+'" data-kind="'+esc(k)+'" data-email="'+esc(r.email||"")+'" data-avoid="'+esc((r.avoid_days||[]).join(","))+'" style="'+(k==="not_job"?"opacity:.6":"")+'"><div class="ic" style="background:var(--indbg);color:var(--indtx)"><i class="ti ti-mail"></i></div>'+
     '<div style="flex:1;min-width:0"><div style="font-weight:600">'+title+'</div>'+
     (r.snippet?'<div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.snippet)+'</div>':'')+
     (r.availability?'<div style="font-size:11.5px;color:var(--amb,#9a6a12);margin-top:3px"><i class="ti ti-calendar-exclamation" style="font-size:12px;vertical-align:-2px"></i> Client says: <b>'+esc(r.availability)+'</b></div>':'')+
@@ -318,6 +319,20 @@ function updateStrip(j){
 }
 function ackUpdate(jid,sid,mode){post({company:CO,action:"ack_update",job_id:jid,suggestion_id:sid,mode:mode});}
 function waitCard(j){
+  // Quote lifecycle — Max prices & sends in Fergus; the board tracks the state.
+  if(j.stage==="quoting"||j.stage==="quote_sent"){
+    var sent=j.stage==="quote_sent";
+    var qhead='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-file-dollar"></i></div>'+
+      '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+      '<div class="muted">'+(j.fergus_job?esc(j.fergus_job)+' · ':'')+(sent?'quote sent — Ava\'s watching for their reply':'draft in Fergus — price it, send it, then mark it sent')+'</div></div>'+
+      (sent?'<span class="pill p-blu">quote · sent</span>':'<span class="pill p-warn">quote · drafted</span>')+'</div>';
+    var qacts=sent
+      ? '<div class="acts sub"><button class="btn btn-p" onclick="quoteAccepted(\''+j.id+'\')" title="Customer said yes — Ava picks who\'s free and lines up the work"><i class="ti ti-check"></i> Accepted — Ava sort it</button>'+
+        '<button class="btn" onclick="dropJob(\''+j.id+'\')">No go — clear it</button></div>'
+      : '<div class="acts sub"><button class="btn btn-p" onclick="quoteSent(\''+j.id+'\')"><i class="ti ti-send"></i> I\'ve sent the quote</button>'+
+        '<button class="btn" onclick="dropJob(\''+j.id+'\')">Didn\'t go ahead</button></div>';
+    return '<div class="qitem" style="border-bottom:1px solid var(--line)">'+updateStrip(j)+qhead+qacts+'<div class="subtl">'+timeline(j.timeline)+'</div></div>';
+  }
   var avail=!j.proposed_time; // assigned with no set time — waiting on the tradie's availability
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
     '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
@@ -360,6 +375,34 @@ function avaSort(sid){
       load();
     }).catch(function(){avaToast("Couldn’t auto-assign — try again.");load();});
 }
+// Quote path: Ava drafts the quote in Fergus (customer matched first, no price);
+// Max prices + sends it there, then tracks sent/accepted here. Acceptance turns
+// it into a booking — Ava picks who's free and the 👍 chain finishes it on the
+// SAME Fergus job.
+function avaQuote(sid){
+  var card=document.querySelector('[data-sid="'+sid+'"]');
+  var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
+  var btn=document.getElementById("avaquote-"+sid);
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Drafting…';}
+  fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"create_quote",suggestion_id:sid,
+    customer:title?title.split(" — ")[0]:"",customer_email:(card&&card.getAttribute("data-email"))||null,
+    job:title?title.split(" — ").slice(1).join(" — "):""})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok&&d.fergus_job_number){avaToast("Draft quote "+d.fergus_job_number+" in Fergus"+(d.customer_reused?" (existing customer)":"")+" — price & send it, then mark it sent.");}
+      else avaToast((d&&d.error)||"Couldn’t draft the quote.");
+      load();
+    }).catch(function(){avaToast("Couldn’t draft the quote — try again.");load();});
+}
+function quoteSent(id){post({company:CO,action:"quote_sent",job_id:id});}
+function quoteAccepted(id){
+  fetch(API+"/ava-schedule-action",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company:CO,action:"quote_accepted",job_id:id})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok&&d.picked){avaToast("Ava asked "+String(d.picked.name||"the crew").split(" ")[0]+" — "+(d.picked.phrase||"")+". Their 👍 books it.");}
+      else avaToast((d&&d.error)||"Couldn’t line it up — assign manually.");
+      load();
+    }).catch(function(){avaToast("Couldn’t line it up — try again.");load();});
+}
+function dropJob(id){avaConfirm("Clear this quote off the board?",function(){post({company:CO,action:"dismiss",job_id:id});});}
 function schedBtn(sid){var t=document.querySelector(".time-"+sid),b=document.getElementById("askbtn-"+sid);if(!t||!b)return;b.innerHTML=t.value.trim()?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free';}
 function schedGo(sid){var t=document.querySelector(".time-"+sid);if(t&&t.value.trim())assign(sid);else assignAsk(sid);}
 function assign(sid){
@@ -374,6 +417,7 @@ function assign(sid){
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
   var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:t,kind:kind,
     duration_mins:(document.querySelector(".dur-"+sid)||{}).value,
+    customer_email:(card&&card.getAttribute("data-email"))||null,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
   // heads-up if the picked time lands on a day the client said they can't do
@@ -393,6 +437,7 @@ function assignAsk(sid){
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
   var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,ask_availability:true,kind:kind,
     duration_mins:(document.querySelector(".dur-"+sid)||{}).value,
+    customer_email:(card&&card.getAttribute("data-email"))||null,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
   var q=slack?("Ask "+name+" in your team chat when they can "+(kind==="quote"?"fit in a quote visit":"do this")+"? They reply with a time and Ava "+(kind==="quote"?"sets up the quote.":"locks it in.")):(name+" isn’t on Slack — assign them and check their availability directly?");
