@@ -375,17 +375,21 @@ h1{letter-spacing:-.03em}
   }
   document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
 
-  // Gmail connect — Domain-Wide Delegation is the primary path. The app isn't
-  // Google-verified yet, so per-user OAuth gets blocked; instead the tenant's
-  // Workspace super-admin authorises Ava once in the admin console (read-only).
-  // Client ID + scope + admin URL come from chase-list (window.__INTG, sourced
-  // from GMAIL_SERVICE_ACCOUNT_KEY). See docs/MOODS_GMAIL_GRANT.md. Per-user
-  // OAuth stays as a personal-Gmail fallback link.
+  // Gmail connect — per-user OAuth is the primary path (the big "Connect with
+  // Google" button → gmail-auth, read+send scopes). Google Workspace tenants can
+  // instead have a super-admin authorise Ava for the whole domain via
+  // Domain-Wide Delegation, revealed behind the "admin console instead" toggle.
+  // DWD Client ID + scopes + admin URL come from chase-list (window.__INTG,
+  // sourced from GMAIL_SERVICE_ACCOUNT_KEY). See docs/MOODS_GMAIL_GRANT.md.
   (function(){
     var GM='<div id="gmov" style="position:fixed;inset:0;z-index:210;background:rgba(20,20,24,.55);display:none;align-items:center;justify-content:center;padding:20px">'
      +'<div style="background:var(--bg,#fff);border:1px solid var(--line);border-radius:8px;max-width:470px;width:100%;padding:24px;max-height:90vh;overflow:auto">'
      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px"><div class="ic" style="width:34px;height:34px;font-size:18px;color:#EA4335"><i class="ti ti-mail"></i></div><div style="font-size:17px;font-weight:600">Connect your inbox to Ava</div></div>'
-     +'<div style="font-size:13px;color:var(--ink2);margin-bottom:15px">Ava reads your inbox to pull out bills and receipts, and can send replies from it when you ask — like confirming a booking or chasing a supplier. Ava never edits or deletes anything: <b>read and send only</b>. Your Google Workspace admin switches it on once (about two minutes). A <b>super-admin</b> has to do this bit.</div>'
+     +'<div style="font-size:13px;color:var(--ink2);margin-bottom:16px">Ava reads your inbox to pull out bills and receipts, and can send replies from it when you ask — like confirming a booking or chasing a supplier. Ava never edits or deletes anything: <b>read and send only</b>. You’ll pick the mailbox and tick the boxes on Google’s screen.</div>'
+     +'<a id="gm-oauth" href="#" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Connect with Google</a>'
+     +'<div style="font-size:11.5px;color:var(--ink3);margin:10px 0 16px;line-height:1.5">Read and send only — never edits or deletes. Revoke anytime from your Google account.</div>'
+     +'<div style="border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink2);line-height:1.5">On a <b>Google Workspace</b> domain and want your admin to switch it on once for everyone? <a id="gm-admintoggle" style="color:var(--ind);font-weight:500;cursor:pointer">Set it up in the admin console instead</a></div>'
+     +'<div id="gm-dwd" style="display:none;margin-top:14px">'
      +'<div style="border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:14px;background:var(--indbg,#eef2ff)">'
      +'<div style="font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px">Paste these into the admin console</div>'
      +'<div style="font-size:11px;color:var(--ink3);margin-bottom:2px">Client ID</div>'
@@ -400,8 +404,9 @@ h1{letter-spacing:-.03em}
      +'<li style="margin-bottom:9px">Click <b>Add new</b>, paste the <b>Client ID</b>, and paste <b>both scopes</b> (they’re comma-separated) into the OAuth scopes box.</li>'
      +'<li>Click <b>Authorise</b>. Ava starts reading within a few minutes — nothing else to do.</li>'
      +'</ol>'
-     +'<div style="font-size:11.5px;color:var(--ink3);margin:13px 0 16px;line-height:1.5">Read and send only — never edits or deletes — super-admin only, and you can revoke anytime from the same screen. On a personal <b>@gmail.com</b> with no admin console? <a id="gm-oauth" href="#" style="color:var(--ind);font-weight:500">Connect it directly instead</a>.</div>'
-     +'<div style="display:flex;justify-content:flex-end"><button type="button" id="gmcancel" class="btn" style="padding:10px 16px">Done</button></div>'
+     +'<div style="font-size:11.5px;color:var(--ink3);margin-top:13px;line-height:1.5">Super-admin only, and you can revoke anytime from the same screen.</div>'
+     +'</div>'
+     +'<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" id="gmcancel" class="btn" style="padding:10px 16px">Done</button></div>'
      +'</div></div>';
     document.body.insertAdjacentHTML("beforeend",GM);
     var ov=document.getElementById("gmov");
@@ -413,7 +418,10 @@ h1{letter-spacing:-.03em}
         document.getElementById("gm-scope").textContent=b.getAttribute("data-dwdscope")||"—";
         document.getElementById("gm-adminlink").setAttribute("href",b.getAttribute("data-dwdurl")||"#");
         document.getElementById("gm-oauth").setAttribute("href",b.getAttribute("data-gmailurl")||"#");
+        document.getElementById("gm-dwd").style.display="none";   // reopen OAuth-first every time
         ov.style.display="flex";return;}
+      var tg=e.target.closest("#gm-admintoggle");
+      if(tg){e.preventDefault();var d=document.getElementById("gm-dwd");var open=d.style.display==="none";d.style.display=open?"block":"none";if(open)d.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
       var ci=e.target.closest("#gm-copyid");if(ci){copy(document.getElementById("gm-clientid"),ci);return;}
       var cs=e.target.closest("#gm-copyscope");if(cs){copy(document.getElementById("gm-scope"),cs);return;}
       if(e.target===ov||e.target.closest("#gmcancel")){ov.style.display="none";}
