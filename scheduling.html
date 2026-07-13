@@ -298,6 +298,17 @@ function fbk(sid,dir){
   else post({company:CO,action:"feedback",suggestion_id:sid,feedback:"up"});
 }
 function cmt(sid){avaPrompt("Note for Ava",function(c){if(c)post({company:CO,action:"comment",suggestion_id:sid,comment:c});},{placeholder:"Add a note for Ava"});}
+function updateStrip(j){
+  var u=j.update;if(!u)return "";
+  return '<div style="margin:0 0 11px;padding:9px 12px;background:var(--ambbg);border:1px solid var(--amb);border-radius:5px">'+
+    '<div style="font-size:12.5px;color:var(--amb);font-weight:600"><i class="ti ti-arrow-back-up" style="vertical-align:-2px"></i> Ava spotted a reply from '+esc(u.from||j.customer||"the customer")+' · '+ago(u.when)+'</div>'+
+    (u.snippet?'<div style="font-size:12.5px;color:var(--ink2);margin:5px 0 9px">“'+esc(u.snippet)+'”</div>':'')+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<button class="btn btn-p" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'add\')"><i class="ti ti-plus"></i> Add to this job</button>'+
+      '<button class="btn" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'dismiss\')">Not related</button>'+
+    '</div></div>';
+}
+function ackUpdate(jid,sid,mode){post({company:CO,action:"ack_update",job_id:jid,suggestion_id:sid,mode:mode});}
 function waitCard(j){
   var avail=!j.proposed_time; // assigned with no set time — waiting on the tradie's availability
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
@@ -317,7 +328,7 @@ function waitCard(j){
       '<button class="btn" onclick="reply(\''+j.id+'\',\'no\')"><i class="ti ti-x" style="color:var(--red)"></i> Can\'t make it</button>'+
       '<button class="btn" onclick="askNewTime(\''+j.id+'\')"><i class="ti ti-clock"></i> New time</button></div>';
   }
-  return '<div class="qitem" style="border-bottom:1px solid var(--line)">'+head+acts+'<div class="subtl">'+timeline(j.timeline)+'</div></div>';
+  return '<div class="qitem" style="border-bottom:1px solid var(--line)">'+updateStrip(j)+head+acts+'<div class="subtl">'+timeline(j.timeline)+'</div></div>';
 }
 function bookedCard(j){
   var fergus=j.fergus_url?'<a class="btn" href="'+esc(j.fergus_url)+'" target="_blank" style="text-decoration:none"><i class="ti ti-external-link"></i> '+esc(j.fergus_job||"Fergus")+'</a>':(j.fergus_job?'<span class="pill p-blu">'+esc(j.fergus_job)+'</span>':'');
@@ -326,7 +337,7 @@ function bookedCard(j){
     '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
     '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+'</div></div>'+
     '<div class="bs"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
-    timeline(j.timeline)+'</div>';
+    updateStrip(j)+timeline(j.timeline)+'</div>';
 }
 function schedBtn(sid){var t=document.querySelector(".time-"+sid),b=document.getElementById("askbtn-"+sid);if(!t||!b)return;b.innerHTML=t.value.trim()?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free';}
 function schedGo(sid){var t=document.querySelector(".time-"+sid);if(t&&t.value.trim())assign(sid);else assignAsk(sid);}
