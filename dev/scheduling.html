@@ -182,7 +182,10 @@ h1{letter-spacing:-.03em}
         <div id="crewphones" style="border-top:1px solid var(--line);padding:2px 16px 12px"></div>
       </details>
 
-      <div class="sec"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — assign a tradie <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
+      <div class="sec" style="display:flex;align-items:center;margin-top:22px"><i class="ti ti-calendar" style="color:var(--ind)"></i> Your calendar <span class="cnt" id="cal_hint" style="margin-right:auto"></span><button class="btn" style="padding:5px 9px" onclick="calNav(-1)" title="Previous week"><i class="ti ti-chevron-left"></i></button><button class="btn" style="padding:5px 9px" onclick="calNav(0)">Today</button><button class="btn" style="padding:5px 9px" onclick="calNav(1)" title="Next week"><i class="ti ti-chevron-right"></i></button></div>
+      <div class="card" id="cal" style="padding:0;overflow-x:auto"></div>
+
+      <div class="sec" style="margin-top:30px"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — assign a tradie <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
       <div class="card" id="lane_new"><div class="row"><div style="flex:1" class="muted">Reading your inbox…</div></div></div>
 
       <div class="sec" style="margin-top:30px"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on the crew <span class="cnt" id="wait_hint"></span></div>
@@ -207,7 +210,7 @@ h1{letter-spacing:-.03em}
 // same one-login as the rest of Elastic: the session app.html stores unlocks this page too
 var KPA_DEF="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
 var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-var CO=null,CREW=[];
+var CO=null,CREW=[],JOBS=[],CALWEEK=0;
 // In-app modal + toast — replaces native prompt()/confirm()/alert() (which render
 // as jarring "app.elasticadmin.com says" browser chrome in an odd spot).
 (function(){
@@ -417,6 +420,7 @@ function load(){
     document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
     renderConns(d.connections);renderCrew();
     var jobs=d.jobs||[];
+    JOBS=jobs;renderCal();
     var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
     var ord={job:0,quote:1,not_job:2};
     news.sort(function(a,b){return (ord[a.kind||"job"]||0)-(ord[b.kind||"job"]||0);});
@@ -427,6 +431,62 @@ function load(){
     lw.parentNode.style.display="block";document.getElementById("wait_hint").textContent=waits.length?(waits.length+" out with the crew"):"";
     document.getElementById("lane_booked").innerHTML=booked.length?booked.map(bookedCard).join(""):'<div class="card"><div class="row"><div style="flex:1" class="muted">No booked jobs yet.</div></div></div>';
   }).catch(function(){document.getElementById("lane_new").innerHTML='<div class="row"><div style="flex:1" class="muted">Couldn\'t reach the server — try again shortly.</div></div>';});
+}
+// ── Your calendar (read-only week view) ─────────────────────────────────────
+// Ava's native schedule is the source of truth: jobs carry a real start_at
+// (parsed NZ time). We place assigned/booked jobs on a Mon–Sun grid. Unassigned
+// inbox requests have no start_at yet, so they live in the lanes below, not here.
+var CAL_START_H=7, CAL_END_H=18, CAL_ROW=42; // 7am–6pm, px per hour
+function calNav(dir){CALWEEK=dir===0?0:CALWEEK+dir;renderCal();}
+function weekMonday(offset){var n=new Date();var dow=n.getDay();var diff=(dow===0?-6:1-dow);var m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+diff+offset*7);m.setHours(0,0,0,0);return m;}
+function crewColor(name){var pal=["#5B54E6","#0E7A50","#B4530A","#B42318","#7A5AF8","#0369A1","#9333EA"];var s=String(name||"");var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return pal[h%pal.length];}
+function tint(hex,a){var m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);if(!m)return hex;return "rgba("+parseInt(m[1],16)+","+parseInt(m[2],16)+","+parseInt(m[3],16)+","+a+")";}
+function renderCal(){
+  var el=document.getElementById("cal");if(!el)return;
+  var mon=weekMonday(CALWEEK), days=[];
+  for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);days.push(d);}
+  var weekEnd=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+7);
+  var today=new Date();today.setHours(0,0,0,0);
+  var DOW=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  // hint: "14–20 Jul"
+  var h=document.getElementById("cal_hint");
+  if(h)h.textContent=days[0].getDate()+"–"+days[6].getDate()+" "+MON[days[6].getMonth()]+(CALWEEK===0?" · this week":"");
+  // jobs that have a real time and fall inside this week
+  var evs=(JOBS||[]).filter(function(j){if(!j.start_at)return false;var t=new Date(j.start_at);return t>=mon&&t<weekEnd;});
+  var bodyH=(CAL_END_H-CAL_START_H)*CAL_ROW;
+  var cols="52px repeat(7,minmax(92px,1fr))";
+  // header
+  var head='<div style="display:grid;grid-template-columns:'+cols+';border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card,#fff);z-index:2"><div></div>';
+  days.forEach(function(d){var isToday=d.getTime()===today.getTime();head+='<div style="text-align:center;padding:7px 4px;font-size:11px;color:'+(isToday?"var(--ind)":"var(--ink3)")+';font-weight:'+(isToday?"700":"500")+'">'+DOW[d.getDay()===0?6:d.getDay()-1]+' <b style="font-size:13px;color:'+(isToday?"var(--ind)":"var(--ink)")+'">'+d.getDate()+'</b></div>';});
+  head+='</div>';
+  // body: gutter + 7 day columns
+  var body='<div style="display:grid;grid-template-columns:'+cols+'">';
+  var gutter='<div style="position:relative;height:'+bodyH+'px">';
+  for(var hr=CAL_START_H;hr<CAL_END_H;hr++){var label=(hr%12||12)+(hr<12?"am":"pm");gutter+='<div style="position:absolute;top:'+((hr-CAL_START_H)*CAL_ROW-6)+'px;right:6px;font-size:10px;color:var(--ink3)">'+label+'</div>';}
+  gutter+='</div>';
+  body+=gutter;
+  days.forEach(function(d,di){
+    var dayStart=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    var dayEnd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+    var col='<div style="position:relative;height:'+bodyH+'px;border-left:1px solid var(--line)'+(d.getTime()===today.getTime()?';background:var(--indbg,#eef2ff)':'')+'">';
+    for(var hr=CAL_START_H;hr<CAL_END_H;hr++)col+='<div style="height:'+CAL_ROW+'px;border-bottom:1px solid var(--line)"></div>';
+    evs.filter(function(j){var t=new Date(j.start_at);return t>=dayStart&&t<dayEnd;}).forEach(function(j){
+      var t=new Date(j.start_at);var mins=(t.getHours()+t.getMinutes()/60-CAL_START_H)*CAL_ROW;
+      var top=Math.max(0,mins);var ht=Math.max(18,Math.min((j.duration_mins||120)/60*CAL_ROW,bodyH-top));
+      var col1=crewColor(j.assigned_to);var tm=(t.getHours()%12||12)+(t.getMinutes()?":"+("0"+t.getMinutes()).slice(-2):"")+(t.getHours()<12?"a":"p");
+      var who=String(j.assigned_to||"").split(" ")[0];var cust=String(j.customer||j.job||"job");
+      var booked=j.lane==="booked";
+      col+='<div title="'+esc(cust+" — "+(j.job||"")+" · "+who+" · "+tm)+'" style="position:absolute;top:'+top+'px;height:'+ht+'px;left:3px;right:3px;background:'+tint(col1,booked?0.22:0.13)+';border-left:3px solid '+col1+';border-radius:4px;padding:2px 5px;font-size:10.5px;line-height:1.25;color:var(--ink);overflow:hidden;cursor:default">'
+        +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(tm+" "+cust)+'</div>'
+        +'<div style="color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(who)+(booked?" · booked":"")+'</div></div>';
+    });
+    col+='</div>';
+    body+=col;
+  });
+  body+='</div>';
+  el.innerHTML='<div style="min-width:720px">'+head+body+'</div>';
+  if(!evs.length)el.innerHTML+='<div style="padding:11px 14px;font-size:12px;color:var(--ink3);border-top:1px solid var(--line)"><i class="ti ti-calendar-off" style="vertical-align:-2px"></i> Nothing scheduled this week yet — assign a request below and it lands here.</div>';
 }
 boot();
 </script>
