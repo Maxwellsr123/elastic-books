@@ -379,16 +379,22 @@ function assignAsk(sid){
   var q=slack?("Ask "+name+" in your team chat when they can "+(kind==="quote"?"fit in a quote visit":"do this")+"? They reply with a time and Ava "+(kind==="quote"?"sets up the quote.":"locks it in.")):(name+" isn’t on Slack — assign them and check their availability directly?");
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
+// Shared connections card — identical to Auto Bookkeeping. Status only; the
+// actual connecting/disconnecting lives on the central Connections page.
+function connStat(name,ic,col,ok,detail,last){
+  return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
+}
 function renderConns(cn){
   cn=cn||{};
   var el=document.getElementById("connrow");if(!el)return;
-  var defs=[{k:"gmail",name:"Gmail",icon:"ti-brand-google"},{k:"fergus",name:"Fergus",icon:"ti-briefcase"},{k:"simpro",name:"Simpro",icon:"ti-briefcase"},{k:"xero",name:"Xero",icon:"ti-file-dollar"}];
-  var on=defs.filter(function(d){return cn[d.k];});
-  if(!on.length){el.style.display="none";return;}
-  el.style.display="flex";
-  el.innerHTML='<span style="font-size:12px;color:var(--ink3);font-weight:500">Connected</span>'+on.map(function(d){
-    return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px"><span style="width:6px;height:6px;border-radius:50%;background:var(--grn);display:inline-block"></span><i class="ti '+d.icon+'" style="font-size:14px"></i> '+d.name+'</span>';
-  }).join("");
+  el.style.display="block";
+  var inb=cn.gmail_inboxes||0;
+  el.innerHTML='<div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 16px 12px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:var(--ind);font-weight:500;text-decoration:none">Manage</a></div>'
+    +connStat("Gmail","ti-mail","#EA4335",cn.gmail,inb?(inb+" inbox"+(inb>1?"es":"")):"",false)
+    +connStat("Xero","ti-calculator","#13B5EA",cn.xero,"",false)
+    +connStat("Fergus","ti-tools","#C2410C",cn.fergus,"",true)
+    +'</div>';
 }
 function ohBlock(){
   var oh=OFFICE||{start:"08:00",end:"17:00",days:[1,2,3,4,5]};
