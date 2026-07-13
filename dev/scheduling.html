@@ -271,10 +271,13 @@ function newCard(r){
   var k=r.kind||"job";
   var title=(r.customer?esc(r.customer)+' — ':'')+esc(r.subject||r.job||'job request');
   var rt=esc(r.requested_time||"");
+  var dur=r.duration_est||120;
+  var durOpts=[[60,"1 hr"],[120,"2 hrs"],[240,"Half day"],[480,"Full day"],[960,"2 days"],[1440,"3 days+"]];
+  var durSel='<select class="dur-'+sid+'" title="How long? — Ava\'s estimate, change if it\'s off">'+durOpts.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===dur?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>';
   var pick='<div class="acts" id="pick-'+sid+'" style="display:none;flex-wrap:wrap">'+
       (rt?'<div style="flex-basis:100%;font-size:11.5px;color:var(--ink3);margin-bottom:2px"><i class="ti ti-user" style="font-size:11px;vertical-align:-1px"></i> Client asked for <b style="color:var(--ink2)">'+rt+'</b> — seeded below, edit if it doesn’t suit.</div>':'')+
       '<select class="crew-'+sid+'">'+crewOpts()+'</select>'+
-      '<input type="text" class="time-'+sid+'" value="'+rt+'" oninput="schedBtn(\''+sid+'\')" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:200px">'+
+      '<input type="text" class="time-'+sid+'" value="'+rt+'" oninput="schedBtn(\''+sid+'\')" placeholder="'+(k==="quote"?"quote visit — e.g. Thu 2pm":"e.g. Fri 11 Jul, 8am")+'" style="width:170px">'+durSel+
       '<button class="btn btn-p" id="askbtn-'+sid+'" onclick="schedGo(\''+sid+'\')" title="With a time, asks them to confirm it. Clear it to ask when they’re free.">'+(rt?'<i class="ti ti-send"></i> Ask them':'<i class="ti ti-clock"></i> Ask when free')+'</button>'+
       '<button class="btn" onclick="document.getElementById(\'pick-'+sid+'\').style.display=\'none\'">Cancel</button></div>';
   var buttons;
@@ -356,6 +359,7 @@ function assign(sid){
   var kind=card?card.getAttribute("data-kind"):"";
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
   var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,time:t,kind:kind,
+    duration_mins:(document.querySelector(".dur-"+sid)||{}).value,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
   // heads-up if the picked time lands on a day the client said they can't do
@@ -374,6 +378,7 @@ function assignAsk(sid){
   var kind=card?card.getAttribute("data-kind"):"";
   var title=card?card.querySelector("div[style*='font-weight:600']").textContent:"";
   var body={company:CO,action:"assign",suggestion_id:sid,tradie_slack_id:slack,tradie_name:name,ask_availability:true,kind:kind,
+    duration_mins:(document.querySelector(".dur-"+sid)||{}).value,
     job:title?title.split(" — ").slice(1).join(" — "):"",
     customer:title?title.split(" — ")[0]:""};
   var q=slack?("Ask "+name+" in your team chat when they can "+(kind==="quote"?"fit in a quote visit":"do this")+"? They reply with a time and Ava "+(kind==="quote"?"sets up the quote.":"locks it in.")):(name+" isn’t on Slack — assign them and check their availability directly?");
