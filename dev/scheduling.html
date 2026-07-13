@@ -168,6 +168,8 @@ h1{letter-spacing:-.03em}
         </div>
       </details>
 
+      <div id="connrow" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 16px"></div>
+
       <div class="grid g4">
         <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n" id="s_new">—</div><div class="d">needs a tradie</div></div>
         <div class="card stat"><div class="l"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on crew</div><div class="n" id="s_wait">—</div><div class="d">asked, no reply yet</div></div>
@@ -357,6 +359,17 @@ function assignAsk(sid){
   var q=slack?("Ask "+name+" in your team chat when they’re free for this? They reply with a time and Ava locks it in."):(name+" isn’t on Slack — assign them and check their availability directly?");
   avaConfirm(q,function(){post(body);},{okText:slack?"Ask them":"Assign"});
 }
+function renderConns(cn){
+  cn=cn||{};
+  var el=document.getElementById("connrow");if(!el)return;
+  var defs=[{k:"gmail",name:"Gmail",icon:"ti-brand-google"},{k:"fergus",name:"Fergus",icon:"ti-briefcase"},{k:"simpro",name:"Simpro",icon:"ti-briefcase"},{k:"xero",name:"Xero",icon:"ti-file-dollar"}];
+  var on=defs.filter(function(d){return cn[d.k];});
+  if(!on.length){el.style.display="none";return;}
+  el.style.display="flex";
+  el.innerHTML='<span style="font-size:12px;color:var(--ink3);font-weight:500">Connected</span>'+on.map(function(d){
+    return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px"><span style="width:6px;height:6px;border-radius:50%;background:var(--grn);display:inline-block"></span><i class="ti '+d.icon+'" style="font-size:14px"></i> '+d.name+'</span>';
+  }).join("");
+}
 function renderCrew(){
   var el=document.getElementById("crewphones");if(!el)return;
   if(!CREW.length){el.innerHTML='<div class="muted" style="padding:8px 0">No crew synced yet.</div>';return;}
@@ -391,7 +404,7 @@ function load(){
     document.getElementById("s_wait").textContent=c.wait||c.waiting||0;
     document.getElementById("s_booked").textContent=c.booked||0;
     document.getElementById("s_crew").textContent=(CREW.map(function(x){return x.name.split(" ")[0];}).join(", "))||"—";
-    renderCrew();
+    renderConns(d.connections);renderCrew();
     var jobs=d.jobs||[];
     var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
     var ord={job:0,quote:1,not_job:2};
