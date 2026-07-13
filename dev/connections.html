@@ -30,6 +30,10 @@ h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
 .p-off{background:#f1f1ec;color:var(--ink3)}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 13px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;color:var(--ink)}
 .btn-p{background:var(--ind);color:#fff;border-color:var(--ind)}
+.lnk{background:none;border:none;font-size:12px;font-weight:600;cursor:pointer;padding:3px 5px;border-radius:4px}
+.lnk.rec{color:var(--ind)}
+.lnk.disc{color:#B42318}
+.lnk:hover{background:#f1f1ec}
 .ti{font-style:normal}
 </style>
 </head>
@@ -68,23 +72,42 @@ function toast(msg){var t=document.getElementById("ctoast");if(!t){t=document.cr
 function render(g){
   g=g||{};window.__INTG=g;
   var box=document.getElementById("conn");
-  // ── Inboxes ──
+  var gmAttrs='data-gmailurl="'+esc(g.gmail_url||"")+'" data-dwdid="'+esc(g.gmail_dwd_client_id||"")+'" data-dwdscope="'+esc(g.gmail_dwd_scope||"")+'" data-dwdurl="'+esc(g.gmail_dwd_admin_url||"")+'"';
+  // ── Inboxes (each: reconnect re-runs OAuth · disconnect stops the scan) ──
   var inboxes=(g.inboxes||[]).map(function(e){
-    return '<div class="row"><i class="ti ti-mail" style="color:#EA4335;font-size:17px"></i><div style="flex:1;font-weight:500">'+esc(e)+'</div><span class="pill p-ok">CONNECTED</span></div>';
+    return '<div class="row"><i class="ti ti-mail" style="color:#EA4335;font-size:17px"></i><div style="flex:1;min-width:0;font-weight:500;overflow:hidden;text-overflow:ellipsis">'+esc(e)+'</div><span class="pill p-ok">CONNECTED</span>'
+      +'<button type="button" class="lnk rec gmailconnect" '+gmAttrs+' title="Re-authorise on Google">Reconnect</button>'
+      +'<button type="button" class="lnk disc" onclick="askDisc(this,\'gmail\',\''+esc(e)+'\')">Disconnect</button></div>';
   }).join("");
-  var addGmail='<button type="button" class="btn gmailconnect" data-gmailurl="'+esc(g.gmail_url||"")+'" data-dwdid="'+esc(g.gmail_dwd_client_id||"")+'" data-dwdscope="'+esc(g.gmail_dwd_scope||"")+'" data-dwdurl="'+esc(g.gmail_dwd_admin_url||"")+'" style="margin-top:12px;border:1px dashed var(--border-stronger)"><i class="ti ti-plus"></i> Add an inbox</button>';
+  var addGmail='<button type="button" class="btn gmailconnect" '+gmAttrs+' style="margin-top:12px;border:1px dashed var(--border-stronger)"><i class="ti ti-plus"></i> Add an inbox</button>';
   var gmailCard='<div class="card"><div class="hd"><div class="ic" style="background:#FDECEA;color:#EA4335"><i class="ti ti-mail"></i></div><div class="t">Inboxes Ava scans</div></div>'
     +'<div class="sub">Ava reads these for bills and receipts — and hunts the ones you\'re missing. Read + send only, never edits or deletes. Add as many as you like.</div>'
     +(inboxes||'<div class="row" style="color:var(--ink3);font-size:13px">No inbox connected yet.</div>')+addGmail+'</div>';
   // ── Xero ──
-  var xeroBtn=g.xero?'<span class="pill p-ok">CONNECTED</span>':(g.xero_url?'<a class="btn btn-p" href="'+esc(g.xero_url)+'">Connect Xero</a>':'<span style="font-size:12px;color:var(--ink3)">Ask Elastic to connect Xero</span>');
-  var xeroCard='<div class="card"><div class="hd"><div class="ic" style="background:#E7F6FB;color:#13B5EA"><i class="ti ti-calculator"></i></div><div class="t" style="flex:1">Xero</div>'+xeroBtn+'</div>'
+  var xeroAct=g.xero
+    ? '<span class="pill p-ok">CONNECTED</span>'+(g.xero_url?'<a class="lnk rec" href="'+esc(g.xero_url)+'">Reconnect</a>':'')+'<button type="button" class="lnk disc" onclick="askDisc(this,\'xero\',\'\')">Disconnect</button>'
+    : (g.xero_url?'<a class="btn btn-p" href="'+esc(g.xero_url)+'">Connect Xero</a>':'<span style="font-size:12px;color:var(--ink3)">Ask Elastic to connect Xero</span>');
+  var xeroCard='<div class="card"><div class="hd"><div class="ic" style="background:#E7F6FB;color:#13B5EA"><i class="ti ti-calculator"></i></div><div class="t" style="flex:1">Xero</div>'+xeroAct+'</div>'
     +'<div class="sub">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload — Ava never reconciles for you.</div></div>';
   // ── Fergus ──
-  var fergusBtn=g.fergus?'<span class="pill p-ok">CONNECTED</span>':(g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
-  var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusBtn+'</div>'
+  var fergusAct=g.fergus
+    ? '<span class="pill p-ok">CONNECTED</span>'+(g.fergus_url?'<a class="lnk rec" href="'+esc(g.fergus_url)+'">Reconnect</a>':'')+'<button type="button" class="lnk disc" onclick="askDisc(this,\'fergus\',\'\')">Disconnect</button>'
+    : (g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
+  var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusAct+'</div>'
     +'<div class="sub">Jobs, quotes and scheduling. Powers Auto Scheduling — assign a tradie and Ava books it here.</div></div>';
   box.innerHTML=gmailCard+xeroCard+fergusCard;
+}
+// Inline confirm → disconnect (no jarring native dialog). Cancel re-renders.
+function askDisc(btn,provider,email){
+  var label=provider==="gmail"?("Stop scanning "+email+"?"):("Disconnect "+provider.charAt(0).toUpperCase()+provider.slice(1)+"?");
+  btn.outerHTML='<span style="font-size:12px;color:var(--ink2);white-space:nowrap">'+esc(label)+' <a onclick="doDisc(this,\''+provider+'\',\''+esc(email||"")+'\')" style="color:#B42318;cursor:pointer;font-weight:600">Yes</a> · <a onclick="load()" style="color:var(--ink3);cursor:pointer">No</a></span>';
+}
+function doDisc(el,provider,email){
+  el.textContent="…";
+  var body={company:CO,action:"disconnect",provider:provider};if(email)body.email=email;
+  fetch(API+"/connections",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)})
+    .then(function(r){return r.json();}).then(function(d){toast(d&&d.ok?"Disconnected.":"Couldn't disconnect.");load();})
+    .catch(function(){toast("Couldn't disconnect — try again.");load();});
 }
 
 function load(){
