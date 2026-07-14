@@ -778,28 +778,6 @@ h1{letter-spacing:-.03em}
   });
 })();
 </script>
-<div id="fbbtn" style="position:fixed;right:18px;bottom:74px;z-index:60;background:var(--ink);color:#fff;border-radius:2px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)">💬 Beta feedback</div>
-<div id="fbpanel" style="position:fixed;right:18px;bottom:124px;z-index:61;width:300px;max-width:calc(100vw - 36px);background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 16px 40px rgba(0,0,0,.22);padding:14px;display:none">
-  <div style="font-weight:600;font-size:14px;margin-bottom:3px">Tell Ava what you think</div>
-  <div style="font-size:12px;color:var(--ink2);margin-bottom:9px">Early beta — what's broken, what's missing, what's shit, what you love. Brutal is welcome.</div>
-  <textarea id="fbtext" rows="4" style="width:100%;border:1px solid var(--line);border-radius:4px;padding:9px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Type away…"></textarea>
-  <button id="fbsend" class="btn btn-p" style="width:100%;margin-top:8px;justify-content:center">Send to the team</button>
-  <div id="fbmsg" style="font-size:12px;color:var(--grn);margin-top:7px;min-height:14px"></div>
-</div>
-<script>
-(function(){
-  var U="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/app-feedback";
-  var ROLE="owner",CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d"),CN="",PG="owner app";
-  var btn=document.getElementById("fbbtn"),panel=document.getElementById("fbpanel"),msg=document.getElementById("fbmsg");
-  btn.addEventListener("click",function(){panel.style.display=panel.style.display==="none"?"block":"none";});
-  document.getElementById("fbsend").addEventListener("click",function(){
-    var t=document.getElementById("fbtext").value.trim();if(!t)return;var b=this;b.disabled=true;b.textContent="Sending…";msg.style.color="var(--grn)";
-    fetch(U,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:CO,company_name:CN,role:ROLE,page:PG,text:t})})
-      .then(function(r){return r.json();}).then(function(){document.getElementById("fbtext").value="";msg.textContent="Thanks — got it. 🙏";b.disabled=false;b.textContent="Send to the team";setTimeout(function(){panel.style.display="none";msg.textContent="";},1600);})
-      .catch(function(){b.disabled=false;b.textContent="Send to the team";msg.style.color="var(--amb)";msg.textContent="Couldn't send — try again.";});
-  });
-})();
-</script>
 <script>
 (function(){
   var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
