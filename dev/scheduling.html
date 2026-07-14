@@ -316,15 +316,23 @@ function fbk(sid,dir){
   else post({company:CO,action:"feedback",suggestion_id:sid,feedback:"up"});
 }
 function cmt(sid){avaPrompt("Note for Ava",function(c){if(c)post({company:CO,action:"comment",suggestion_id:sid,comment:c});},{placeholder:"Add a note for Ava"});}
+function dispName(s){
+  // "William021591608" = scraped name+phone glued together — show "William"
+  s=String(s==null?"":s).trim();
+  s=s.replace(/([A-Za-z).])\s*(?:\+?64|0)\d[\d\s-]{5,}$/,"$1").trim();
+  return s;
+}
 function updateStrip(j){
   var u=j.update;if(!u)return "";
-  return '<div style="margin:0 0 11px;padding:9px 12px;background:var(--ambbg);border:1px solid var(--amb);border-radius:5px">'+
-    '<div style="font-size:12.5px;color:var(--amb);font-weight:600"><i class="ti ti-arrow-back-up" style="vertical-align:-2px"></i> Ava spotted a reply from '+esc(u.from||j.customer||"the customer")+' · '+ago(u.when)+'</div>'+
-    (u.snippet?'<div style="font-size:12.5px;color:var(--ink2);margin:5px 0 9px">“'+esc(cleanTail(u.snippet))+'”</div>':'')+
-    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+  var snip=u.snippet?cleanTail(u.snippet):"";
+  if(snip.length>180)snip=snip.slice(0,180).replace(/\s+\S*$/,"")+"…";
+  return '<div style="margin:0 0 12px;padding:13px 15px;background:var(--ambbg);border:1px solid var(--amb);border-radius:6px">'+
+    '<div style="font-size:12.5px;color:var(--amb);font-weight:600;letter-spacing:.01em"><i class="ti ti-arrow-back-up" style="vertical-align:-2px"></i> '+esc(dispName(u.from||j.customer)||"The customer")+' replied · '+ago(u.when)+'</div>'+
+    (snip?'<div style="font-size:13px;color:var(--ink);line-height:1.55;margin:8px 0 0;padding-left:10px;border-left:2px solid var(--amb)">“'+esc(snip)+'”</div>':'')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">'+
       '<button class="btn btn-p" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'dismiss\')" title="Seen it, nothing to change — clears this banner"><i class="ti ti-check"></i> Handled</button>'+
       '<button class="btn" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'add\')" title="Pin it to the job\'s timeline, then clear"><i class="ti ti-plus"></i> Add to this job</button>'+
-      ((u.email_link||j.email_link)?'<a class="btn" href="'+esc(u.email_link||j.email_link)+'" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-mail-share"></i> Open email</a>':'')+
+      ((u.email_link||j.email_link)?'<a href="'+esc(u.email_link||j.email_link)+'" target="_blank" rel="noopener" style="text-decoration:none;font-size:12.5px;font-weight:600;color:var(--ink2);padding:6px 4px"><i class="ti ti-mail-share" style="vertical-align:-2px"></i> Open email</a>':'')+
     '</div></div>';
 }
 function ackUpdate(jid,sid,mode){post({company:CO,action:"ack_update",job_id:jid,suggestion_id:sid,mode:mode});}
@@ -333,7 +341,7 @@ function waitCard(j){
   if(j.stage==="quoting"||j.stage==="quote_sent"){
     var sent=j.stage==="quote_sent";
     var qhead='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-file-dollar"></i></div>'+
-      '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+      '<div style="flex:1"><div style="font-weight:600">'+esc(dispName(j.customer)||"")+' — '+esc(j.job||"")+'</div>'+
       '<div class="muted">'+(j.fergus_job?esc(j.fergus_job)+' · ':'')+(sent?'quote sent — Ava\'s watching for their reply':'draft in Fergus — price it, send it, then mark it sent')+mailLink(j.email_link)+'</div></div>'+
       (sent?'<span class="pill p-blu">quote · sent</span>':'<span class="pill p-warn">quote · drafted</span>')+'</div>';
     var qacts=sent
@@ -345,7 +353,7 @@ function waitCard(j){
   }
   var avail=!j.proposed_time; // assigned with no set time — waiting on the tradie's availability
   var head='<div class="row"><div class="ic" style="background:var(--ambbg);color:var(--amb)"><i class="ti ti-clock-hour-4"></i></div>'+
-    '<div style="flex:1"><div style="font-weight:600">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+    '<div style="flex:1"><div style="font-weight:600">'+esc(dispName(j.customer)||"")+' — '+esc(j.job||"")+'</div>'+
     '<div class="muted">'+esc(j.assigned_to||"crew")+' · '+(avail?'<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px"></i> asking when they’re free':esc(j.proposed_time||""))+(j.location?' · '+esc(j.location):'')+mailLink(j.email_link)+'</div></div>'+
     (j.stage==="confirmed"?'<span class="pill p-ok">confirmed</span>':'<span class="pill p-warn">asked · '+(avail?'availability':'waiting')+'</span>')+'</div>';
   var acts;
@@ -367,7 +375,7 @@ function bookedCard(j){
   var fergus=j.fergus_url?'<a class="btn" href="'+esc(j.fergus_url)+'" target="_blank" style="text-decoration:none"><i class="ti ti-external-link"></i> '+esc(j.fergus_job||"Fergus")+'</a>':(j.fergus_job?'<span class="pill p-blu">'+esc(j.fergus_job)+'</span>':'');
   return '<div class="card" style="margin-bottom:14px;padding:16px 18px">'+
     '<div class="bh"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'+
-    '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">'+esc(j.customer||"")+' — '+esc(j.job||"")+'</div>'+
+    '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">'+esc(dispName(j.customer)||"")+' — '+esc(j.job||"")+'</div>'+
     '<div class="muted">'+esc(j.assigned_to||"")+' · '+esc(j.proposed_time||"")+(j.location?' · '+esc(j.location):'')+mailLink(j.email_link)+'</div></div>'+
     '<div class="bs"><span class="pill p-ok">booked ✓</span>'+fergus+'</div></div>'+
     updateStrip(j)+timeline(j.timeline)+'</div>';
