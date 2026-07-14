@@ -22,29 +22,29 @@
 
   var css=document.createElement("style");
   css.textContent=
-    "#avacb{position:fixed;right:20px;bottom:20px;z-index:900;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#5B54E6,#7B74EE);color:#fff;font-size:22px;box-shadow:0 8px 24px rgba(91,84,230,.4);display:flex;align-items:center;justify-content:center;transition:transform .12s}" +
+    "#avacb{position:fixed;right:20px;bottom:20px;z-index:900;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#534AB7,#6F66DB);color:#fff;font-size:22px;box-shadow:0 8px 24px rgba(83,74,183,.4);display:flex;align-items:center;justify-content:center;transition:transform .12s}" +
     "#avacb:hover{transform:scale(1.06)}" +
     "#avacp,#avacp *{text-transform:none!important;letter-spacing:normal!important}" +
-    "#avacp{position:fixed;right:20px;bottom:84px;z-index:901;width:min(380px,calc(100vw - 40px));height:min(540px,calc(100vh - 120px));background:#fff;border:1px solid #E9E9E2;border-radius:12px;box-shadow:0 18px 60px rgba(20,20,24,.22);display:none;flex-direction:column;overflow:hidden;font-family:Inter,system-ui,sans-serif}" +
+    "#avacp{position:fixed;right:20px;bottom:84px;z-index:901;width:min(380px,calc(100vw - 40px));height:min(540px,calc(100vh - 120px));background:#fff;border:1px solid #D9D9CC;border-radius:12px;box-shadow:0 18px 60px rgba(20,20,24,.22);display:none;flex-direction:column;overflow:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}" +
     "#avacp.open{display:flex}" +
     "#avach{display:flex;align-items:center;gap:9px;padding:12px 14px;background:linear-gradient(135deg,#141418,#242432);color:#fff}" +
     "#avach .t{font-size:14px;font-weight:600}#avach .s{font-size:11px;color:#b9b9c9}" +
-    "#avacm{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;background:#F7F7F4}" +
+    "#avacm{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;background:#FAF8F4}" +
     ".avamsg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}" +
-    ".avamsg.u{align-self:flex-end;background:#5B54E6;color:#fff;border-bottom-right-radius:4px}" +
-    ".avamsg.a{align-self:flex-start;background:#fff;border:1px solid #E9E9E2;color:#141418;border-bottom-left-radius:4px}" +
-    ".avamsg.think{color:#67676E;font-style:italic;background:#fff;border:1px dashed #E9E9E2}" +
-    "#avacf{display:flex;gap:8px;padding:10px;border-top:1px solid #E9E9E2;background:#fff}" +
-    "#avaci{flex:1;border:1px solid #E9E9E2;border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;outline:none;resize:none;max-height:90px}" +
-    "#avaci:focus{border-color:#5B54E6}" +
-    "#avacs{border:none;background:#5B54E6;color:#fff;border-radius:8px;padding:0 14px;font-size:15px;cursor:pointer}" +
+    ".avamsg.u{align-self:flex-end;background:#534AB7;color:#fff;border-bottom-right-radius:4px}" +
+    ".avamsg.a{align-self:flex-start;background:#fff;border:1px solid #D9D9CC;color:#141418;border-bottom-left-radius:4px}" +
+    ".avamsg.think{color:#67676E;font-style:italic;background:#fff;border:1px dashed #D9D9CC}" +
+    "#avacf{display:flex;gap:8px;padding:10px;border-top:1px solid #D9D9CC;background:#fff}" +
+    "#avaci{flex:1;border:1px solid #D9D9CC;border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;outline:none;resize:none;max-height:90px}" +
+    "#avaci:focus{border-color:#FF6A1A}" +
+    "#avacs{border:none;background:#FF6A1A;color:#fff;border-radius:8px;padding:0 14px;font-size:15px;cursor:pointer}" +
     "#avacs:disabled{opacity:.5;cursor:default}";
   document.head.appendChild(css);
 
   var bub=document.createElement("button");bub.id="avacb";bub.title="Chat to Ava";bub.innerHTML="💬";
   var panel=document.createElement("div");panel.id="avacp";
   panel.innerHTML=
-    '<div id="avach"><div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#5B54E6,#7B74EE);display:flex;align-items:center;justify-content:center;font-weight:700">A</div>'+
+    '<div id="avach"><div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#534AB7,#6F66DB);display:flex;align-items:center;justify-content:center;font-weight:700">A</div>'+
     '<div style="flex:1"><div class="t">Ava</div><div class="s">can search your inbox &amp; sort the board</div></div>'+
     '<button id="avacx" style="background:none;border:none;color:#b9b9c9;font-size:18px;cursor:pointer">×</button></div>'+
     '<div id="avacm"></div>'+

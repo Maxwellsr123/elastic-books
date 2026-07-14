@@ -7,14 +7,14 @@
 <script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){document.title="DEV · "+document.title;});</script>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F7F4;--card:#fff;--line:#E9E9E2;--ink:#141418;--ink2:#67676E;--ink3:#9C9CA2;--ind:#5B54E6;--indbg:#EEEDFB;--indtx:#3D36C4;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;--ind:#534AB7;--indbg:#EEEDFE;--indtx:#3F3795;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:26px}
-.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#5B54E6,#7B74EE);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#534AB7,#6F66DB);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
 .brand{font-weight:600}.brand span{color:var(--ink3);font-weight:400}
 .back{margin-left:auto;font-size:13px;color:var(--ink2);text-decoration:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:5px}
 h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
@@ -29,7 +29,7 @@ h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
 .p-ok{background:var(--grnbg);color:var(--grn)}
 .p-off{background:#f1f1ec;color:var(--ink3)}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 13px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;color:var(--ink)}
-.btn-p{background:var(--ind);color:#fff;border-color:var(--ind)}
+.btn-p{background:#FF6A1A;color:#fff;border-color:#FF6A1A}.btn-p:hover{background:#D2530F;border-color:#D2530F}
 .lnk{background:none;border:none;font-size:12px;font-weight:600;cursor:pointer;padding:3px 5px;border-radius:4px}
 .lnk.rec{color:var(--ind)}
 .lnk.disc{color:#B42318}
@@ -45,7 +45,7 @@ h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
   <div id="conn"><div class="card"><div class="sub" style="margin-left:0">Loading your connections…</div></div></div>
 </div>
 
-<div id="gate" style="display:none;position:fixed;inset:0;background:rgba(247,247,244,.98);z-index:100;align-items:center;justify-content:center;padding:20px">
+<div id="gate" style="display:none;position:fixed;inset:0;background:rgba(250,248,244,.98);z-index:100;align-items:center;justify-content:center;padding:20px">
   <div style="max-width:360px;text-align:center">
     <div class="logo" style="width:52px;height:52px;font-size:24px;margin:0 auto 14px"></div>
     <div style="font-weight:600;font-size:16px;margin-bottom:6px">Sign in to manage connections</div>
