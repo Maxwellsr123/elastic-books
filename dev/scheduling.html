@@ -156,23 +156,23 @@ h1{letter-spacing:-.03em}
     <div class="wrap">
       <div class="hero"><div class="spark"></div>
         <h2>Morning, Max 👋</h2>
-        <p>Jobs land in your inbox, Ava lines them up — you just say who and when.</p>
+        <p>Jobs book themselves now — Ava triages your inbox, lines up the crew, and confirms the customer. You only price the quotes.</p>
       </div>
       <details style="margin:-6px 0 18px;">
         <summary style="cursor:pointer;font-size:12.5px;color:var(--ink2);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-help-circle" style="font-size:15px"></i> How this works</summary>
         <div class="card" style="padding:14px 16px;margin-top:9px;font-size:13px;color:var(--ink2);line-height:1.65">
-          ① A customer emails about a job — <b style="color:var(--ink)">Ava spots it</b> and puts it on this board (tagged job / quote-first / not-a-job).<br>
-          ② You hit <b style="color:var(--ink)">Assign</b>, pick a tradie and a time — <b style="color:var(--ink)">Ava asks them in your team Slack</b>. They just reply 👍 or 👎 in the chat.<br>
-          ③ They say yes → Ava <b style="color:var(--ink)">books it in Fergus and emails the customer</b> to confirm. Says no → it comes straight back to you for a new time or tradie.<br>
-          Works from here or entirely from Slack — your crew never needs this dashboard.
+          ① A customer emails — <b style="color:var(--ink)">Ava reads it and decides</b>: real job, quote, or neither. Can’t tell? <b style="color:var(--ink)">She asks the customer</b> straight back.<br>
+          ② A <b style="color:var(--ink)">job</b>: Ava picks whoever’s free, asks them in your team Slack — their 👍 <b style="color:var(--ink)">books it in Fergus</b> and the customer gets confirmed by email, from your address, signed by Ava.<br>
+          ③ A <b style="color:var(--ink)">quote</b>: Ava drafts it in Fergus ready for you to <b style="color:var(--ink)">price &amp; send</b>. She spots the send, checks in with the customer, and their yes books it like any job.<br>
+          Every move lands in your Slack as it happens — step in only when Ava flags something.
         </div>
       </details>
 
       <div id="connrow" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 16px"></div>
 
       <div class="grid g4">
-        <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New requests</div><div class="n" id="s_new">—</div><div class="d">needs a tradie</div></div>
-        <div class="card stat"><div class="l"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on crew</div><div class="n" id="s_wait">—</div><div class="d">asked, no reply yet</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-inbox" style="color:var(--ind)"></i> New</div><div class="n" id="s_new">—</div><div class="d">Ava’s sorting these</div></div>
+        <div class="card stat"><div class="l"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on crew</div><div class="n" id="s_wait">—</div><div class="d">asked in Slack — a 👍 books it</div></div>
         <div class="card stat"><div class="l"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked</div><div class="n" id="s_booked">—</div><div class="d">in Fergus + customer told</div></div>
         <div class="card stat"><div class="l"><i class="ti ti-users" style="color:var(--blu)"></i> Your crew</div><div class="n" id="s_crew" style="font-size:19px">—</div><div class="d">from your team</div></div>
       </div>
@@ -185,8 +185,11 @@ h1{letter-spacing:-.03em}
       <div class="sec" style="display:flex;align-items:center;margin-top:22px"><i class="ti ti-calendar" style="color:var(--ind)"></i> Your calendar <span class="cnt" id="cal_hint" style="margin-right:auto"></span><button class="btn" style="padding:5px 9px" onclick="calNav(-1)" title="Previous week"><i class="ti ti-chevron-left"></i></button><button class="btn" style="padding:5px 9px" onclick="calNav(0)">Today</button><button class="btn" style="padding:5px 9px" onclick="calNav(1)" title="Next week"><i class="ti ti-chevron-right"></i></button></div>
       <div class="card" id="cal" style="padding:0;overflow-x:auto"></div>
 
-      <div class="sec" style="margin-top:30px"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — assign a tradie <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
+      <div class="sec" style="margin-top:30px"><i class="ti ti-inbox" style="color:var(--ind)"></i> New — Ava’s sorting <span class="pill p-ok" style="margin-left:2px">● Live from Gmail</span></div>
       <div class="card" id="lane_new"><div class="row"><div style="flex:1" class="muted">Reading your inbox…</div></div></div>
+
+      <div class="sec" style="margin-top:30px"><i class="ti ti-file-dollar" style="color:var(--amb)"></i> Quotes <span class="cnt" id="quote_hint"></span></div>
+      <div class="card" id="lane_quotes"></div>
 
       <div class="sec" style="margin-top:30px"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Waiting on the crew <span class="cnt" id="wait_hint"></span></div>
       <div class="card" id="lane_wait"></div>
@@ -194,7 +197,7 @@ h1{letter-spacing:-.03em}
       <div class="sec" style="margin-top:30px"><i class="ti ti-calendar-check" style="color:var(--grn)"></i> Booked <span class="cnt">confirmed &amp; the customer's been told</span></div>
       <div id="lane_booked"></div>
 
-      <p style="font-size:12px;color:var(--ink3);margin:24px 2px 0"><b style="color:var(--ink2)">Live:</b> requests are read from KPA's Gmail; assigning messages your crew in the team Slack; the timeline is the real trail. The final Fergus job + customer email runs through Ava's confirmed flow (how Suzanne was done) — one tap away from fully automatic.</p>
+      <p style="font-size:12px;color:var(--ink3);margin:24px 2px 0"><b style="color:var(--ink2)">Fully automatic:</b> Ava sweeps new mail every 10 minutes — books confident jobs, drafts quotes in Fergus, and asks the customer when she can’t tell. Every action she takes gets a line in your Slack admin channel.</p>
     </div>
   </main>
 </div>
@@ -259,7 +262,9 @@ function ago(t){try{var h=Math.round((Date.now()-new Date(t).getTime())/3.6e6);i
 function clock(t){try{var d=new Date(t);return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+", "+d.toLocaleTimeString("en-NZ",{hour:"numeric",minute:"2-digit"}).replace(" ","").toLowerCase();}catch(e){return"";}}
 function crewOpts(sel){return CREW.map(function(c){var v=c.slack_id||("fergus:"+(c.fergus_id||c.name));return '<option value="'+esc(v)+'" data-name="'+esc(c.name)+'" data-slack="'+esc(c.slack_id||"")+'"'+(sel===v?" selected":"")+'>'+esc(c.name)+(c.slack_id?"":" · not on Slack")+'</option>';}).join("");}
 var ICO={mail:"ti-mail",user:"ti-user",send:"ti-send",message:"ti-message-2",check:"ti-check",x:"ti-x",clock:"ti-clock","calendar-check":"ti-calendar-check"};
-function timeline(tl){if(!tl||!tl.length)return"";return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(s.text)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
+// Strip quoted-reply tails ("> On 2 Jul, max@ wrote: …") so cards read clean.
+function cleanTail(s){s=String(s==null?"":s);var m=s.search(/(\r?\n)?\s*(>+\s?)?On .{5,90}wrote:/);if(m>=0)s=s.slice(0,m);s=s.split(/\r?\n\s*>/)[0];return s.replace(/\s+/g," ").trim();}
+function timeline(tl){if(!tl||!tl.length)return"";var prev=null;return '<div class="tl">'+tl.map(function(s){var w=s.who||"ava";var tx=cleanTail(s.text);if(tx===prev)return "";prev=tx;return '<div class="step"><div class="dot who-'+w+'"><i class="ti '+(ICO[s.icon]||"ti-point")+'"></i></div><div class="tx">'+esc(tx)+'<span class="tt">'+clock(s.t)+'</span></div></div>';}).join("")+'</div>';}
 
 // Direct link to the Gmail thread the card came from — evidence one click away.
 function mailLink(u){return u?' · <a href="'+esc(u)+'" target="_blank" rel="noopener" style="color:var(--ind);text-decoration:none;white-space:nowrap"><i class="ti ti-mail-share" style="font-size:11px;vertical-align:-1px"></i> email</a>':'';}
@@ -315,10 +320,10 @@ function updateStrip(j){
   var u=j.update;if(!u)return "";
   return '<div style="margin:0 0 11px;padding:9px 12px;background:var(--ambbg);border:1px solid var(--amb);border-radius:5px">'+
     '<div style="font-size:12.5px;color:var(--amb);font-weight:600"><i class="ti ti-arrow-back-up" style="vertical-align:-2px"></i> Ava spotted a reply from '+esc(u.from||j.customer||"the customer")+' · '+ago(u.when)+'</div>'+
-    (u.snippet?'<div style="font-size:12.5px;color:var(--ink2);margin:5px 0 9px">“'+esc(u.snippet)+'”</div>':'')+
+    (u.snippet?'<div style="font-size:12.5px;color:var(--ink2);margin:5px 0 9px">“'+esc(cleanTail(u.snippet))+'”</div>':'')+
     '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-      '<button class="btn btn-p" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'add\')"><i class="ti ti-plus"></i> Add to this job</button>'+
-      '<button class="btn" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'dismiss\')">Not related</button>'+
+      '<button class="btn btn-p" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'dismiss\')" title="Seen it, nothing to change — clears this banner"><i class="ti ti-check"></i> Handled</button>'+
+      '<button class="btn" onclick="ackUpdate(\''+j.id+'\',\''+u.suggestion_id+'\',\'add\')" title="Pin it to the job\'s timeline, then clear"><i class="ti ti-plus"></i> Add to this job</button>'+
       ((u.email_link||j.email_link)?'<a class="btn" href="'+esc(u.email_link||j.email_link)+'" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-mail-share"></i> Open email</a>':'')+
     '</div></div>';
 }
@@ -530,9 +535,17 @@ function load(){
     var news=(d.newRequests||[]).concat(jobs.filter(function(j){return j.lane==="new";}).map(function(j){j.kind="job";return j;}));
     var ord={job:0,quote:1,not_job:2};
     news.sort(function(a,b){return (ord[a.kind||"job"]||0)-(ord[b.kind||"job"]||0);});
-    var waits=jobs.filter(function(j){return j.lane==="waiting";});
+    var isQuoteStage=function(j){return j.stage==="quoting"||j.stage==="quote_sent";};
+    var quotes=jobs.filter(isQuoteStage);
+    var waits=jobs.filter(function(j){return j.lane==="waiting"&&!isQuoteStage(j);});
     var booked=jobs.filter(function(j){return j.lane==="booked";});
+    document.getElementById("s_wait").textContent=waits.length; // crew only — quotes have their own lane
     document.getElementById("lane_new").innerHTML=news.length?news.map(newCard).join(""):'<div class="row"><div style="flex:1" class="muted"><i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing waiting — Ava\'s watching your inbox.</div></div>';
+    var lq=document.getElementById("lane_quotes");
+    if(lq){lq.innerHTML=quotes.length?quotes.map(waitCard).join(""):'<div class="row"><div style="flex:1" class="muted">No quotes in motion — new ones land here drafted in Fergus, ready to price.</div></div>';
+      var qDraft=quotes.filter(function(j){return j.stage==="quoting";}).length,qSent=quotes.length-qDraft,qBits=[];
+      if(qDraft)qBits.push(qDraft+" to price & send");if(qSent)qBits.push(qSent+" with the customer");
+      var qh=document.getElementById("quote_hint");if(qh)qh.textContent=qBits.join(" · ");}
     var lw=document.getElementById("lane_wait");lw.innerHTML=waits.length?waits.map(waitCard).join(""):'<div class="row"><div style="flex:1" class="muted">No one waiting on a reply.</div></div>';
     lw.parentNode.style.display="block";document.getElementById("wait_hint").textContent=waits.length?(waits.length+" out with the crew"):"";
     document.getElementById("lane_booked").innerHTML=booked.length?booked.map(bookedCard).join(""):'<div class="card"><div class="row"><div style="flex:1" class="muted">No booked jobs yet.</div></div></div>';
