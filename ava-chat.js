@@ -56,7 +56,7 @@
   function render(){
     var m=box();if(!m)return;
     var h=hist();
-    m.innerHTML=h.length?"":'<div class="avamsg a">Hey — I run the scheduling here. Ask me anything: <b>"find the job I think you missed from Dave"</b>, <b>"what\'s on the board?"</b>, <b>"did William get booked?"</b></div>';
+    m.innerHTML=h.length?"":'<div class="avamsg a">Hey, I run the scheduling here. Ask me anything: "find the job I think you missed from Dave", "what\'s on the board?", "did William get booked?"</div>';
     h.forEach(function(x){var d=document.createElement("div");d.className="avamsg "+(x.role==="user"?"u":"a");d.textContent=x.content;m.appendChild(d);});
     m.scrollTop=m.scrollHeight;
   }
