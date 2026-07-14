@@ -24,6 +24,7 @@
   css.textContent=
     "#avacb{position:fixed;right:20px;bottom:20px;z-index:900;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#5B54E6,#7B74EE);color:#fff;font-size:22px;box-shadow:0 8px 24px rgba(91,84,230,.4);display:flex;align-items:center;justify-content:center;transition:transform .12s}" +
     "#avacb:hover{transform:scale(1.06)}" +
+    "#avacp,#avacp *{text-transform:none!important;letter-spacing:normal!important}" +
     "#avacp{position:fixed;right:20px;bottom:84px;z-index:901;width:min(380px,calc(100vw - 40px));height:min(540px,calc(100vh - 120px));background:#fff;border:1px solid #E9E9E2;border-radius:12px;box-shadow:0 18px 60px rgba(20,20,24,.22);display:none;flex-direction:column;overflow:hidden;font-family:Inter,system-ui,sans-serif}" +
     "#avacp.open{display:flex}" +
     "#avach{display:flex;align-items:center;gap:9px;padding:12px 14px;background:linear-gradient(135deg,#141418,#242432);color:#fff}" +
