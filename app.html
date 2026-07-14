@@ -368,7 +368,7 @@ h1{letter-spacing:-.03em}
     function stat(name,ic,col,ok,detail,last){
       return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
     }
-    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:var(--ind);font-weight:500;text-decoration:none">Manage</a></div>'+
+    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:#D2530F;font-weight:600;text-decoration:none">Manage</a></div>'+
       stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
       stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false)+
       stat("Fergus","ti-tools","#C2410C",g.fergus,"",true);

@@ -464,7 +464,7 @@ function renderConns(cn){
   el.style.display="block";
   var inb=cn.gmail_inboxes||0;
   el.innerHTML='<div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 16px 12px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:var(--ind);font-weight:500;text-decoration:none">Manage</a></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:#D2530F;font-weight:600;text-decoration:none">Manage</a></div>'
     +connStat("Gmail","ti-mail","#EA4335",cn.gmail,inb?(inb+" inbox"+(inb>1?"es":"")):"",false)
     +connStat("Xero","ti-calculator","#13B5EA",cn.xero,"",false)
     +connStat("Fergus","ti-tools","#C2410C",cn.fergus,"",true)
