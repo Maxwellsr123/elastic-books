@@ -332,7 +332,13 @@ h1{letter-spacing:-.03em}
     // Ava's inbox scan can occasionally pile a personal/non-business receipt — one
     // click drops it from the pile (chase-feedback → ignored=true, filtered out).
     var ig='<button class="tbtn draw" data-fb="ignore" data-id="'+id+'" title="Not a business expense — remove it from the pile"><i class="ti ti-eye-off"></i> Ignore</button>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.</div></div><span class="pill p-ind">waiting</span></div>'+'<div class="think"><div class="acts">'+rc+ig+'</div></div>'+'</div>';
+    // Jewel's tick: mark the pile receipts she has already uploaded into Xero, so a
+    // second pass over the pile never re-uploads one. State only — the card stays put.
+    var vc=i.va_checked
+      ?'<button class="tbtn on" data-fb="va_uncheck" data-id="'+id+'" title="Marked as already uploaded into Xero — click to untick"><i class="ti ti-checkbox"></i> In Xero</button>'
+      :'<button class="tbtn" data-fb="va_check" data-id="'+id+'" title="Tick once you’ve uploaded this receipt into Xero"><i class="ti ti-square"></i> Uploaded to Xero?</button>';
+    var pill=i.va_checked?'<span class="pill" style="background:#e6f4ea;color:#0e7a50">in Xero ✓</span>':'<span class="pill p-ind">waiting</span>';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.</div></div>'+pill+'</div>'+'<div class="think"><div class="acts">'+rc+vc+ig+'</div></div>'+'</div>';
   }
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;

@@ -200,8 +200,15 @@ function renderPanel(id){
   var hunting=it.filter(function(i){return i.receipt_incoming;}).length;
   var pile=it.filter(function(i){return i.lane==="pile";}).length;
 
-  var html='<div class="drop"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
-    +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Ava reads every line, matches receipts, and asks the owner the rest.</div>'
+  // "when did we last feed this client a report?" — the answer Max kept having to guess
+  var lastRep='';
+  if(cl.last_report_drop){
+    var d=new Date(cl.last_report_drop),days=Math.floor((Date.now()-d.getTime())/864e5);
+    var agoTxt=days<=0?"today":(days===1?"yesterday":days+" days ago");
+    lastRep=' &nbsp;·&nbsp; Last report: <b>'+d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</b> ('+agoTxt+')'+(days>=14?' <span style="color:var(--amb)">⚠ getting stale</span>':'');
+  } else { lastRep=' &nbsp;·&nbsp; <b>No report dropped yet</b>'; }
+  var html='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
+    +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
     +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
     +'<input type="file" class="bfile" data-id="'+id+'" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">'
     +'<div class="bproc muted" style="margin-top:9px;min-height:15px"></div></div>';
@@ -256,10 +263,8 @@ function loadFeatures(id){
     fetch(API+"/reminders-list?company="+id).then(function(r){return r.json();}).catch(function(){return null;})
   ]).then(function(rs){FCACHE[id]={sched:rs[0],rem:rs[1]};render(FCACHE[id]);});
 }
-document.addEventListener("change",function(e){
-  var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
-  var co=f.getAttribute("data-id"),proc=f.closest(".drop").querySelector(".bproc");
-  var files=Array.prototype.slice.call(f.files);f.value="";track(co,"report_drop");
+function uploadReport(co,proc,files){
+  track(co,"report_drop");
   var done=0;
   (function next(idx){
     if(idx>=files.length){proc.textContent="Ava is hunting Gmail for receipts…";
@@ -274,6 +279,22 @@ document.addEventListener("change",function(e){
         .then(function(){done++;next(idx+1);}).catch(function(){next(idx+1);});};
     rd.readAsDataURL(file);
   })(0);
+}
+document.addEventListener("change",function(e){
+  var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
+  var co=f.getAttribute("data-id"),proc=f.closest(".drop").querySelector(".bproc");
+  var files=Array.prototype.slice.call(f.files);f.value="";
+  uploadReport(co,proc,files);
+});
+// the box says "Drop the reconciliation report" — so let an actual drag-and-drop work
+document.addEventListener("dragover",function(e){var d=e.target.closest&&e.target.closest(".drop");if(d){e.preventDefault();d.style.outline="2px dashed var(--indtx)";d.style.outlineOffset="-2px";}});
+document.addEventListener("dragleave",function(e){var d=e.target.closest&&e.target.closest(".drop");if(d&&!d.contains(e.relatedTarget)){d.style.outline="";}});
+document.addEventListener("drop",function(e){
+  var d=e.target.closest&&e.target.closest(".drop");if(!d)return;
+  e.preventDefault();d.style.outline="";
+  var files=Array.prototype.slice.call((e.dataTransfer&&e.dataTransfer.files)||[]);
+  if(!files.length)return;
+  uploadReport(d.getAttribute("data-co"),d.querySelector(".bproc"),files);
 });
 function refresh(co){
   fetch(API+"/chase-list?company="+co).then(function(r){return r.json();}).then(function(cl){CACHE[co]=cl;renderPanel(co);});
