@@ -188,7 +188,12 @@ function itemRow(i,actions){
   var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>'
     :(i.receipt==="have"?'<span class="muted" style="white-space:nowrap"><i class="ti ti-paperclip" style="vertical-align:-2px"></i> on the Xero txn ✓</span>':'');
   var extra=(i.extra_receipts||[]).map(function(x){return '<a href="'+x.url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">'+esc(x.filename)+'</a>';}).join(" ");
-  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+(i.job_ref?' · <b>'+esc(i.job_ref)+'</b>':"")+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div></div>'+rc+extra+actions+'</div>';
+  // Jewel needs to see which costs belong to jobs: bold job # when the owner set one,
+  // "job cost" when ticked without a #, and Ava's materials hunch when unanswered.
+  var job=i.job_ref?' · <b>'+esc(i.job_ref)+'</b>'
+    :(i.is_job===true?' · <b>job cost</b> <span class="muted">(no job #)</span>'
+    :(i.is_job==null&&i.ava_job?' · <span style="color:#9a6700">job? looks like materials — ask the owner</span>':''));
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+job+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div></div>'+rc+extra+actions+'</div>';
 }
 function renderPanel(id){
   var p=document.getElementById("p-"+id),cl=CACHE[id];
