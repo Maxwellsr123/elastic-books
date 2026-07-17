@@ -265,18 +265,24 @@ function loadFeatures(id){
 }
 function uploadReport(co,proc,files){
   track(co,"report_drop");
-  var done=0;
+  // a failed read must SAY so — this used to count any HTTP response as "read",
+  // so two 502s still showed "Done — 2 files read" (Max, 17 Jul)
+  var done=0,lines=0,matched=0,cleared=0,fails=[];
   (function next(idx){
-    if(idx>=files.length){proc.textContent="Ava is hunting Gmail for receipts…";
+    if(idx>=files.length){
+      if(fails.length){proc.innerHTML='<span style="color:#b42318"><b>'+fails.length+' file'+(fails.length===1?"":"s")+' NOT read:</b><br>'+fails.map(esc).join("<br>")+'</span>';refresh(co);return;}
+      proc.textContent="Ava is hunting Gmail for receipts…";
       fetch(API+"/chase-hunt",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co})})
-        .then(function(){proc.textContent="Done — "+done+" file"+(done===1?"":"s")+" read.";refresh(co);})
+        .then(function(){proc.textContent="Done — "+done+" file"+(done===1?"":"s")+" read: "+lines+" line"+(lines===1?"":"s")+(matched?", "+matched+" matched a receipt":"")+(cleared?", "+cleared+" ticked off as reconciled in Xero":"")+".";refresh(co);})
         .catch(function(){refresh(co);});
       return;}
     var file=files[idx];proc.textContent="Ava is reading "+file.name+" ("+(idx+1)+"/"+files.length+")…";
     var rd=new FileReader();
     rd.onload=function(){var b64=String(rd.result).split(",")[1];
       fetch(API+"/chase-drop",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co,kind:"bankline",file_base64:b64,mime:file.type||"application/octet-stream",filename:file.name})})
-        .then(function(){done++;next(idx+1);}).catch(function(){next(idx+1);});};
+        .then(function(r){return r.json().catch(function(){return {error:"server error "+r.status};});})
+        .then(function(m){if(m&&m.ok){done++;lines+=(m.count||0);matched+=(m.matched||0);cleared+=(m.cleared||0);}else{fails.push(file.name+" — "+((m&&m.error)||"couldn't be read"));}next(idx+1);})
+        .catch(function(){fails.push(file.name+" — network error");next(idx+1);});};
     rd.readAsDataURL(file);
   })(0);
 }
