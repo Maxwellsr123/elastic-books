@@ -201,6 +201,7 @@ function itemRow(i,actions){
     :i.receipt==="have"?(i.dropped?'receipt uploaded by the owner/team':(String(i.source||"").indexOf("gmail")===0?'Ava found the receipt in email':'receipt attached in Xero'))
     :i.receipt==="cant_find"?'owner says the receipt is lost'
     :i.receipt==="not_needed"?(i.receipt_required===false?'owner said no receipt needed':((i.feedback==="up"||i.kind_confirmed)?'owner confirmed — no receipt owed':'no receipt owed'))
+    :i.receipt==="needed"?(i.receipt_incoming?'receipt on its way by email':'receipt still owed')
     :'';
   if(why)why=' · <span style="color:var(--indtx)">'+why+(i.feedback==="up"&&i.receipt==="have"?' · owner 👍':'')+'</span>';
   // Ava's read on WHAT the payment is (with her reasoning on hover) — the same summary

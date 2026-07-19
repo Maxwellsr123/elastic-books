@@ -276,6 +276,9 @@ h1{letter-spacing:-.03em}
       ?('<button class="tbtn" data-attach="'+id+'" style="border-color:var(--ind);color:var(--indtx)"><i class="ti ti-paperclip"></i> Attach receipt</button>'
         +'<button class="tbtn" data-fb="no_receipt" data-id="'+id+'">Not needed</button>'
         +'<button class="tbtn" data-fb="cant_find" data-id="'+id+'">Can\'t find it</button>'
+        // confirmed BEFORE the job ask existed (or skipped it): job-looking cost with
+        // no job # still owes that answer — ask here too (Max, 19 Jul — Pilehire)
+        +((i.is_job===true||(i.is_job==null&&i.ava_job))&&!i.job_ref?'<input type="text" class="jref-ask" data-id="'+id+'" placeholder="Job #" title="Which job does this cost belong to?" style="width:100px;padding:7px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12.5px"><button class="tbtn jref-save" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-check"></i> Save job</button>':'')
         +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
       :('<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
         +(i.receipt==="have"?'':'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>')
