@@ -193,7 +193,20 @@ function itemRow(i,actions){
   var job=i.job_ref?' · <b>'+esc(i.job_ref)+'</b>'
     :(i.is_job===true?' · <b>job cost</b> <span class="muted">(no job #)</span>'
     :(i.is_job==null&&i.ava_job?' · <span style="color:#9a6700">job? looks like materials — ask the owner</span>':''));
-  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+job+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div></div>'+rc+extra+actions+'</div>';
+  // GST only when the owner actually answered — silence means unasked, not "no"
+  var gst=i.gst===true?' · <b>GST</b>':(i.gst===false?' · <b>no GST</b>':'');
+  // why is this line reconcilable? A receipt link alone doesn't say whether a human
+  // signed off — name the proof and who gave it on every row (Jewel, 18 Jul)
+  var why=i.personal?'owner coded it personal'
+    :i.receipt==="have"?(i.dropped?'receipt uploaded by the owner/team':(String(i.source||"").indexOf("gmail")===0?'Ava found the receipt in email':'receipt attached in Xero'))
+    :i.receipt==="cant_find"?'owner says the receipt is lost'
+    :i.receipt==="not_needed"?(i.receipt_required===false?'owner said no receipt needed':((i.feedback==="up"||i.kind_confirmed)?'owner confirmed — no receipt owed':'no receipt owed'))
+    :'';
+  if(why)why=' · <span style="color:var(--indtx)">'+why+(i.feedback==="up"&&i.receipt==="have"?' · owner 👍':'')+'</span>';
+  // Ava's read on WHAT the payment is (with her reasoning on hover) — the same summary
+  // the owner confirmed, so Jewel codes with context, not just a supplier name (Max, 19 Jul)
+  var ins=i.insight?'<div class="rs" style="color:var(--indtx);margin-top:2px" title="'+esc(i.reasoning||"")+'">💡 '+esc(i.insight)+(i.confidence!=null?' <span style="color:var(--ink3)">'+Math.round(i.confidence*100)+'% sure</span>':'')+'</div>':'';
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+gst+job+why+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div>'+ins+'</div>'+rc+extra+actions+'</div>';
 }
 function renderPanel(id){
   var p=document.getElementById("p-"+id),cl=CACHE[id];

@@ -278,7 +278,7 @@ h1{letter-spacing:-.03em}
         +'<button class="tbtn" data-fb="cant_find" data-id="'+id+'">Can\'t find it</button>'
         +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>')
       :('<button class="tbtn" data-fb="up" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-thumb-up"></i> Yep, spot on</button>'
-        +'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>'
+        +(i.receipt==="have"?'':'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>')
         +'<button class="tbtn" data-editrow="'+id+'"><i class="ti ti-adjustments-alt"></i> Not quite</button>'
         +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>');
     var box='<div class="think">'+head
@@ -288,8 +288,10 @@ h1{letter-spacing:-.03em}
       +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
         +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
       +cwrap+'</div>';
-    var rpill=noR?'<span class="pill p-ok">no receipt needed</span>':i.receipt_incoming?'<span class="pill p-ind">receipt on its way</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
-    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rpill+'</div>'+box+'</div>';
+    // a matched line can land here just to ask WHAT it's for — never re-ask for the receipt
+    var rpill=i.receipt==="have"?'<span class="pill p-ok">receipt ✓ · what\'s it for?</span>':noR?'<span class="pill p-ok">no receipt needed</span>':i.receipt_incoming?'<span class="pill p-ind">receipt on its way</span>':i.lane==="await_receipt"?'<span class="pill p-warn">confirmed · send receipt</span>':'<span class="pill p-warn">send receipt</span>';
+    var rview=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;color:var(--ind);text-decoration:none;margin-right:8px;white-space:nowrap">View ↗</a>':'';
+    return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-receipt"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+(i.date||"")+(i.account?(" · "+i.account):"")+'</div></div>'+rview+rpill+'</div>'+box+'</div>';
   }
   function doneRow(i){
     if(i.personal){return '<div class="row"><div class="ic"><i class="ti ti-user-heart" style="color:var(--ind)"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">Personal · '+(i.account||"Drawings")+' — no receipt needed</div></div><button class="tbtn" data-fb="business" data-id="'+i.id+'" title="This is filed as personal (owner drawings). Click if it&#39;s actually a business expense and should go back on the books.">Not personal → business expense</button></div>';}
@@ -475,6 +477,19 @@ h1{letter-spacing:-.03em}
   document.addEventListener("click",function(e){
     var b=e.target.closest("[data-fb]");
     if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
+      // 👍 on a job-looking cost with no job # yet: confirm, then ask WHICH job right
+      // here — the job # box was buried behind "Not quite" (Max, 19 Jul — Pilehire)
+      if(act==="up"){
+        var itUp=null;for(var ui=0;ui<U_ITEMS.length;ui++){if(U_ITEMS[ui].id===id){itUp=U_ITEMS[ui];break;}}
+        if(itUp&&!itUp.job_ref&&(itUp.is_job===true||(itUp.is_job==null&&itUp.ava_job))){
+          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:"up"})}).catch(function(){});
+          var jcard=b.closest(".qitem"),jth=jcard&&jcard.querySelector(".think");
+          if(jth){jth.innerHTML='<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed. Which job is this for?</div>'
+            +'<div style="display:flex;gap:6px;flex-wrap:wrap"><input type="text" class="jref-ask" data-id="'+id+'" placeholder="Job # e.g. KPA-2711" style="width:160px;padding:7px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12.5px"><button class="tbtn jref-save" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-check"></i> Save</button><button class="tbtn jref-skip" data-id="'+id+'" data-nojob="1">Not for a job</button><button class="tbtn jref-skip" data-id="'+id+'">Skip</button></div>';
+            var ja=jth.querySelector(".jref-ask");if(ja)ja.focus();}
+          else loadList();
+          return;}
+      }
       // 👍 confirm reliably moves the item out of this list — drop it instantly, sync after
       if(act==="up"&&U_FILTER==="confirm"){
         U_ITEMS=U_ITEMS.filter(function(i){return i.id!==id;});
@@ -487,6 +502,15 @@ h1{letter-spacing:-.03em}
         up:["Confirmed — Ava takes it from here.",null]};
       var dm=doneMsg[act];if(dm)setTimeout(function(){toast(dm[0],dm[1],id);},400);
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
+    var js=e.target.closest(".jref-save");
+    if(js){var jsid=js.getAttribute("data-id");var jin=document.querySelector('.jref-ask[data-id="'+jsid+'"]');var jval=jin?jin.value.trim():"";
+      js.style.opacity=".5";
+      (jval?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:jsid,action:"job_ref",job_ref:jval})}):Promise.resolve())
+        .then(function(){toast(jval?("Tagged to "+jval+" — Ava takes it from here."):"Confirmed — Ava takes it from here.");loadList();}).catch(function(){loadList();});return;}
+    var jk=e.target.closest(".jref-skip");
+    if(jk){var jkid=jk.getAttribute("data-id");jk.style.opacity=".5";
+      (jk.getAttribute("data-nojob")?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:jkid,action:"no_job"})}):Promise.resolve())
+        .then(function(){toast("Confirmed — Ava takes it from here.");loadList();}).catch(function(){loadList();});return;}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
     var cs=e.target.closest(".cmt-send");
@@ -502,6 +526,11 @@ h1{letter-spacing:-.03em}
     var rp=e.target.closest("[data-reopen]");
     if(rp){var pid=rp.getAttribute("data-reopen");rp.style.opacity=".5";
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key!=="Enter")return;
+    var a=e.target&&e.target.closest?e.target.closest(".jref-ask"):null;
+    if(a){var sv=document.querySelector('.jref-save[data-id="'+a.getAttribute("data-id")+'"]');if(sv)sv.click();}
   });
   document.addEventListener("change",function(e){
     var j=e.target.closest(".jref-in");
