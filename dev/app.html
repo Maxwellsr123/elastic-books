@@ -261,7 +261,10 @@ h1{letter-spacing:-.03em}
       +jrow("For a job?",'<button class="tbtn'+jobY+'" data-fb="job" data-id="'+id+'">Yes</button><button class="tbtn'+jobN+'" data-fb="no_job" data-id="'+id+'">No</button><input type="text" class="jref-in" data-id="'+id+'" value="'+esc(i.job_ref||"")+'" placeholder="Job #" title="Which job is this cost for? e.g. KPA-2711" style="width:96px;padding:6px 9px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12px">')
       +jrow("GST",'<button class="tbtn'+gstY+'" data-fb="gst" data-id="'+id+'">Yes</button><button class="tbtn'+gstN+'" data-fb="no_gst" data-id="'+id+'">No</button>');
     // Ava's best read, stated once — the fast path is a single confirm, not a grid.
-    var typeTxt=i.personal?"personal spend":"a business expense";
+    // "Drawings" IS personal — a card reading "business expense (Drawings)" contradicts
+    // itself (Max, 20 Jul). Trust the suggested account, not just the archived flag.
+    var acctPersonal=/drawing|personal/i.test(String(i.account||""))||i.ava_personal;
+    var typeTxt=(i.personal||acctPersonal)?"personal spend, not a business expense":"a business expense";
     var jobTxt=(i.is_job===true||(i.is_job!==false&&i.ava_job))?" for a job":"";
     var gstTxt=i.gst===true?", incl. GST":(i.gst===false?", no GST":"");
     var read='Looks like '+typeTxt+jobTxt+gstTxt+(i.account?' ('+esc(i.account)+')':'')+'.';
