@@ -173,6 +173,18 @@ document.addEventListener("click",function(e){
     return;}
   var sm=e.target.closest(".showmore");
   if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
+  var sp=e.target.closest(".showpile");
+  if(sp){var pm=document.getElementById("pm-"+sp.getAttribute("data-id"));if(pm){pm.style.display="block";sp.parentNode.style.display="none";}return;}
+  var pv=e.target.closest(".bvac");
+  if(pv){var vid=pv.getAttribute("data-id"),vco=pv.getAttribute("data-co"),vact=pv.getAttribute("data-act");track(vco,vact);pv.disabled=true;
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:vco,id:vid,action:vact})})
+      .then(function(){refresh(vco);}).catch(function(){pv.disabled=false;});
+    return;}
+  var pg=e.target.closest(".bpig");
+  if(pg){var gid=pg.getAttribute("data-id"),gco=pg.getAttribute("data-co");track(gco,"pile_ignore");pg.disabled=true;pg.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:gco,id:gid,action:"ignore"})})
+      .then(function(){refresh(gco);toast("Dropped from the pile");}).catch(function(){pg.disabled=false;pg.textContent="Ignore";});
+    return;}
   var bb=e.target.closest(".bback");
   if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");track(bco,"send_back");bb.disabled=true;bb.textContent="…";
     fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
@@ -217,7 +229,7 @@ function renderPanel(id){
   var review=it.filter(function(i){return i.lane==="review"||i.lane==="looper";});
   var owner=it.filter(function(i){return i.lane==="guess"||(i.needs_receipt&&!i.receipt_incoming&&!i.reconciled&&!i.bill&&i.lane!=="review"&&i.lane!=="looper");});
   var hunting=it.filter(function(i){return i.receipt_incoming;}).length;
-  var pile=it.filter(function(i){return i.lane==="pile";}).length;
+  var pileItems=it.filter(function(i){return i.lane==="pile";});
 
   // "when did we last feed this client a report?" — the answer Max kept having to guess
   var lastRep='';
@@ -242,7 +254,25 @@ function renderPanel(id){
     html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Owner said yes elsewhere? Use the button.</span></div><div class="list">'
       +owner.slice(0,8).map(oRow).join("")
       +(owner.length>8?'<div class="ownermore" id="om-'+id+'" style="display:none">'+owner.slice(8).map(oRow).join("")+'</div><div class="row"><a class="showmore" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+owner.length+' →</a></div>':"")+'</div>';}
-  if(hunting||pile){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+(hunting?hunting+' receipt'+(hunting===1?"":"s")+' arriving by email':'')+(hunting&&pile?' · ':'')+(pile?pile+' receipt'+(pile===1?"":"s")+' in the pile waiting for bank lines':'')+'</div>';}
+  // The pile itself, not just a count — Jewel works the pile (uploads receipts into
+  // Xero, ticks them off) and couldn't see it from the Desk (Max, 20 Jul). Unticked
+  // receipts sort first; ticking calls chase-feedback va_check (state only).
+  if(pileItems.length){
+    var pRow=function(i){
+      var doc=i.receipt_url||((i.extra_receipts||[])[0]||{}).url;
+      var rc=doc?'<a href="'+doc+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>':'';
+      var vc=i.va_checked
+        ?'<button class="btn bvac" data-id="'+i.id+'" data-co="'+id+'" data-act="va_uncheck" title="Marked as already uploaded into Xero — click to untick" style="padding:6px 11px;font-size:12px;color:#0e7a50"><i class="ti ti-checkbox"></i> In Xero ✓</button>'
+        :'<button class="btn bvac" data-id="'+i.id+'" data-co="'+id+'" data-act="va_check" title="Tick once you’ve uploaded this receipt into Xero" style="padding:6px 11px;font-size:12px"><i class="ti ti-square"></i> Uploaded to Xero?</button>';
+      var ig='<button class="btn bpig" data-id="'+i.id+'" data-co="'+id+'" title="Not a business expense — drop it from the pile" style="padding:6px 11px;font-size:12px">Ignore</button>';
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"no date")+' · receipt in hand, waiting for its bank line'+(i.note?' · '+esc(String(i.note).slice(0,80)):'')+'</div></div>'+rc+vc+ig+'</div>';
+    };
+    var pi=pileItems.slice().sort(function(a,b){return (a.va_checked?1:0)-(b.va_checked?1:0);});
+    html+='<div class="sec" style="color:var(--indtx)">Receipt pile <span class="cnt">receipts in hand, no bank line yet — tick what you’ve uploaded into Xero</span></div><div class="list">'
+      +pi.slice(0,8).map(pRow).join("")
+      +(pi.length>8?'<div class="pilemore" id="pm-'+id+'" style="display:none">'+pi.slice(8).map(pRow).join("")+'</div><div class="row"><a class="showpile" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+pi.length+' →</a></div>':"")+'</div>';
+  }
+  if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
