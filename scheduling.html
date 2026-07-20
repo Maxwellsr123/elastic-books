@@ -249,13 +249,6 @@ var CO=null,CREW=[],JOBS=[],FERGUS=[],CALEVENTS=[],CALWEEK=0,OFFICE=null;
 })();
 function gate(m){var g=document.getElementById("gate");g.style.display="flex";document.getElementById("gatemsg").textContent=m;}
 function boot(){
-  // AUTO SCHEDULING PAUSED (2026-07-17) — parked while Auto Bookkeeping lands.
-  // The backend is paused with it (dispatch/chase crons off, gmail scout in
-  // shadow, ava-slack-job off). Delete this block + restore the index.html
-  // card to reopen. dev/scheduling.html stays live for tinkering.
-  document.getElementById("gatettl").textContent="Auto Scheduling is taking a breather";
-  gate("We’re heads-down getting Auto Bookkeeping rock-solid first, so the scheduling board is paused. Ava still books jobs any time you ask her in Slack — and this board will be back.");
-  return;
   var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
   var qc=new URLSearchParams(location.search).get("c");
   if(window.IS_DEV&&(!s||!s.email)){CO=qc||KPA_DEF;load();return;}  // dev is open
