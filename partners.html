@@ -63,12 +63,12 @@ input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-fa
     <button id="newfirm" class="btn"><i class="ti ti-plus"></i> New firm</button>
     <div id="newfirmform" style="display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px">
       <div style="font-weight:600;font-size:13.5px;margin-bottom:2px">Add a bookkeeping firm</div>
-      <div class="muted">Leave the email blank to create the firm quietly — you can add their login later. With an email, they get their sign-in link straight away.</div>
+      <div class="muted">Their sign-in link goes out the moment you hit create — they log in, invite their clients, and add their own staff from there.</div>
       <div class="formrow">
-        <input class="fi" id="nf-name" placeholder="Firm name" style="flex:1;min-width:160px">
-        <input class="fi" id="nf-email" placeholder="First login email (optional)" style="flex:1;min-width:180px">
-        <input class="fi" id="nf-uname" placeholder="Their name (optional)" style="width:140px">
-        <button class="btn btn-p" id="nf-go">Create</button>
+        <input class="fi" id="nf-name" placeholder="Firm / business name" style="flex:1;min-width:160px">
+        <input class="fi" id="nf-uname" placeholder="Owner's name" style="width:150px">
+        <input class="fi" id="nf-email" placeholder="owner@email.com" style="flex:1;min-width:180px">
+        <button class="btn btn-p" id="nf-go"><i class="ti ti-mail-forward"></i> Create &amp; send sign-in link</button>
       </div>
       <div class="muted" id="nf-msg" style="margin-top:8px;min-height:15px"></div>
     </div>
@@ -127,6 +127,7 @@ function start(){
 function connDots(c){
   return '<span class="dot" title="Gmail" style="background:'+(c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
 }
+function ago(d){var days=Math.floor((Date.now()-new Date(d).getTime())/864e5);return days<=0?"today":(days===1?"yesterday":days+" days ago");}
 function firmKey(f){return f.id===null?"direct":f.id;}
 function renderFirms(){
   var html="";
@@ -134,8 +135,12 @@ function renderFirms(){
     var k=firmKey(f);
     var badges='<span class="badge b-ind">'+f.clients.length+' client'+(f.clients.length===1?"":"s")+'</span> ';
     if(f.id!==null){
-      if(f.pending_invites.length)badges+='<span class="badge b-amb">'+f.pending_invites.length+' invited</span> ';
-      badges+=f.staff.length?'<span class="badge b-grn">'+f.staff.length+' login'+(f.staff.length===1?"":"s")+'</span>':'<span class="badge b-mut">no logins yet</span>';
+      if(f.pending_invites.length)badges+='<span class="badge b-amb">'+f.pending_invites.length+' client invite'+(f.pending_invites.length===1?"":"s")+' out</span> ';
+      if(!f.staff.length)badges+='<span class="badge b-mut">no logins yet</span>';
+      else{
+        badges+='<span class="badge b-ind">'+f.staff.length+' user'+(f.staff.length===1?"":"s")+'</span> ';
+        badges+=f.staff.some(function(s){return s.last_seen;})?'<span class="badge b-grn">signed in</span>':'<span class="badge b-amb">awaiting first sign-in</span>';
+      }
     } else badges+='<span class="badge b-mut">house book</span>';
     html+='<div class="co" data-k="'+k+'"><div class="cohead"><div class="coname"><i class="ti ti-building-store" style="color:var(--indtx)"></i> '+esc(f.name)+'</div>'+badges+'<i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+k+'"></div></div>';
   });
@@ -169,7 +174,7 @@ function renderPanel(k){
     +'<div class="muted iv-msg" data-k="'+k+'" style="margin-top:8px;min-height:15px"></div></div>';
   // staff
   html+='<div class="sec">Firm logins <span class="cnt">who at '+esc(f.name)+' can sign in</span></div>';
-  if(f.staff.length){html+='<div class="list">'+f.staff.map(function(s){return '<div class="row"><div class="rmain"><div class="rt">'+esc(s.name||s.email.split("@")[0])+'</div><div class="rs">'+esc(s.email)+'</div></div></div>';}).join("")+'</div>';}
+  if(f.staff.length){html+='<div class="list">'+f.staff.map(function(s){return '<div class="row"><div class="rmain"><div class="rt">'+esc(s.name||s.email.split("@")[0])+'</div><div class="rs">'+esc(s.email)+' · '+(s.last_seen?'<span style="color:var(--grn)">last signed in '+ago(s.last_seen)+'</span>':'<span style="color:var(--amb)">hasn\'t signed in yet</span>')+'</div></div></div>';}).join("")+'</div>';}
   html+='<div style="background:#fff;border:1px solid var(--line);border-radius:4px;padding:13px;margin-top:'+(f.staff.length?'8px':'0')+'">'
     +'<div class="formrow" style="margin-top:0"><input class="fi st-name" data-k="'+k+'" placeholder="Name" style="width:140px"><input class="fi st-email" data-k="'+k+'" placeholder="their@email.com" style="flex:1;min-width:180px"><button class="btn baddstaff" data-k="'+k+'"><i class="ti ti-mail-forward"></i> Add &amp; send sign-in link</button></div>'
     +'<div class="muted st-msg" data-k="'+k+'" style="margin-top:8px;min-height:15px">Heads up: this emails them their sign-in link immediately.</div></div>';
@@ -239,12 +244,13 @@ document.getElementById("nf-go").addEventListener("click",function(){
   var un=document.getElementById("nf-uname").value.trim();
   var msg=document.getElementById("nf-msg");
   if(!nm){msg.textContent="Firm name first.";return;}
-  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){msg.textContent="That email doesn't look right.";return;}
+  if(!un){msg.textContent="Owner's name too.";return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){msg.textContent="That email doesn't look right.";return;}
   var b=this;b.disabled=true;b.textContent="…";
-  fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"create_partner",name:nm,user_email:em||undefined,user_name:un||undefined})})
-    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Create";
+  fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"create_partner",name:nm,user_email:em,user_name:un})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Create &amp; send sign-in link';
       if(d&&d.error){msg.textContent=d.error;return;}
-      msg.textContent=em?(d.sign_in_sent?"Firm created — their sign-in link is on its way.":"Firm created, but the email didn't send."):"Firm created.";
+      msg.textContent=d.sign_in_sent?"Firm created — "+un.split(" ")[0]+"'s sign-in link is on its way.":"Firm created, but the email didn't send — they can request a link from the login screen.";
       document.getElementById("nf-name").value="";document.getElementById("nf-email").value="";document.getElementById("nf-uname").value="";
       reload();})
     .catch(function(){b.disabled=false;b.textContent="Create";msg.textContent="Couldn't create the firm — try again.";});
