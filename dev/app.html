@@ -188,6 +188,8 @@ h1{letter-spacing:-.03em}
           <div class="card stat ufilt" data-filter="bills" style="cursor:pointer"><div class="l"><i class="ti ti-file-invoice" style="font-size:16px;color:var(--red,#b42318)"></i> Bills to pay</div><div class="n" id="u_bills">—</div><div class="d" id="u_billstot">bills Ava found in your inbox</div></div>
           <div class="card stat ufilt" data-filter="pile" style="cursor:pointer"><div class="l"><i class="ti ti-paperclip" style="font-size:16px;color:var(--blu)"></i> Receipt pile</div><div class="n" id="u_pile">—</div><div class="d">your receipts, waiting for their bank line</div></div>
         </div>
+        <div class="sec" style="display:flex;align-items:center;gap:8px">Auto collect <span class="pill p-ind" style="font-size:10.5px;letter-spacing:.4px;text-transform:uppercase">New</span></div>
+        <div class="card" id="acol"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading Auto Collect…</div></div></div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
         <div class="sec" style="display:flex;align-items:center;gap:8px">GST put-away</div>
@@ -207,16 +209,6 @@ h1{letter-spacing:-.03em}
             <div style="flex:1">
               <div style="font-weight:600;font-size:14.5px">How's the business actually doing?</div>
               <div style="font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.65">Ava's learning to read your Xero numbers and give it to you straight — what came in, what went out, what you're really making, and where money's being left on the table. A plain-English pulse on the business, with the Elastic team behind it. No spreadsheets — just the answer.</div>
-            </div>
-          </div>
-        </div>
-        <div class="sec" style="display:flex;align-items:center;gap:8px">Debt collector <span class="pill p-ind" style="font-size:10.5px;letter-spacing:.4px;text-transform:uppercase">Coming soon</span></div>
-        <div class="card" style="padding:16px 18px">
-          <div style="display:flex;gap:13px;align-items:flex-start">
-            <div style="width:38px;height:38px;border-radius:5px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-message-dollar" style="font-size:19px"></i></div>
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:14.5px">Overdue invoices, chased for you</div>
-              <div style="font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.65">When a customer drifts past due, Ava sends the friendly nudge, then the firmer follow-up, and flags you before it gets awkward. You stay the good guy — the Elastic team does the chasing.</div>
             </div>
           </div>
         </div>
@@ -935,6 +927,65 @@ h1{letter-spacing:-.03em}
         route();
       }).catch(function(){route();});
   } else { route(); }
+})();
+</script>
+<script>
+(function(){
+  // ── Auto Collect — the overdue-invoice chaser card ──────────────────────
+  // Reads /auto-collect (GET status, POST enable|pause|resume). Ava emails the
+  // customer from the client's own Gmail, calls if ignored, holds them to the
+  // promised date and re-checks Xero until paid. Updates thread into Slack.
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/auto-collect";
+  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
+  var box=document.getElementById("acol");if(!box)return;
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
+  function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function nd(s){if(!s)return "";try{return new Date(s+"T12:00:00+12:00").toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}catch(e){return s;}}
+  var STATE={new:["queued","p-ind"],needs_contact:["needs contact details","p-warn"],emailed:["emailed — awaiting reply","p-ind"],followup:["followed up","p-ind"],calling:["calling","p-ind"],called:["called","p-ind"],needs_human:["needs you","p-warn"],paid:["paid ✓","p-ok"],stopped:["closed","p-ind"]};
+  function pillFor(ch){
+    if(ch.state==="promised")return '<span class="pill p-ok">promised '+esc(nd(ch.promised_date))+'</span>';
+    var m=STATE[ch.state]||[ch.state,"p-ind"];return '<span class="pill '+m[1]+'">'+esc(m[0])+'</span>';
+  }
+  function post(action){return fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:CO,action:action})}).then(function(r){return r.json();});}
+  function head(d){
+    var st=!d.enabled?"":(d.paused?'<span class="pill p-warn">paused</span>':(d.ready?'<span class="pill p-ok">on</span>':'<span class="pill p-warn">setup needed</span>'));
+    return '<div style="display:flex;align-items:center;gap:13px;padding:14px 16px'+(d.enabled?';border-bottom:1px solid var(--line)':'')+'">'
+      +'<div class="ic" style="color:var(--grn);background:var(--grnbg)"><i class="ti ti-cash"></i></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px">Auto Collect</div>'
+      +'<div style="font-size:12.5px;color:var(--ink2);line-height:1.5">Ava chases overdue invoices for you — a polite email from your own address, a friendly call if they go quiet, then she holds them to the date they promise until it’s actually paid. Every reply lands in your Slack thread.</div></div>'
+      +(d.enabled?st:'<button class="btn btn-p" id="ac_on" style="white-space:nowrap">Turn on</button>')+'</div>';
+  }
+  function render(d){
+    if(!d||d.error){box.innerHTML='<div class="row"><div style="flex:1;color:var(--ink3);font-size:13px">Couldn’t load Auto Collect — refresh to retry.</div></div>';return;}
+    var s=d.setup||{},c=d.counts||{},h=head(d);
+    if(d.enabled){
+      if(!d.paused&&!s.xero){
+        h+='<div class="row"><div class="ic" style="color:#13B5EA;background:var(--blubg)"><i class="ti ti-calculator"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">Connect Xero to switch it on</div><div style="font-size:12px;color:var(--ink2)">That’s how Ava sees which invoices are overdue and when they’re paid.</div></div>'+(s.xero_url?'<a href="'+esc(s.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Xero</a>':'<span class="pill p-warn">unavailable</span>')+'</div>';
+      }
+      if(!d.paused&&s.xero&&!s.gmail_send){
+        h+='<div class="row"><div class="ic" style="color:#EA4335;background:#FDECEA"><i class="ti ti-mail"></i></div><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">Connect Gmail so Ava can send</div><div style="font-size:12px;color:var(--ink2)">Reminders go from your own email address — tick the send box on Google’s screen.</div></div><a href="'+esc(s.gmail_url||"#")+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Gmail</a></div>';
+      }
+      var chases=(d.chases||[]).filter(function(x){return x.state!=="stopped";});
+      if(d.ready&&!chases.length){
+        h+='<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Chase list is empty — either nothing’s overdue, or Ava’s next sweep hasn’t run yet. She checks Xero at 25 past each hour, and anything overdue lands here.</div></div>';
+      }
+      if(chases.length){
+        var owing=money(c.owing_total||0);
+        h+='<div class="row" style="background:var(--bg)"><div style="flex:1;font-size:12.5px;color:var(--ink2)"><b style="color:var(--ink);font-size:14px">'+owing+'</b> overdue across '+(c.active||0)+' invoice'+((c.active||0)===1?"":"s")+(c.promised?' · '+c.promised+' promised':'')+(c.needs_you?' · <b style="color:var(--amb)">'+c.needs_you+' need'+(c.needs_you===1?"s":"")+' you</b>':'')+'</div></div>';
+        chases.slice(0,6).forEach(function(ch){
+          h+='<div class="row"><div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis">'+esc(ch.customer||"—")+' <span style="color:var(--ink3);font-weight:400">· '+esc(ch.invoice||"")+'</span></div><div style="font-size:12px;color:var(--ink2)">'+(ch.state==="paid"?"":money(ch.owing)+" owing · ")+'due '+esc(nd(ch.due_date))+'</div></div>'+pillFor(ch)+'</div>';
+        });
+      }
+      h+='<div class="row" style="border-top:1px solid var(--line)"><div style="flex:1;font-size:12px;color:var(--ink3)">Disputes stop the chasing and come straight to you. Tweaks? Just tell Ava in Slack.</div><a id="ac_toggle" style="font-size:12.5px;font-weight:500;color:var(--ink2);cursor:pointer;white-space:nowrap">'+(d.paused?"▶ Resume":"⏸ Pause")+'</a></div>';
+    }
+    box.innerHTML=h;
+    var on=document.getElementById("ac_on");
+    if(on)on.addEventListener("click",function(){on.disabled=true;on.textContent="…";post("enable").then(load).catch(load);});
+    var tg=document.getElementById("ac_toggle");
+    if(tg)tg.addEventListener("click",function(){tg.textContent="…";post(d.paused?"resume":"pause").then(load).catch(load);});
+  }
+  function load(){fetch(API+"?company="+CO).then(function(r){return r.json();}).then(render).catch(function(){render(null);});}
+  load();
 })();
 </script>
 <script src="ava-chat.js"></script>
