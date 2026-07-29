@@ -8,6 +8,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="ava-conns.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -172,7 +173,7 @@ h1{letter-spacing:-.03em}
             Everything else — the matching, coding, chasing and reconciling — is handled for you.
           </div>
         </details>
-        <div class="card" id="uintg" style="padding:6px 16px;margin-bottom:20px;display:none"></div>
+        <div id="uintg" style="margin-bottom:20px;display:none"></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:20px">
           <div class="drop" id="udrop" style="margin-bottom:0">
             <div class="dz"><i class="ti ti-camera-plus"></i></div>
@@ -375,17 +376,16 @@ h1{letter-spacing:-.03em}
     var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
     box.style.display="block";
     // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app
-    if(!g.gmail && !g.xero && !g.fergus){
-      box.innerHTML='<div style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link your inbox, Xero and Fergus and Ava gets to work.</div><a class="btn btn-p" href="connections.html" style="text-decoration:none">Connect accounts</a></div>';
+    if(!g.gmail && !g.xero){
+      box.innerHTML='<div class="card" style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link the inbox your receipts land in and your Xero, and Ava gets to work.</div><a class="btn btn-p" href="connections.html" style="text-decoration:none">Connect accounts</a></div>';
       return;
     }
-    function stat(name,ic,col,ok,detail,last){
-      return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0'+(last?'':';border-bottom:1px solid var(--line)')+'"><div class="ic" style="width:30px;height:30px;font-size:16px;color:'+col+'"><i class="ti '+ic+'"></i></div><div style="flex:1;font-weight:500;font-size:13.5px">'+name+(detail?' <span style="color:var(--ink3);font-weight:400;font-size:12px">· '+detail+'</span>':'')+'</div>'+(ok?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':'<span class="pill p-warn">not connected</span>')+'</div>';
-    }
-    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 2px"><div style="font-size:12px;font-weight:600;color:var(--ink2)">Connections</div><a href="connections.html" style="font-size:12px;color:#D2530F;font-weight:600;text-decoration:none">Manage</a></div>'+
-      stat("Gmail","ti-mail","#EA4335",g.gmail,(g.inboxes&&g.inboxes.length)?(g.inboxes.length+" inbox"+(g.inboxes.length>1?"es":"")):"",false)+
-      stat("Xero","ti-calculator","#13B5EA",g.xero,g.fergus?"":"",false)+
-      stat("Fergus","ti-tools","#C2410C",g.fergus,"",true);
+    // Only what feeds the books. Fergus powers Auto Scheduling, not this — it
+    // lives on that page and in Settings, not here. (avaConns → ava-conns.js)
+    avaConns(box,g,[
+      {key:"gmail",note:"The inboxes Ava reads for receipts and bills."},
+      {key:"xero",note:"The bank lines she files them against."}
+    ]);
   }
   document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
 

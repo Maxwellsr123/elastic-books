@@ -8,6 +8,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="ava-conns.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -66,6 +67,7 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
     <div class="wrap">
       <h1>GST put-away</h1>
       <p class="lede">How much to set aside each week so GST day never stings — worked out from your own numbers, not a rule of thumb. Ava re-reads your last 12 months in Xero every Monday morning.</p>
+      <div id="connrow" style="display:none;margin-bottom:16px"></div>
       <div class="card" id="ugst" style="padding:18px 20px">
         <div style="display:flex;gap:14px;align-items:flex-start">
           <div style="width:42px;height:42px;border-radius:5px;background:var(--grnbg);color:var(--grn);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-pig-money" style="font-size:22px"></i></div>
@@ -85,9 +87,14 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
   var gh=document.getElementById("ugst_head"),gs=document.getElementById("ugst_sub"),tb=document.getElementById("ugst_months");
   fetch("https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-list?company="+CO).then(function(r){return r.json();}).then(function(d){
     var g=d.gst;
+    // Xero is the whole input here — the invoices, bills and bank spend Ava
+    // reads the GST off. No inbox, no Fergus. (avaConns → ava-conns.js)
+    avaConns("connrow",d.integrations,[
+      {key:"xero",note:"The 12 months of invoices, bills and bank spend she reads the GST off."}
+    ]);
     if(!g||g.weekly_avg==null){
       gh.textContent="Ava hasn't read this Xero yet";
-      gs.textContent=(d.integrations&&d.integrations.xero)?"The first read runs on Monday morning's sweep — check back then.":"Connect Xero on the Auto Bookkeeping page and Ava will work out your number on the next Monday sweep.";
+      gs.textContent=(d.integrations&&d.integrations.xero)?"The first read runs on Monday morning's sweep — check back then.":"Connect Xero above and Ava will work out your number on the next Monday sweep.";
       return;
     }
     var w=Number(g.weekly_avg)||0,m=Number(g.monthly_avg)||0,y=Number(g.twelve_mo_net)||0,t=g.trend_pct;
