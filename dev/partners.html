@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elastic — Partner Portal</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+--ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.top{display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-bottom:1px solid var(--line);background:#131218;color:#fff;position:sticky;top:0;z-index:10}
+.top .brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:15px}
+.top .logo{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.top .sub{font-size:11px;font-weight:700;letter-spacing:1.4px;color:#6F66DB;text-transform:uppercase}
+.wrap{max-width:880px;margin:0 auto;padding:24px 20px 80px}
+.sec{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.sec .cnt{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;color:var(--ink3)}
+.co{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:10px;overflow:hidden}
+.cohead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.cohead:hover{background:#FCFCF9}
+.coname{font-weight:600;font-size:14.5px;flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.b-grn{background:var(--grnbg);color:var(--grn)}.b-amb{background:var(--ambbg);color:var(--amb)}.b-ind{background:var(--indbg);color:var(--indtx)}.b-red{background:var(--redbg);color:var(--red)}.b-mut{background:#EFEFE8;color:var(--ink3)}
+.panel{border-top:1px solid var(--line);padding:16px;display:none;background:#FBFBF8}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:3px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--bg)}
+.btn-p{background:#FF6A1A;color:#fff;border-color:#FF6A1A}.btn-p:hover{background:#D2530F;border-color:#D2530F}
+.list{background:#fff;border:1px solid var(--line);border-radius:4px}
+.row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-top:1px solid #ECECE4;flex-wrap:wrap}
+.row:first-child{border-top:0}
+.rmain{flex:1;min-width:180px}
+.rt{font-weight:600;font-size:13.5px}
+.rs{font-size:12px;color:var(--ink2);margin-top:1px}
+.muted{color:var(--ink3);font-size:12.5px}
+a{color:var(--indtx)}
+input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-family:inherit;font-size:13px}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+@media(max-width:640px){.top{padding:12px 14px}.top .sub{display:none}.wrap{padding:16px 10px 60px}.cohead{padding:12px 34px 12px 12px;flex-wrap:wrap;position:relative;row-gap:8px}.coname{flex-basis:100%}.cohead>i{position:absolute;right:12px;top:12px}.row{padding:10px 11px}.formrow{flex-direction:column;align-items:stretch}.formrow .fi{width:100%}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><div class="logo">E</div><div><div>Partner Portal <span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:3px;vertical-align:middle">BETA</span></div><div class="sub">Elastic · every firm, one screen</div></div></div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <a href="admin.html" style="font-size:12px;color:#A7A2F4;text-decoration:none;font-weight:600">The Desk →</a>
+    <span id="whoami" style="font-size:12px;color:#8B8B98"></span>
+    <a id="signout" style="font-size:12px;color:#A7A2F4;cursor:pointer;font-weight:600">Sign out</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="sec">Firms <span class="cnt" id="firmhint">loading…</span></div>
+  <div id="firmlist"></div>
+  <div style="margin-top:18px">
+    <button id="newfirm" class="btn"><i class="ti ti-plus"></i> New firm</button>
+    <div id="newfirmform" style="display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:2px">Add a bookkeeping firm</div>
+      <div class="muted">Leave the email blank to create the firm quietly — you can add their login later. With an email, they get their sign-in link straight away.</div>
+      <div class="formrow">
+        <input class="fi" id="nf-name" placeholder="Firm name" style="flex:1;min-width:160px">
+        <input class="fi" id="nf-email" placeholder="First login email (optional)" style="flex:1;min-width:180px">
+        <input class="fi" id="nf-uname" placeholder="Their name (optional)" style="width:140px">
+        <button class="btn btn-p" id="nf-go">Create</button>
+      </div>
+      <div class="muted" id="nf-msg" style="margin-top:8px;min-height:15px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="gate">
+  <div style="width:100%;max-width:380px;text-align:center">
+    <div style="width:52px;height:52px;border-radius:6px;background:linear-gradient(135deg,var(--ind),var(--ind2));margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px">E</div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:5px">Elastic team sign-in</div>
+    <div style="font-size:13px;color:var(--ink2);margin-bottom:18px">Enter your @elasticadmin email and we'll send a link.</div>
+    <input id="gemail" type="email" placeholder="you@elasticadmin.com" style="width:100%;border:1px solid var(--line);border-radius:3px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:10px">
+    <button id="gbtn" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Email me a link</button>
+    <div id="gmsg" style="font-size:12.5px;margin-top:10px;min-height:16px;color:var(--ink2)"></div>
+  </div>
+</div>
+
+<script>
+var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var APP="app.html";
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+var SKEY="ava_session";
+function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
+var SESSION=getS();
+var FIRMS=[];
+
+// ── auth: loopers only, and this page needs the token (partner-desk is gated) ──
+function boot(){
+  var t=new URLSearchParams(location.search).get("t");
+  if(t){fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
+    .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){localStorage.setItem(SKEY,JSON.stringify({email:d.email,name:d.name,looper:d.looper,partner:d.partner,companies:d.companies,token:d.token}));}history.replaceState({},"",location.pathname);SESSION=getS();boot();})
+    .catch(function(){history.replaceState({},"",location.pathname);boot();});return;}
+  if(!SESSION||!SESSION.token){document.getElementById("gate").style.display="flex";return;}
+  if(!SESSION.looper){location.replace(APP);return;}
+  start();
+}
+document.getElementById("gbtn").addEventListener("click",function(){
+  var v=(document.getElementById("gemail").value||"").trim().toLowerCase(),m=document.getElementById("gmsg");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.textContent="Enter a valid email.";return;}
+  this.disabled=true;this.textContent="Sending…";var b=this;
+  fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:v,redirect:location.origin+location.pathname})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Email me a link";m.textContent=d&&d.error?d.error:"Check your email — link sent.";})
+    .catch(function(){b.disabled=false;b.textContent="Email me a link";m.textContent="Couldn't send — try again.";});
+});
+document.getElementById("signout").addEventListener("click",function(){localStorage.removeItem(SKEY);location.reload();});
+
+// ── the portal ──
+function start(){
+  document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.error){if(/sign in/i.test(d.error)){localStorage.removeItem(SKEY);location.reload();return;}
+      document.getElementById("firmhint").textContent=d.error;return;}
+    FIRMS=d.firms||[];renderFirms();
+  }).catch(function(){document.getElementById("firmhint").textContent="couldn't load firms";});
+}
+function connDots(c){
+  return '<span class="dot" title="Gmail" style="background:'+(c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
+}
+function firmKey(f){return f.id===null?"direct":f.id;}
+function renderFirms(){
+  var html="";
+  FIRMS.forEach(function(f){
+    var k=firmKey(f);
+    var badges='<span class="badge b-ind">'+f.clients.length+' client'+(f.clients.length===1?"":"s")+'</span> ';
+    if(f.id!==null){
+      if(f.pending_invites.length)badges+='<span class="badge b-amb">'+f.pending_invites.length+' invited</span> ';
+      badges+=f.staff.length?'<span class="badge b-grn">'+f.staff.length+' login'+(f.staff.length===1?"":"s")+'</span>':'<span class="badge b-mut">no logins yet</span>';
+    } else badges+='<span class="badge b-mut">house book</span>';
+    html+='<div class="co" data-k="'+k+'"><div class="cohead"><div class="coname"><i class="ti ti-building-store" style="color:var(--indtx)"></i> '+esc(f.name)+'</div>'+badges+'<i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+k+'"></div></div>';
+  });
+  document.getElementById("firmlist").innerHTML=html;
+  var n=FIRMS.length;document.getElementById("firmhint").textContent=n+" firm"+(n===1?"":"s");
+}
+function findFirm(k){for(var i=0;i<FIRMS.length;i++)if(firmKey(FIRMS[i])===k)return FIRMS[i];return null;}
+function renderPanel(k){
+  var f=findFirm(k),p=document.getElementById("p-"+k);
+  if(!f){p.innerHTML='<div class="muted">Gone — reload.</div>';return;}
+  var html="";
+  // clients
+  if(f.clients.length){
+    html+='<div class="sec" style="margin-top:0">Clients <span class="cnt">click through to any board</span></div><div class="list">'
+      +f.clients.map(function(c){return '<div class="row"><div class="rmain"><div class="rt">'+connDots(c)+' '+esc(c.name)+'</div><div class="rs">since '+(c.created_at?new Date(c.created_at).toLocaleDateString("en-NZ",{day:"numeric",month:"short",year:"numeric"}):"—")+(c.gmail?"":" · Gmail not connected")+(c.xero?"":" · Xero not connected")+'</div></div><a href="'+c.link+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open board →</a></div>';}).join("")+'</div>';
+  } else html+='<div class="muted" style="margin-bottom:4px">No clients yet.</div>';
+
+  if(f.id===null){
+    html+='<div class="muted" style="margin-top:12px">The house book — clients Elastic runs directly. Onboard these from <a href="admin.html">The Desk</a>.</div>';
+    p.innerHTML=html;return;
+  }
+  // pending invites
+  if(f.pending_invites.length){
+    html+='<div class="sec">Invited — waiting <span class="cnt">they haven\'t signed up yet</span></div><div class="list">'
+      +f.pending_invites.map(function(i){return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.client_name)+'</div><div class="rs">'+(i.email?"emailed "+esc(i.email):"copy link, not emailed")+' · expires '+new Date(i.expires_at).toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</div></div><button class="btn bcopy" data-link="'+esc(i.link)+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-copy"></i> Copy link</button><button class="btn brevoke" data-k="'+k+'" data-id="'+i.id+'" style="padding:6px 11px;font-size:12px;color:var(--red)">Revoke</button></div>';}).join("")+'</div>';
+  }
+  // invite form
+  html+='<div class="sec">Invite a client <span class="cnt">email it, or create a copy link to send yourself</span></div>'
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:4px;padding:13px">'
+    +'<div class="formrow" style="margin-top:0"><input class="fi iv-name" data-k="'+k+'" placeholder="Client business name" style="flex:1;min-width:160px"><input class="fi iv-email" data-k="'+k+'" placeholder="Their email (optional)" style="flex:1;min-width:180px"><button class="btn btn-p binvite" data-k="'+k+'">Invite</button></div>'
+    +'<div class="muted iv-msg" data-k="'+k+'" style="margin-top:8px;min-height:15px"></div></div>';
+  // staff
+  html+='<div class="sec">Firm logins <span class="cnt">who at '+esc(f.name)+' can sign in</span></div>';
+  if(f.staff.length){html+='<div class="list">'+f.staff.map(function(s){return '<div class="row"><div class="rmain"><div class="rt">'+esc(s.name||s.email.split("@")[0])+'</div><div class="rs">'+esc(s.email)+'</div></div></div>';}).join("")+'</div>';}
+  html+='<div style="background:#fff;border:1px solid var(--line);border-radius:4px;padding:13px;margin-top:'+(f.staff.length?'8px':'0')+'">'
+    +'<div class="formrow" style="margin-top:0"><input class="fi st-name" data-k="'+k+'" placeholder="Name" style="width:140px"><input class="fi st-email" data-k="'+k+'" placeholder="their@email.com" style="flex:1;min-width:180px"><button class="btn baddstaff" data-k="'+k+'"><i class="ti ti-mail-forward"></i> Add &amp; send sign-in link</button></div>'
+    +'<div class="muted st-msg" data-k="'+k+'" style="margin-top:8px;min-height:15px">Heads up: this emails them their sign-in link immediately.</div></div>';
+  p.innerHTML=html;
+}
+function reload(openK){
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.firms){FIRMS=d.firms;renderFirms();
+      if(openK){var pp=document.getElementById("p-"+openK);if(pp){pp.style.display="block";renderPanel(openK);}}}
+  });
+}
+function copyText(txt,btn){
+  var done=function(){var old=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> Copied';setTimeout(function(){btn.innerHTML=old;},1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){window.prompt("Copy this link:",txt);});}
+  else window.prompt("Copy this link:",txt);
+}
+document.addEventListener("click",function(e){
+  var h=e.target.closest(".cohead");
+  if(h){var k=h.parentNode.getAttribute("data-k"),p=document.getElementById("p-"+k);
+    var open=p.style.display==="block";
+    document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
+    if(!open){p.style.display="block";renderPanel(k);}
+    return;}
+  var cp=e.target.closest(".bcopy");
+  if(cp){copyText(cp.getAttribute("data-link"),cp);return;}
+  var rv=e.target.closest(".brevoke");
+  if(rv){var rk=rv.getAttribute("data-k");rv.disabled=true;rv.textContent="…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,partner:rk,action:"revoke",id:rv.getAttribute("data-id")})})
+      .then(function(){reload(rk);}).catch(function(){rv.disabled=false;rv.textContent="Revoke";});
+    return;}
+  var iv=e.target.closest(".binvite");
+  if(iv){var ik=iv.getAttribute("data-k");
+    var nm=document.querySelector('.iv-name[data-k="'+ik+'"]').value.trim();
+    var em=document.querySelector('.iv-email[data-k="'+ik+'"]').value.trim();
+    var msg=document.querySelector('.iv-msg[data-k="'+ik+'"]');
+    if(!nm){msg.textContent="Client business name first.";return;}
+    iv.disabled=true;iv.textContent="…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,partner:ik,action:"invite",client_name:nm,email:em||undefined})})
+      .then(function(r){return r.json();}).then(function(d){iv.disabled=false;iv.textContent="Invite";
+        if(d&&d.error){msg.textContent=d.error;return;}
+        if(d.emailed)msg.innerHTML="Invite emailed ✓ — link also below in the waiting list.";
+        else msg.innerHTML='Link created — <a class="bcopy" data-link="'+esc(d.link)+'" style="cursor:pointer;font-weight:600">copy it</a> and send it to them.';
+        reload(ik);})
+      .catch(function(){iv.disabled=false;iv.textContent="Invite";msg.textContent="Couldn't create the invite — try again.";});
+    return;}
+  var st=e.target.closest(".baddstaff");
+  if(st){var sk=st.getAttribute("data-k");
+    var se=document.querySelector('.st-email[data-k="'+sk+'"]').value.trim().toLowerCase();
+    var sn=document.querySelector('.st-name[data-k="'+sk+'"]').value.trim();
+    var sm=document.querySelector('.st-msg[data-k="'+sk+'"]');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(se)){sm.textContent="Enter a valid email.";return;}
+    st.disabled=true;
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,partner:sk,action:"add_user",email:se,name:sn})})
+      .then(function(r){return r.json();}).then(function(d){st.disabled=false;
+        if(d&&d.error){sm.textContent=d.error;return;}
+        sm.textContent=d.sign_in_sent?"Added — sign-in link is in their inbox.":"Added — but the sign-in email didn't send; they can request one from the login screen.";
+        reload(sk);})
+      .catch(function(){st.disabled=false;sm.textContent="Couldn't add them — try again.";});
+    return;}
+});
+document.getElementById("newfirm").addEventListener("click",function(){
+  var f=document.getElementById("newfirmform");f.style.display=f.style.display==="none"?"block":"none";
+});
+document.getElementById("nf-go").addEventListener("click",function(){
+  var nm=document.getElementById("nf-name").value.trim();
+  var em=document.getElementById("nf-email").value.trim().toLowerCase();
+  var un=document.getElementById("nf-uname").value.trim();
+  var msg=document.getElementById("nf-msg");
+  if(!nm){msg.textContent="Firm name first.";return;}
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){msg.textContent="That email doesn't look right.";return;}
+  var b=this;b.disabled=true;b.textContent="…";
+  fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"create_partner",name:nm,user_email:em||undefined,user_name:un||undefined})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Create";
+      if(d&&d.error){msg.textContent=d.error;return;}
+      msg.textContent=em?(d.sign_in_sent?"Firm created — their sign-in link is on its way.":"Firm created, but the email didn't send."):"Firm created.";
+      document.getElementById("nf-name").value="";document.getElementById("nf-email").value="";document.getElementById("nf-uname").value="";
+      reload();})
+    .catch(function(){b.disabled=false;b.textContent="Create";msg.textContent="Couldn't create the firm — try again.";});
+});
+boot();
+</script>
+</body>
+</html>
