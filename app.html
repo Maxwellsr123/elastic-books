@@ -944,7 +944,7 @@ h1{letter-spacing:-.03em}
       }
       var chases=(d.chases||[]).filter(function(x){return x.state!=="stopped";});
       if(d.ready&&!chases.length){
-        h+='<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">All clear — nothing overdue in Xero right now. Ava checks every hour.</div></div>';
+        h+='<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Chase list is empty — either nothing’s overdue, or Ava’s next sweep hasn’t run yet. She checks Xero at 25 past each hour, and anything overdue lands here.</div></div>';
       }
       if(chases.length){
         var owing=money(c.owing_total||0);
