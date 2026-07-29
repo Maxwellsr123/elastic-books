@@ -42,6 +42,9 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .rs{font-size:12px;color:var(--ink2);margin-top:1px}
 .muted{color:var(--ink3);font-size:12.5px}
 a{color:var(--indtx)}
+input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-family:inherit;font-size:13px}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:640px){.formrow{flex-direction:column;align-items:stretch}.formrow .fi{width:100%!important;flex:unset!important}}
 #gate{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
 @media(max-width:640px){.top{padding:12px 14px}.top .sub{display:none}.wrap{padding:16px 10px 60px}.cohead{padding:12px 34px 12px 12px;flex-wrap:wrap;position:relative;row-gap:8px}.coname{flex-basis:100%}.cohead>i{position:absolute;right:12px;top:12px}.row{padding:10px 11px}}
 </style>
@@ -56,6 +59,17 @@ a{color:var(--indtx)}
 </div>
 
 <div class="wrap">
+  <div class="sec">Invite a client <span class="cnt">they sign themselves up — email or Slack not required</span></div>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px;margin-bottom:8px">
+    <div class="formrow">
+      <input class="fi" id="iv-name" placeholder="Client business name" style="flex:1;min-width:160px">
+      <input class="fi" id="iv-email" placeholder="Their email (optional — blank makes a copy link)" style="flex:1;min-width:220px">
+      <button class="btn btn-p" id="iv-go"><i class="ti ti-mail-forward"></i> Invite</button>
+    </div>
+    <div class="muted" id="iv-msg" style="margin-top:8px;min-height:15px">They confirm their business details, connect Gmail &amp; Xero, and land on their own board — no Slack anywhere.</div>
+  </div>
+  <div id="invlist"></div>
+
   <div class="sec">Needs Elastic <span class="cnt" id="workhint">loading clients…</span></div>
   <div id="worklist"></div>
   <div class="sec" style="margin-top:28px">Quiet <span class="cnt">nothing owed right now</span></div>
@@ -87,7 +101,7 @@ var CACHE={};
 function boot(){
   var t=new URLSearchParams(location.search).get("t");
   if(t){fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
-    .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){localStorage.setItem(SKEY,JSON.stringify({email:d.email,name:d.name,looper:d.looper,companies:d.companies}));}history.replaceState({},"",location.pathname);SESSION=getS();boot();})
+    .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){localStorage.setItem(SKEY,JSON.stringify({email:d.email,name:d.name,looper:d.looper,companies:d.companies,token:d.token}));}history.replaceState({},"",location.pathname);SESSION=getS();boot();})
     .catch(function(){history.replaceState({},"",location.pathname);boot();});return;}
   if(window.IS_DEV&&!SESSION){SESSION={email:"max@elasticadmin.com",name:"Dev looper",looper:true};start();return;}
   if(!SESSION){document.getElementById("gate").style.display="flex";return;}
@@ -117,8 +131,42 @@ function toast(msg,undoFn){
   if(undoFn){var u=document.createElement("a");u.textContent="Undo";u.style.cssText="color:#7FD1A8;font-weight:700;cursor:pointer";u.addEventListener("click",function(){t.remove();undoFn();});t.appendChild(u);}
   document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},8000);
 }
+// ── invites: The Desk onboards new house clients the same way partner firms do ──
+function copyText(txt,btn){
+  var done=function(){var old=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> Copied';setTimeout(function(){btn.innerHTML=old;},1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){window.prompt("Copy this link:",txt);});}
+  else window.prompt("Copy this link:",txt);
+}
+function loadInvites(){
+  if(!SESSION.token){document.getElementById("iv-msg").textContent="Sign out and back in once to enable inviting (your session predates it).";document.getElementById("iv-go").disabled=true;return;}
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)).then(function(r){return r.json();}).then(function(d){
+    var house=((d&&d.firms)||[]).filter(function(f){return f.id===null;})[0];
+    var inv=(house&&house.pending_invites)||[];
+    if(!inv.length){document.getElementById("invlist").innerHTML="";return;}
+    document.getElementById("invlist").innerHTML='<div class="list" style="margin-bottom:8px">'+inv.map(function(i){
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.client_name)+'</div><div class="rs">'+(i.email?"invited — emailed "+esc(i.email):"invited — copy link, not emailed")+' · expires '+new Date(i.expires_at).toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</div></div>'
+        +'<button class="btn bicopy" data-link="'+esc(i.link)+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-copy"></i> Copy link</button>'
+        +'<button class="btn birevoke" data-id="'+i.id+'" style="padding:6px 11px;font-size:12px;color:var(--red)">Revoke</button></div>';
+    }).join("")+'</div>';
+  }).catch(function(){});
+}
+document.getElementById("iv-go").addEventListener("click",function(){
+  var nm=document.getElementById("iv-name").value.trim(),em=document.getElementById("iv-email").value.trim().toLowerCase(),m=document.getElementById("iv-msg");
+  if(!nm){m.textContent="Client business name first.";return;}
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){m.textContent="That email doesn't look right (or leave it blank for a copy link).";return;}
+  var b=this;b.disabled=true;b.textContent="…";
+  fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"invite",client_name:nm,email:em||undefined})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';
+      if(d&&d.error){m.textContent=d.error;return;}
+      document.getElementById("iv-name").value="";document.getElementById("iv-email").value="";
+      if(d.emailed)m.textContent="Invite emailed — it's in the waiting list below until they sign up.";
+      else m.innerHTML='Link created — <a class="bicopy" data-link="'+esc(d.link)+'" style="cursor:pointer;font-weight:600">copy it</a> and send it to them.';
+      loadInvites();})
+    .catch(function(){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';m.textContent="Couldn't create the invite — try again.";});
+});
 function start(){
   document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
+  loadInvites();
   fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
     var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
     if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});
@@ -157,6 +205,13 @@ function renderClients(rows){
   document.getElementById("workhint").textContent=working+" client"+(working===1?"":"s")+" with work";
 }
 document.addEventListener("click",function(e){
+  var ic=e.target.closest(".bicopy");
+  if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
+  var ir=e.target.closest(".birevoke");
+  if(ir){ir.disabled=true;ir.textContent="…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"revoke",id:ir.getAttribute("data-id")})})
+      .then(function(){loadInvites();}).catch(function(){ir.disabled=false;ir.textContent="Revoke";});
+    return;}
   var h=e.target.closest(".cohead");
   if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
     var open=p.style.display==="block";
@@ -238,7 +293,10 @@ function renderPanel(id){
     var agoTxt=days<=0?"today":(days===1?"yesterday":days+" days ago");
     lastRep=' &nbsp;·&nbsp; Last report: <b>'+d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</b> ('+agoTxt+')'+(days>=14?' <span style="color:var(--amb)">⚠ getting stale</span>':'');
   } else { lastRep=' &nbsp;·&nbsp; <b>No report dropped yet</b>'; }
-  var html='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
+  // features are separated on the admin side: bookkeeping is the one with
+  // Elastic touches (upload the report, reconcile & tick off) — the rest run themselves
+  var html='<div class="sec" style="margin-top:0;color:var(--indtx)">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span></div>';
+  html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
     +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
     +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
     +'<input type="file" class="bfile" data-id="'+id+'" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">'
@@ -273,6 +331,8 @@ function renderPanel(id){
       +(pi.length>8?'<div class="pilemore" id="pm-'+id+'" style="display:none">'+pi.slice(8).map(pRow).join("")+'</div><div class="row"><a class="showpile" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+pi.length+' →</a></div>':"")+'</div>';
   }
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
+  html+='<div class="sec">Other features <span class="cnt">run themselves — no Elastic touch</span></div>'
+    +'<div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div>';
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
