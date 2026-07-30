@@ -59,6 +59,9 @@ input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-fa
 <div class="wrap">
   <div class="sec">Firms <span class="cnt" id="firmhint">loading…</span></div>
   <div id="firmlist"></div>
+  <div class="sec" style="margin-top:26px">Usage · last 30 days <span class="cnt" id="usagehint">loading…</span></div>
+  <div id="usagelist"></div>
+
   <div style="margin-top:18px">
     <button id="newfirm" class="btn"><i class="ti ti-plus"></i> New firm</button>
     <div id="newfirmform" style="display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px">
@@ -123,6 +126,7 @@ function start(){
       document.getElementById("firmhint").textContent=d.error;return;}
     FIRMS=d.firms||[];renderFirms();
   }).catch(function(){document.getElementById("firmhint").textContent="couldn't load firms";});
+  loadUsage();
 }
 function connDots(c){
   return '<span class="dot" title="Gmail" style="background:'+(c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
@@ -179,6 +183,32 @@ function renderPanel(k){
     +'<div class="formrow" style="margin-top:0"><input class="fi st-name" data-k="'+k+'" placeholder="Name" style="width:140px"><input class="fi st-email" data-k="'+k+'" placeholder="their@email.com" style="flex:1;min-width:180px"><button class="btn baddstaff" data-k="'+k+'"><i class="ti ti-mail-forward"></i> Add &amp; send sign-in link</button></div>'
     +'<div class="muted st-msg" data-k="'+k+'" style="margin-top:8px;min-height:15px">Heads up: this emails them their sign-in link immediately.</div></div>';
   p.innerHTML=html;
+}
+// ── usage: billable tokens per firm -> client -> feature, straight off the
+// fortnightly billing view (charge = 2× token cost) — same numbers the
+// invoice reports bill ──
+function fmtCost(n){return n>0&&n<0.01?"<$0.01":"$"+n.toFixed(2);}
+function fmtTok(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);}
+function loadUsage(){
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&usage=30").then(function(r){return r.json();}).then(function(d){
+    var u=d&&d.usage;if(!u){document.getElementById("usagehint").textContent="couldn't load usage";return;}
+    var charge=0,cost=0;u.firms.forEach(function(f){charge+=f.charge;cost+=f.cost;});
+    document.getElementById("usagehint").textContent=fmtCost(charge)+" billable ("+fmtCost(cost)+" token cost) · "+u.periods.length+" billing period"+(u.periods.length===1?"":"s")+": "+u.periods.join(", ");
+    var html="";
+    u.firms.forEach(function(f){
+      if(!f.charge&&!f.tasks)return;
+      html+='<div class="co"><div class="cohead" style="cursor:default"><div class="coname"><i class="ti ti-coin" style="color:var(--indtx)"></i> '+esc(f.name)+'</div>'
+        +'<span class="badge b-grn">'+fmtCost(f.charge)+' billable</span><span class="badge b-mut">'+fmtTok(f.tin+f.tout)+' tok · '+f.tasks+' tasks</span></div>'
+        +'<div class="panel" style="display:block"><div class="list">'
+        +f.clients.map(function(c){
+          var feats=c.features.map(function(x){return esc(x.feature)+' <b>'+fmtCost(x.charge)+'</b> <span style="color:var(--ink3)">('+x.tasks+' tasks · '+fmtTok(x.tin+x.tout)+' tok)</span>';}).join('<br>');
+          return '<div class="row"><div class="rmain"><div class="rt">'+esc(c.name)+' — '+fmtCost(c.charge)+' <span class="muted" style="font-weight:400">('+fmtCost(c.cost)+' cost)</span></div><div class="rs" style="line-height:1.7">'+feats+'</div></div></div>';
+        }).join("")
+        +'</div></div></div>';
+    });
+    html+='<div class="muted" style="margin-top:8px">Charge = token cost × 2. Same source as the fortnightly invoice reports (billed on the 1st and 16th). USD, ex-GST.</div>';
+    document.getElementById("usagelist").innerHTML=html||'<div class="muted">No billable usage in this window.</div>';
+  }).catch(function(){document.getElementById("usagehint").textContent="couldn't load usage";});
 }
 function reload(openK){
   fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)).then(function(r){return r.json();}).then(function(d){
