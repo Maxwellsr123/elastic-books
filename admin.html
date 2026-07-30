@@ -350,6 +350,20 @@ document.addEventListener("click",function(e){
         .catch(function(){td.innerHTML='<div class="muted" style="padding:8px 0;color:var(--amb)">Couldn\'t reach the thread — try again.</div>';});
     }
     return;}
+  var bf=e.target.closest(".bfeat");
+  if(bf){var fco=bf.getAttribute("data-co"),fkey=bf.getAttribute("data-key"),turningOff=bf.getAttribute("data-on")==="1";
+    var fname=bf.closest(".row").querySelector(".rt").textContent;
+    // Switching a client's feature off from our side stops Ava working for them.
+    // That's their call more than ours, so make it a deliberate one.
+    if(turningOff&&!confirm("Switch "+fname+" OFF for this client?\n\nAva stops doing it — the hourly jobs will skip them until it's switched back on."))return;
+    bf.disabled=true;bf.textContent="…";
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:fco,key:fkey,on:!turningOff,by:(SESSION&&SESSION.email)||"desk"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){FEATS[fco]=d;renderPanel(fco);toast(fname+(turningOff?" switched off":" switched on"));}
+        else{bf.disabled=false;bf.textContent=turningOff?"Switch off":"Switch on";alert("Couldn't change it: "+((d&&d.error)||"unknown"));}})
+      .catch(function(){bf.disabled=false;bf.textContent=turningOff?"Switch off":"Switch on";});
+    return;}
   var as=e.target.closest(".acstory");
   if(as){var aid=as.getAttribute("data-id"),sd=document.getElementById("st-"+aid);
     if(sd){var shut=sd.style.display==="none";sd.style.display=shut?"":"none";STORY[aid]=shut;
@@ -418,6 +432,7 @@ document.addEventListener("click",function(e){
     var open=p.style.display==="block";
     document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
     if(!open){p.style.display="block";renderPanel(id);track(id,"panel_open");
+      if(!FEATS[id])loadFeats(id,function(){if(p.style.display==="block")renderPanel(id);});
       // The Desk stays open for hours; Auto Collect moves every hour at :25.
       // Re-read it on open and repaint if it changed under us.
       fetch(API+"/auto-collect?company="+id).then(function(r){return r.json();}).then(function(ac){
@@ -595,7 +610,9 @@ function acThreadHtml(d){
   if(!(d.messages||[]).length)return '<div class="muted" style="padding:8px 0">The thread is empty.</div>';
   return '<div style="border:1px solid var(--line);border-radius:4px;background:#fff;padding:4px 12px;margin:6px 0 2px">'
     +d.messages.map(function(m){
-      var who=m.from==="ava"?'<span style="color:var(--indtx)">Ava</span>':'<span style="color:var(--grn)">Someone in Slack</span>';
+      var who=m.from==="ava"?'<span style="color:var(--indtx)">Ava</span>'
+        :m.from==="customer"?'<span style="color:var(--grn)">'+esc(d.customer||"The customer")+'</span>'
+        :'<span style="color:var(--ink2)">Someone in Slack</span>';
       return '<div style="padding:10px 0;border-top:1px solid #F1F1E9">'
         +'<div style="display:flex;gap:8px;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px">'+who
         +'<span style="margin-left:auto;font-weight:500">'+acWhen(m.at)+'</span></div>'
@@ -689,6 +706,38 @@ function acBlock(id){
   return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Collect <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
+// ── feature switches ───────────────────────────────────────────────────────
+// Every feature arrives switched on; a client who doesn't want one switches it
+// off and the ENGINE stops — the cron skips them, not just the page (Max, 31
+// Jul). Same row the owner's own board flips, so the two can't disagree.
+var FEATS={};
+function featBlock(id){
+  var f=FEATS[id];
+  var open=FOLDS[id+"|feat"]===false;   // defaults closed; it's a settings drawer
+  var body;
+  if(!f){body='<div class="muted">Loading their switches…</div>';}
+  else if(f.error){body='<div class="muted">Couldn\'t read their switches.</div>';}
+  else{
+    body='<div class="list">'+f.features.map(function(x){
+      var on=x.on;
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(x.name)+'</div>'
+        +'<div class="rs">'+esc(x.blurb)+'</div></div>'
+        +'<span class="badge '+(on?'b-grn':'b-mut')+'">'+(on?'on':'off')+'</span>'
+        +'<button class="btn bfeat" data-co="'+id+'" data-key="'+esc(x.key)+'" data-on="'+(on?'1':'0')+'" style="padding:6px 11px;font-size:12px'+(on?'':';color:var(--grn)')+'">'
+        +(on?'Switch off':'Switch on')+'</button></div>';
+    }).join("")+'</div>'
+    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. Auto Scheduling isn\'t here: it\'s under construction and gated separately.</div>';
+  }
+  var offCount=f&&f.features?f.features.filter(function(x){return !x.on;}).length:0;
+  return '<div class="sec fhead" data-fold="'+id+'|feat" style="cursor:pointer">Feature switches <span class="cnt">'
+    +(f&&f.features?(offCount?offCount+' switched off':'all on'):'…')+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
+function loadFeats(id,then){
+  fetch(API+"/features?company="+id).then(function(r){return r.json();})
+    .then(function(d){FEATS[id]=d;if(then)then();})
+    .catch(function(){FEATS[id]={error:true};if(then)then();});
+}
 function renderPanel(id){
   var p=document.getElementById("p-"+id),cl=CACHE[id];
   if(!cl){p.innerHTML='<div class="muted">Couldn\'t load this client.</div>';return;}
@@ -749,6 +798,7 @@ function renderPanel(id){
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
   html+='</div>';
   html+=acBlock(id);
+  html+=featBlock(id);
   var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
   html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
