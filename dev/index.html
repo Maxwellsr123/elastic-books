@@ -109,7 +109,7 @@ h1{letter-spacing:-.03em}
     </div>
 
     <div class="hero" id="hero">
-      <div class="hi">Kia ora<span id="hero-name"></span> <span class="co" id="hero-co"></span></div>
+      <div class="hi"><span id="hero-greet">Welcome back</span><span id="hero-name"></span> <span class="co" id="hero-co"></span></div>
       <div class="sub">Here's what Ava's been doing for you.</div>
       <div class="stats" id="hero-stats"></div>
       <div class="featline" id="hero-feats"></div>
@@ -215,6 +215,8 @@ h1{letter-spacing:-.03em}
   document.getElementById("landing-h1").style.display="none";
   document.getElementById("landing-lede").style.display="none";
   var hero=document.getElementById("hero");hero.style.display="block";
+  var hr=new Date().getHours();
+  document.getElementById("hero-greet").textContent=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
   document.getElementById("hero-name").textContent=s.name?", "+String(s.name).split(" ")[0]:"";
   document.getElementById("hero-co").textContent="· "+comp.name;
   fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
