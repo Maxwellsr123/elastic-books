@@ -58,6 +58,13 @@
   .hero .featline{margin-top:14px;font-size:12.5px;color:#b7b4c7;line-height:1.75}
   .hero .featline b{color:#dedbee;font-weight:600}
   .hero .fine{margin-top:12px;font-size:11px;color:#77748a}
+  .hero .ledger{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:none}
+  .hero .ledger .lt{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B8B98;cursor:pointer;user-select:none}
+  .hero .ledger .rows{display:none;margin-top:10px;max-height:260px;overflow-y:auto}
+  .hero .lrow{display:flex;gap:10px;align-items:baseline;font-size:12px;color:#b7b4c7;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .hero .lrow .lw{color:#77748a;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:92px}
+  .hero .lrow .lf{flex:1;min-width:0}
+  .hero .lrow .lc{color:#dedbee;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
   .top .out{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:4px;cursor:pointer;display:none}
 </style>
 
@@ -106,6 +113,10 @@ h1{letter-spacing:-.03em}
       <div class="sub">Here's what Ava's been doing for you.</div>
       <div class="stats" id="hero-stats"></div>
       <div class="featline" id="hero-feats"></div>
+      <div class="ledger" id="hero-ledger">
+        <div class="lt" id="hero-ledger-toggle">Where it went — recent activity ▸</div>
+        <div class="rows" id="hero-ledger-rows"></div>
+      </div>
       <div class="fine">Usage-based pricing: token cost + 100% markup · invoiced on the 1st &amp; 16th · USD ex-GST</div>
     </div>
 
@@ -186,13 +197,19 @@ h1{letter-spacing:-.03em}
     document.getElementById("bk-card").setAttribute("href","https://elasticadmin.com");
     return;
   }
-  // signed in: sign-out affordance
+  // signed in: sign-out affordance (+ Desk/portal shortcuts for the Elastic team)
   var out=document.getElementById("signout");
   out.style.display="inline-flex";
   out.addEventListener("click",function(){localStorage.removeItem("ava_session");location.reload();});
-  if(!(s.companies&&s.companies.length)||s.looper||!s.token)return; // loopers/partners without a board keep the plain page
+  if(s.looper){out.insertAdjacentHTML("beforebegin",'<a href="admin.html" class="out" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-shield-check"></i> The Desk</a><a href="partners.html" class="out" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-building-store"></i> Partners</a>');}
+  if(!(s.companies&&s.companies.length)||!s.token)return;
   var qc=new URLSearchParams(location.search).get("c");
   var comp=null;for(var i=0;i<s.companies.length;i++){if(s.companies[i].id===qc){comp=s.companies[i];break;}}
+  if(!comp&&s.looper){
+    // loopers see every company — default their hero to Max's own business
+    var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+    for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
+  }
   comp=comp||s.companies[0];
   // swap the marketing intro for the product hero
   document.getElementById("landing-h1").style.display="none";
@@ -210,9 +227,26 @@ h1{letter-spacing:-.03em}
         +'<div class="stat"><div class="k">Tokens</div><div class="n">'+fmtT((cur.tin||0)+(cur.tout||0))+'</div></div>'
         +(prev?'<div class="stat"><div class="k">Last fortnight</div><div class="n">'+fmtC(prev.charge)+'</div></div>':'');
       document.getElementById("hero-stats").innerHTML=stats;
-      var feats=(cur.features||[]).filter(function(f){return f.charge>=0.005||f.tasks>0;}).slice(0,5)
-        .map(function(f){return esc(f.feature)+' <b>'+fmtC(f.charge)+'</b> <span style="color:#77748a">('+f.tasks+' tasks)</span>';});
+      var feats=(cur.features||[]).filter(function(f){return f.charge>=0.005||f.tasks>0;})
+        .map(function(f){return esc(f.feature)+' <b>'+fmtC(f.charge)+'</b> <span style="color:#77748a">('+f.tasks+' tasks · '+fmtT((f.tin||0)+(f.tout||0))+' tok)</span>';});
       document.getElementById("hero-feats").innerHTML=feats.length?feats.join(" &nbsp;·&nbsp; "):"No billable activity yet this fortnight — connect Xero and Gmail and Ava gets to work.";
+      // the itemised ledger: every metered run, newest first
+      var ev=(d&&d.events)||[];
+      if(ev.length){
+        document.getElementById("hero-ledger").style.display="block";
+        document.getElementById("hero-ledger-rows").innerHTML=ev.map(function(e){
+          var t=new Date(e.at);
+          var when=t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" "+t.toLocaleTimeString("en-NZ",{hour:"2-digit",minute:"2-digit"});
+          return '<div class="lrow"><span class="lw">'+when+'</span><span class="lf">'+esc(e.feature)+' <span style="color:#77748a">· '+e.tasks+' task'+(e.tasks===1?"":"s")+' · '+fmtT(e.tokens)+' tok</span></span><span class="lc">'+fmtC(e.charge)+'</span></div>';
+        }).join("");
+        var tog=document.getElementById("hero-ledger-toggle");
+        tog.addEventListener("click",function(){
+          var r=document.getElementById("hero-ledger-rows");
+          var open=r.style.display==="block";
+          r.style.display=open?"none":"block";
+          tog.textContent="Where it went — recent activity "+(open?"▸":"▾");
+        });
+      }
     }).catch(function(){
       document.getElementById("hero-stats").innerHTML='<div class="stat"><div class="k">Usage</div><div class="n">—</div></div>';
     });
