@@ -91,10 +91,10 @@ h1{letter-spacing:-.03em}
     <p class="lede"><b>Elastic Admin</b> runs the books for trade businesses. Connect the Gmail inboxes where your receipts and bills land, and <b>Ava</b> — the Elastic Admin assistant — reads them to find the paperwork, matches each document to the right bank transaction in Xero, and preps your books. With your permission she can also send from your inbox — only to chase a supplier for a missing receipt or reply where you’ve asked her to; she never deletes or modifies mail. A human bookkeeper checks and reconciles everything. You can disconnect an inbox at any time.</p>
 
     <div class="grid">
-      <a class="card" href="app.html">
-        <div class="row"><div class="ico book"><i class="ti ti-book-2"></i></div><span class="pill live">● Live · Beta</span></div>
-        <div><div class="h">Auto Bookkeeping</div><div class="d">Drop a receipt, Ava reads it, matches it to the right spend and gets your books audit-ready — your bookkeeper reconciles instead of chasing.</div></div>
-        <span class="open">Open <i class="ti ti-arrow-right"></i></span>
+      <a class="card" href="app.html" id="bk-card">
+        <div class="row"><div class="ico book"><i class="ti ti-book-2"></i></div><span class="pill live" id="bk-pill">● Live · Beta</span></div>
+        <div><div class="h">Auto Bookkeeping</div><div class="d">Ava does 80% — reads every receipt, matches it to the right spend, preps your books audit-ready. The last 20% is human: your bookkeeper, or the Elastic team, reconciles and signs off.</div></div>
+        <span class="open" id="bk-open">Open <i class="ti ti-arrow-right"></i></span>
       </a>
 
       <a class="card" href="scheduling.html">
@@ -145,6 +145,22 @@ h1{letter-spacing:-.03em}
     <div class="foot">Powered by Ava · Elastic Admin · Aotearoa NZ &nbsp;·&nbsp; <a href="../privacy.html" style="color:inherit;font-weight:600">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://elasticadmin.com" style="color:inherit;font-weight:600">elasticadmin.com</a><br>
     Our use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.</div>
   </div>
+<script>
+// Auto Bookkeeping needs a human in the loop, so it comes with a bookkeeper —
+// ours or the client's firm. Anyone with a board already has that as part of
+// the service; without a session (a prospect reading this page) the card
+// shows locked with the pitch instead of an Open that would bounce them.
+(function(){
+  var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
+  var member=!!(s&&((s.companies&&s.companies.length)||s.looper||s.partner));
+  if(!member){
+    var pill=document.getElementById("bk-pill");
+    pill.textContent="🔒 Live · comes with a bookkeeper";pill.className="pill soon";
+    document.getElementById("bk-open").innerHTML='Unlocked when Elastic or your bookkeeper runs your books <i class="ti ti-arrow-right"></i>';
+    document.getElementById("bk-card").setAttribute("href","https://elasticadmin.com");
+  }
+})();
+</script>
 <script src="ava-chat.js"></script>
 </body>
 </html>
