@@ -117,7 +117,7 @@ h1{letter-spacing:-.03em}
         <div class="lt" id="hero-ledger-toggle">Where it went — recent activity ▸</div>
         <div class="rows" id="hero-ledger-rows"></div>
       </div>
-      <div class="fine">Usage-based pricing: token cost + 100% markup · invoiced on the 1st &amp; 16th · USD ex-GST</div>
+      <div class="fine">Usage-based billing · invoiced on the 1st &amp; 16th · USD ex-GST</div>
     </div>
 
     <h1 id="landing-h1">Elastic Admin — your admin, handled</h1>
@@ -221,6 +221,7 @@ h1{letter-spacing:-.03em}
   document.getElementById("hero-co").textContent="· "+comp.name;
   fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
     .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
       var ps=(d&&d.periods)||[];
       var cur=ps[0]||{charge:0,tasks:0,tin:0,tout:0,features:[]};
       var prev=ps[1];
