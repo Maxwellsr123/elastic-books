@@ -13,7 +13,7 @@
       if(s&&!s.looper&&s.companies&&s.companies.length)return s.companies[0].id;
     }catch(e){}
     if(window.IS_DEV&&window.SANDBOX_CO)return KPA; // dev pages browse KPA data
-    return KPA;
+    return ""; // never fall back to KPA — a stranger with no session must not see client data
   }
   var CO=companyId(), KEY="ava_chat_"+CO;
   function hist(){try{return JSON.parse(sessionStorage.getItem(KEY)||"[]");}catch(e){return [];}}

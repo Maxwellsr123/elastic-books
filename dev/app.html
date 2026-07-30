@@ -227,7 +227,7 @@ h1{letter-spacing:-.03em}
 
   var FN="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-drop";
   // company comes from the private link (?c=<id>); falls back to KPA for the original demo
-  var KPA=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
+  var KPA=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}return "";})());
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
   var U_ITEMS=[],U_FILTER="need";
   function needRow(i){
@@ -739,7 +739,7 @@ h1{letter-spacing:-.03em}
 <script>
 (function(){
   var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
-  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:"5c829c7f-0b63-4bbc-87b9-c24b822a564d");
+  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}return "";})());
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
   var UPAL=["#B5630F","#0E7A50","#B42318","#0E7490","#A21CAF","#C2410C","#4D7C0F","#BE123C"];
   function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
