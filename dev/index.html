@@ -58,13 +58,13 @@
   .hero .featline{margin-top:14px;font-size:12.5px;color:#b7b4c7;line-height:1.75}
   .hero .featline b{color:#dedbee;font-weight:600}
   .hero .fine{margin-top:12px;font-size:11px;color:#77748a}
-  .hero .ledger{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:none}
-  .hero .ledger .lt{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B8B98;cursor:pointer;user-select:none}
-  .hero .ledger .rows{display:none;margin-top:10px;max-height:260px;overflow-y:auto}
-  .hero .lrow{display:flex;gap:10px;align-items:baseline;font-size:12px;color:#b7b4c7;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-  .hero .lrow .lw{color:#77748a;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:92px}
-  .hero .lrow .lf{flex:1;min-width:0}
-  .hero .lrow .lc{color:#dedbee;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .hero .banner{display:none;margin-top:14px;padding:11px 14px;border-radius:4px;font-size:13px;line-height:1.5;font-weight:500}
+  .hero .banner.warn{display:block;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.45);color:#fcd34d}
+  .hero .banner.overdue{display:block;background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.5);color:#fca5a5}
+  .hero .banner a{color:inherit;font-weight:700}
+  .hero .seg{display:inline-flex;gap:0;margin-top:16px;border:1px solid rgba(255,255,255,.14);border-radius:4px;overflow:hidden}
+  .hero .seg button{background:transparent;border:0;color:#8B8B98;font:inherit;font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer}
+  .hero .seg button.on{background:rgba(255,255,255,.1);color:#fff}
   .top .out{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:4px;cursor:pointer;display:none}
 </style>
 
@@ -111,13 +111,10 @@ h1{letter-spacing:-.03em}
     <div class="hero" id="hero">
       <div class="hi"><span id="hero-greet">Welcome back</span><span id="hero-name"></span> <span class="co" id="hero-co"></span></div>
       <div class="sub">Here's what Ava's been doing for you.</div>
+      <div class="banner" id="hero-banner"></div>
       <div class="stats" id="hero-stats"></div>
       <div class="featline" id="hero-feats"></div>
-      <div class="ledger" id="hero-ledger">
-        <div class="lt" id="hero-ledger-toggle">Where it went — recent activity ▸</div>
-        <div class="rows" id="hero-ledger-rows"></div>
-      </div>
-      <div class="fine">Usage-based billing · invoiced on the 1st &amp; 16th · USD ex-GST</div>
+      <div class="fine"><a href="usage.html" style="color:#b7b4c7;font-weight:600;text-decoration:none">Usage &amp; billing <i class="ti ti-arrow-right"></i></a></div>
     </div>
 
     <h1 id="landing-h1">Elastic Admin — your admin, handled</h1>
@@ -188,6 +185,7 @@ h1{letter-spacing:-.03em}
   function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   function fmtC(n){return n>0&&n<0.01?"<$0.01":"$"+Number(n).toFixed(2);}
   function fmtT(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);}
+  function fmtD(ymd){if(!ymd)return"";var d=new Date(ymd+"T12:00:00");return d.toLocaleDateString("en-NZ",{weekday:"short",day:"numeric",month:"short"});}
   var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
   var member=!!(s&&((s.companies&&s.companies.length)||s.looper||s.partner));
   if(!member){
@@ -222,36 +220,37 @@ h1{letter-spacing:-.03em}
   fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
     .then(function(r){return r.json();}).then(function(d){
       if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
-      var ps=(d&&d.periods)||[];
-      var cur=ps[0]||{charge:0,tasks:0,tin:0,tout:0,features:[]};
-      var prev=ps[1];
-      var stats='<div class="stat"><div class="k">This fortnight</div><div class="n">'+fmtC(cur.charge)+'</div></div>'
-        +'<div class="stat"><div class="k">Tasks Ava ran</div><div class="n">'+(cur.tasks||0)+'</div></div>'
-        +'<div class="stat"><div class="k">Tokens</div><div class="n">'+fmtT((cur.tin||0)+(cur.tout||0))+'</div></div>'
-        +(prev?'<div class="stat"><div class="k">Last fortnight</div><div class="n">'+fmtC(prev.charge)+'</div></div>':'');
-      document.getElementById("hero-stats").innerHTML=stats;
-      var feats=(cur.features||[]).filter(function(f){return f.charge>=0.005||f.tasks>0;})
-        .map(function(f){return esc(f.feature)+' <b>'+fmtC(f.charge)+'</b> <span style="color:#77748a">('+f.tasks+' tasks · '+fmtT((f.tin||0)+(f.tout||0))+' tok)</span>';});
-      document.getElementById("hero-feats").innerHTML=feats.length?feats.join(" &nbsp;·&nbsp; "):"No billable activity yet this fortnight — connect Xero and Gmail and Ava gets to work.";
-      // the itemised ledger: every metered run, newest first
-      var ev=(d&&d.events)||[];
-      if(ev.length){
-        document.getElementById("hero-ledger").style.display="block";
-        document.getElementById("hero-ledger-rows").innerHTML=ev.map(function(e){
-          var t=new Date(e.at);
-          var when=t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" "+t.toLocaleTimeString("en-NZ",{hour:"2-digit",minute:"2-digit"});
-          return '<div class="lrow"><span class="lw">'+when+'</span><span class="lf">'+esc(e.feature)+' <span style="color:#77748a">· '+e.tasks+' task'+(e.tasks===1?"":"s")+' · '+fmtT(e.tokens)+' tok</span></span><span class="lc">'+fmtC(e.charge)+'</span></div>';
-        }).join("");
-        var tog=document.getElementById("hero-ledger-toggle");
-        tog.addEventListener("click",function(){
-          var r=document.getElementById("hero-ledger-rows");
-          var open=r.style.display==="block";
-          r.style.display=open?"none":"block";
-          tog.textContent="Where it went — recent activity "+(open?"▸":"▾");
-        });
+      // tasks only on the hero — the money lives in Usage & billing
+      var tasks=d.tasks||{week:0,month:0,year:0};
+      var CAP={week:"Resets every Monday",month:"This calendar month",year:"This year"};
+      document.getElementById("hero-stats").innerHTML=
+        '<div class="stat" style="min-width:190px"><div class="k">Tasks Ava ran</div><div class="n" id="task-n"></div></div>'
+        +'<div style="display:flex;flex-direction:column;justify-content:flex-end"><div class="seg" id="task-seg">'
+        +'<button data-k="week" class="on">Week</button><button data-k="month">Month</button><button data-k="year">Year</button>'
+        +'</div></div>';
+      function pick(k){
+        document.getElementById("task-n").textContent=(tasks[k]||0).toLocaleString();
+        document.getElementById("hero-feats").textContent=CAP[k]+(tasks[k]?"":" — connect Xero and Gmail and Ava gets to work.");
+        var bs=document.querySelectorAll("#task-seg button");
+        for(var i=0;i<bs.length;i++)bs[i].className=bs[i].getAttribute("data-k")===k?"on":"";
+      }
+      document.getElementById("task-seg").addEventListener("click",function(e){
+        var k=e.target&&e.target.getAttribute&&e.target.getAttribute("data-k");
+        if(k)pick(k);
+      });
+      pick("week");
+      // account standing: Ava keeps working, but shortfalls get a banner
+      var acc=d.account||{state:"ok"};
+      var ban=document.getElementById("hero-banner");
+      if(acc.state==="warning"){
+        ban.className="banner warn";
+        ban.innerHTML='Your account needs a top-up — '+fmtC(acc.owing)+' owing. Clear it by '+fmtD(acc.deadline)+' and Ava keeps working without a pause. <a href="usage.html">See usage &amp; billing →</a>';
+      }else if(acc.state==="overdue"){
+        ban.className="banner overdue";
+        ban.innerHTML='Your account is overdue — '+fmtC(acc.owing)+' owing. Ava is still working for now, but work pauses unless it’s cleared. <a href="usage.html">See usage &amp; billing →</a>';
       }
     }).catch(function(){
-      document.getElementById("hero-stats").innerHTML='<div class="stat"><div class="k">Usage</div><div class="n">—</div></div>';
+      document.getElementById("hero-stats").innerHTML='<div class="stat"><div class="k">Tasks Ava ran</div><div class="n">—</div></div>';
     });
 })();
 </script>
