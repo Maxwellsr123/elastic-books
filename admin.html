@@ -205,6 +205,8 @@ function renderClients(rows){
   document.getElementById("workhint").textContent=working+" client"+(working===1?"":"s")+" with work";
 }
 document.addEventListener("click",function(e){
+  var fh=e.target.closest(".fhead");
+  if(fh){var fb=fh.nextElementSibling;if(fb&&fb.classList.contains("fbody")){var open=fb.style.display!=="none";fb.style.display=open?"none":"";var ch=fh.querySelector("i");if(ch){ch.classList.toggle("ti-chevron-up",!open);ch.classList.toggle("ti-chevron-down",open);}}return;}
   var ic=e.target.closest(".bicopy");
   if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
   var ir=e.target.closest(".birevoke");
@@ -294,8 +296,10 @@ function renderPanel(id){
     lastRep=' &nbsp;·&nbsp; Last report: <b>'+d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</b> ('+agoTxt+')'+(days>=14?' <span style="color:var(--amb)">⚠ getting stale</span>':'');
   } else { lastRep=' &nbsp;·&nbsp; <b>No report dropped yet</b>'; }
   // features are separated on the admin side: bookkeeping is the one with
-  // Elastic touches (upload the report, reconcile & tick off) — the rest run themselves
-  var html='<div class="sec" style="margin-top:0;color:var(--indtx)">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span></div>';
+  // Elastic touches (upload the report, reconcile & tick off) — the rest run
+  // themselves. Each feature block collapses on its header.
+  var html='<div class="sec fhead" style="margin-top:0;color:var(--indtx);cursor:pointer">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-up" style="margin-left:auto;color:var(--ink3)"></i></div>';
+  html+='<div class="fbody">';
   html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
     +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
     +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
@@ -331,8 +335,9 @@ function renderPanel(id){
       +(pi.length>8?'<div class="pilemore" id="pm-'+id+'" style="display:none">'+pi.slice(8).map(pRow).join("")+'</div><div class="row"><a class="showpile" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+pi.length+' →</a></div>':"")+'</div>';
   }
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
-  html+='<div class="sec">Other features <span class="cnt">run themselves — no Elastic touch</span></div>'
-    +'<div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div>';
+  html+='</div>';
+  html+='<div class="sec fhead" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-down" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody" style="display:none"><div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
