@@ -109,7 +109,8 @@ function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{mini
 var SKEY="ava_session";
 function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
 var SESSION=getS();
-var CACHE={};
+var CACHE={};   // chase-list per company (Auto Bookkeeping)
+var ACOL={};    // auto-collect per company (Auto Collect)
 // folded feature sections, per client — survives re-renders and reloads
 var FOLDS={};try{FOLDS=JSON.parse(localStorage.getItem("desk_folds")||"{}")||{};}catch(e){}
 
@@ -277,8 +278,15 @@ function start(){
   fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
     var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
     if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});
-    Promise.all(cs.map(function(c){return fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).then(function(cl){CACHE[c.id]=cl;return {c:c,cl:cl};}).catch(function(){return {c:c,cl:null};});}))
-      .then(renderClients);
+    // Both features per client, in one pass. Auto Collect runs owner-side, but
+    // when Ava hands a chase back it's a human's job — and that human can be us
+    // (Max, 31 Jul). So the Desk reads it too and surfaces the handovers.
+    Promise.all(cs.map(function(c){
+      return Promise.all([
+        fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch(API+"/auto-collect?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;})
+      ]).then(function(both){CACHE[c.id]=both[0];ACOL[c.id]=both[1];return {c:c,cl:both[0],ac:both[1]};});
+    })).then(renderClients);
   }).catch(function(){document.getElementById("workhint").textContent="couldn't load clients";});
 }
 function laneCounts(cl){
@@ -292,20 +300,31 @@ function laneCounts(cl){
     pile:n(function(i){return i.lane==="pile";})
   };
 }
+// Auto Collect, boiled down to the two numbers that decide whether this client
+// belongs in "Needs Elastic": how many chases Ava's handed back, and what's out.
+function acCounts(ac){
+  if(!ac||ac.error||!ac.enabled)return {on:false,needs:0,active:0,owing:0,paused:false,ready:false};
+  var c=ac.counts||{};
+  return {on:true,needs:c.needs_you||0,active:c.active||0,owing:c.owing_total||0,paused:!!ac.paused,ready:!!ac.ready};
+}
 function renderClients(rows){
-  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl);return (cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
+  // handovers outrank bookkeeping: an invoice nobody's chasing costs the client
+  // more than a receipt nobody's filed.
+  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac);
+    return (ab.needs-aa.needs)||(cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
   var work="",quiet="",working=0;
   rows.forEach(function(r){
-    var c=laneCounts(r.cl),name=r.c.name;
+    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac);
     var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
     var badges="";
     if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
     if(c.review)badges+='<span class="badge b-amb">'+c.review+' check</span> ';
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
     if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
+    if(ac.needs)badges+='<span class="badge b-red" title="Auto Collect: Ava has handed these back — email sent, no reply, or a dispute">'+ac.needs+' collect</span> ';
     if(!badges)badges='<span class="badge b-mut">all quiet</span>';
     var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="setrate" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--ink3)" title="Their agreed labour sell rate — click to change">$'+(RATES[r.c.id]?RATES[r.c.id].rate:20)+'/hr</a><a href="#" class="loghours" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Log Elastic team hours against this client">Hours +</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
-    if(c.ready||c.review||c.owner||c.pile){work+=html;working++;}else quiet+=html;
+    if(c.ready||c.review||c.owner||c.pile||ac.needs){work+=html;working++;}else quiet+=html;
   });
   document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
   document.getElementById("quietlist").innerHTML=quiet;
@@ -318,6 +337,11 @@ document.addEventListener("click",function(e){
     var fk=fh.getAttribute("data-fold");if(fk){FOLDS[fk]=open;try{localStorage.setItem("desk_folds",JSON.stringify(FOLDS));}catch(_e){}}}return;}
   var ic=e.target.closest(".bicopy");
   if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
+  var as=e.target.closest(".acstory");
+  if(as){var aid=as.getAttribute("data-id"),sd=document.getElementById("st-"+aid);
+    if(sd){var shut=sd.style.display==="none";sd.style.display=shut?"":"none";STORY[aid]=shut;
+      as.innerHTML=(shut?"Hide trail":"Trail")+as.innerHTML.slice(as.innerHTML.indexOf(" <span"));}
+    return;}
   var ir=e.target.closest(".birevoke");
   if(ir){ir.disabled=true;ir.textContent="…";
     fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"revoke",id:ir.getAttribute("data-id")})})
@@ -380,7 +404,14 @@ document.addEventListener("click",function(e){
   if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
     var open=p.style.display==="block";
     document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
-    if(!open){p.style.display="block";renderPanel(id);track(id,"panel_open");}
+    if(!open){p.style.display="block";renderPanel(id);track(id,"panel_open");
+      // The Desk stays open for hours; Auto Collect moves every hour at :25.
+      // Re-read it on open and repaint if it changed under us.
+      fetch(API+"/auto-collect?company="+id).then(function(r){return r.json();}).then(function(ac){
+        if(!ac||ac.error)return;
+        if(JSON.stringify(ac)===JSON.stringify(ACOL[id]))return;
+        ACOL[id]=ac;if(p.style.display==="block")renderPanel(id);
+      }).catch(function(){});}
     return;}
   var b=e.target.closest(".bdrop");
   if(b){var f=document.querySelector('.bfile[data-id="'+b.getAttribute("data-id")+'"]');if(f)f.click();return;}
@@ -440,6 +471,160 @@ function itemRow(i,actions){
   var ins=i.insight?'<div class="rs" style="color:var(--indtx);margin-top:2px" title="'+esc(i.reasoning||"")+'">💡 '+esc(i.insight)+(i.confidence!=null?' <span style="color:var(--ink3)">'+Math.round(i.confidence*100)+'% sure</span>':'')+'</div>':'';
   return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+gst+job+why+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div>'+ins+'</div>'+rc+extra+actions+'</div>';
 }
+// ── Auto Collect, Desk-side ────────────────────────────────────────────────
+// The owner's board shows the chase running. The Desk shows the SAME rows plus
+// the reason Ava stopped, because a handover is the moment a human is owed the
+// job — and Elastic can be that human before the owner even opens their board.
+// Read-only: nobody emails a client's customer from here.
+var AC_STATE={"new":["queued","b-ind"],needs_contact:["needs contact details","b-red"],emailed:["emailed — awaiting reply","b-ind"],
+  followup:["followed up","b-ind"],calling:["calling","b-ind"],called:["called","b-ind"],needs_human:["needs a human","b-red"],
+  promised:["promised","b-grn"],paid:["paid ✓","b-grn"],stopped:["closed","b-mut"]};
+function acDate(s){if(!s)return "";try{return new Date(String(s).slice(0,10)+"T12:00:00").toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}catch(e){return s;}}
+function acPill(ch){
+  if(ch.state==="promised"&&ch.promised_date)return '<span class="badge b-grn">promised '+esc(acDate(ch.promised_date))+'</span>';
+  var m=AC_STATE[ch.state]||[ch.state,"b-ind"];
+  return '<span class="badge '+m[1]+'">'+esc(m[0])+'</span>';
+}
+// ── the paper trail ────────────────────────────────────────────────────────
+// "How's Ava going with the chasing?" is a question about work, not states, and
+// the answer is the history: what she sent, what came back, what she did next.
+// The owner reads it in their Slack thread; the Desk has no Slack, so it reads
+// the same events here.
+var STORY={};   // chase id -> open, survives the panel re-render
+function acWhen(at){
+  if(!at)return "";
+  var d=new Date(at),days=Math.floor((Date.now()-d.getTime())/864e5);
+  return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" <span style=\"color:var(--ink3)\">"+(days<=0?"today":days===1?"yesterday":days+"d ago")+"</span>";
+}
+var AC_INTENT={promise:"they promised to pay",paid_claim:"they say it's already paid",dispute:"they're disputing it",question:"they asked a question",other:"no clear answer"};
+function acEvent(e){
+  var k=e.kind,ic="ti-point",col="var(--ink2)",txt="";
+  switch(k){
+    case "emailed": ic="ti-mail";txt="Emailed "+esc(e.to||"them")+(e.subject?' — <span style="color:var(--ink3)">“'+esc(e.subject)+'”</span>':"");break;
+    case "followup_emailed": ic="ti-mail-forward";txt="Followed up by email"+(e.reason?' <span style="color:var(--ink3)">('+esc(e.reason)+')</span>':"");break;
+    case "reply": ic="ti-message-2";col="var(--indtx)";
+      txt="<b>They replied</b> — "+esc(AC_INTENT[e.intent]||e.intent||"replied")+(e.promised_date?" by <b>"+esc(acDate(e.promised_date))+"</b>":"")+(e.summary?'<div style="color:var(--ink2);margin-top:2px">'+esc(e.summary)+'</div>':"");break;
+    case "calling": ic="ti-phone-outgoing";txt="Rang them"+(e.phone?" on "+esc(e.phone):"");break;
+    case "call_voicemail": ic="ti-phone-off";txt="Went to voicemail";break;
+    case "call_done": ic="ti-phone-check";col="var(--indtx)";
+      txt="<b>Spoke to them</b> — "+esc(AC_INTENT[e.intent]||e.intent||"call finished")+(e.promised_date?" by <b>"+esc(acDate(e.promised_date))+"</b>":"")+(e.summary?'<div style="color:var(--ink2);margin-top:2px">'+esc(e.summary)+'</div>':"");break;
+    case "promise_broken": ic="ti-clock-x";col="var(--amb)";txt="Promised date came and went"+(e.n?" ("+e.n+" times now)":"");break;
+    case "promises_broken": ic="ti-clock-x";col="var(--red)";txt="Too many broken promises — stopped chasing";break;
+    case "paid_claim_unresolved": ic="ti-alert-circle";col="var(--amb)";txt="They said it was paid, but Xero still shows it owing";break;
+    case "paid": ic="ti-circle-check";col="var(--grn)";txt="<b>Paid ✓</b>";break;
+    case "stopped": ic="ti-circle-minus";txt="Closed in Xero"+(e.reason?" ("+esc(e.reason)+")":"");break;
+    case "owner_handover": ic="ti-hand-stop";col="var(--red)";txt="<b>Handed back to the owner</b>"+(e.silent_days?" — "+e.silent_days+" days of silence":"");break;
+    case "owner_reminder": ic="ti-bell";col="var(--amb)";txt="Nudged the owner again — still unpaid";break;
+    case "needs_contact": ic="ti-address-book";col="var(--red)";txt="No email or phone on their Xero contact";break;
+    case "out_of_moves": ic="ti-hand-stop";col="var(--red)";txt="Out of moves — email and phone both exhausted";break;
+    case "too_many_touches": ic="ti-hand-stop";col="var(--red)";txt="Touch limit reached — Ava stopped here";break;
+    case "email_blocked": ic="ti-mail-x";col="var(--amb)";txt="Couldn't send"+(e.reason?" — "+esc(e.reason):"");break;
+    case "email_error": ic="ti-mail-x";col="var(--amb)";txt="Email failed"+(e.reason?" — "+esc(e.reason):"")+", retrying";break;
+    case "call_error": ic="ti-phone-x";col="var(--amb)";txt="Call failed"+(e.reason?" — "+esc(e.reason):"");break;
+    case "call_lost": ic="ti-phone-x";txt="Call didn't connect";break;
+    default: txt=esc(String(k||"step").replace(/_/g," "));
+  }
+  return '<div style="display:flex;gap:9px;padding:6px 0;font-size:12.5px;line-height:1.5;border-top:1px solid #F1F1E9">'
+    +'<i class="ti '+ic+'" style="color:'+col+';font-size:15px;margin-top:1px"></i>'
+    +'<div style="flex:1;min-width:0;color:'+col+'">'+txt+'</div>'
+    +'<div style="white-space:nowrap;color:var(--ink2);font-size:11.5px">'+acWhen(e.at)+'</div></div>';
+}
+function acStory(ch){
+  var h=(ch.history||[]);
+  var body=h.length?h.map(acEvent).join("")
+    :'<div class="muted" style="padding:6px 0">No trail on this one yet — she picked it up but hasn\'t sent anything.</div>';
+  var foot='<div style="display:flex;gap:12px;padding:8px 0 2px;font-size:12px;color:var(--ink3);flex-wrap:wrap">'
+    +'<span>'+(ch.emails_sent||0)+' email'+((ch.emails_sent||0)===1?'':'s')+(ch.calls?' · '+ch.calls+' call'+(ch.calls===1?'':'s'):'')+' since '+esc(acDate(ch.started_at))+'</span>'
+    +(ch.slack_url?'<a href="'+esc(ch.slack_url)+'" target="_blank" style="font-weight:600;text-decoration:none;margin-left:auto">Full thread in Slack ↗</a>':'')+'</div>';
+  return '<div class="acst" id="st-'+ch.id+'"'+(STORY[ch.id]?'':' style="display:none"')+'>'+body+foot+'</div>';
+}
+function acRow(ch,withWhy){
+  var overdue=0,paid=ch.state==="paid";
+  if(ch.due_date){var d=new Date(String(ch.due_date).slice(0,10)+"T12:00:00");overdue=Math.floor((Date.now()-d.getTime())/864e5);}
+  // Xero zeroes amount_due the moment it's paid, so a settled row must not read
+  // "$0.00 owing · 2d overdue" — say what happened instead.
+  var sub=(paid?'settled · was due '+esc(acDate(ch.due_date)):money(ch.owing)+' owing · due '+esc(acDate(ch.due_date))+(overdue>0?' · <b>'+overdue+'d overdue</b>':''))
+    +(ch.emails_sent?' · '+ch.emails_sent+' email'+(ch.emails_sent===1?'':'s'):'')
+    +(ch.calls?' · '+ch.calls+' call'+(ch.calls===1?'':'s'):'');
+  // Contact details, one click from a phone call — the whole point of handing it
+  // to a human is that the human can now do the thing Ava can't.
+  var contact='';
+  if(withWhy){
+    if(ch.contact_phone)contact+='<a class="bicopy" data-link="'+esc(ch.contact_phone)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" title="Copy their phone number"><i class="ti ti-phone"></i> '+esc(ch.contact_phone)+'</a>';
+    if(ch.contact_email)contact+='<a class="bicopy" data-link="'+esc(ch.contact_email)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;margin-left:8px" title="Copy their email"><i class="ti ti-mail"></i> copy email</a>';
+    if(!ch.contact_phone&&!ch.contact_email)contact='<span class="muted" style="white-space:nowrap">no contact details</span>';
+  }
+  var why=(withWhy&&ch.why)?'<div class="rs" style="color:var(--red);margin-top:2px">'+esc(ch.why)+'</div>':'';
+  // Every row opens into what Ava actually did. The last thing that happened is
+  // the label, so the trail is worth opening before you've opened it.
+  var hist=ch.history||[];
+  var lastTxt=hist.length?({emailed:"emailed",followup_emailed:"followed up",reply:"they replied",
+    calling:"rang them",call_done:"spoke to them",call_voicemail:"voicemail",paid:"paid",owner_handover:"handed back",
+    needs_contact:"no contact details",promise_broken:"promise broken"}[hist[hist.length-1].kind]||"last step"):"nothing sent yet";
+  var toggle='<a class="acstory" data-id="'+ch.id+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">'
+    +(STORY[ch.id]?'Hide trail':'Trail')+' <span class="muted" style="font-weight:400">('+hist.length+' · '+esc(lastTxt)+')</span></a>';
+  return '<div class="row" style="flex-direction:column;align-items:stretch;gap:0">'
+    +'<div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">'
+    +'<div class="rmain"><div class="rt">'+esc(ch.customer||"—")+(paid?'':' — '+money(ch.owing))
+    +' <span class="muted" style="font-weight:400">'+esc(ch.invoice||"")+'</span></div><div class="rs">'+sub+'</div>'+why+'</div>'
+    +contact+toggle+acPill(ch)+'</div>'+acStory(ch)+'</div>';
+}
+function acBlock(id){
+  var ac=ACOL[id];
+  var needs=[],rest=[],hint="",body="";
+  if(!ac||ac.error){
+    hint="couldn't load";
+    body='<div class="muted">Couldn\'t read Auto Collect for this client — refresh to retry.</div>';
+  }else if(!ac.enabled){
+    hint="not switched on";
+    body='<div class="muted">The owner hasn\'t switched Auto Collect on. Nothing is being chased — if their debtors are getting old, that\'s a conversation to have.</div>';
+  }else{
+    var c=ac.counts||{};
+    var chases=(ac.chases||[]).filter(function(x){return x.state!=="stopped"&&x.state!=="paid";});
+    var won=(ac.chases||[]).filter(function(x){return x.state==="paid";});
+    needs=chases.filter(function(x){return x.state==="needs_human"||x.state==="needs_contact";});
+    rest=chases.filter(function(x){return x.state!=="needs_human"&&x.state!=="needs_contact";});
+    // A handover is the one you have to read, so open its trail unasked.
+    needs.forEach(function(x){if(STORY[x.id]===undefined)STORY[x.id]=true;});
+    var st=ac.paused?'<span class="badge b-amb">paused</span>'
+      :(ac.ready?'<span class="badge b-grn">on</span>':'<span class="badge b-amb">setup needed</span>');
+    hint=money(c.owing_total||0)+' overdue · '+(c.active||0)+' chase'+((c.active||0)===1?'':'s')
+      +(c.promised?' · '+c.promised+' promised':'')+(c.needs_you?' · '+c.needs_you+' need a human':'');
+    body='<div class="row" style="background:#fff;border:1px solid var(--line);border-radius:4px;margin-bottom:10px">'
+      +'<div class="rmain"><div class="rt">'+money(c.owing_total||0)+' overdue across '+(c.active||0)+' invoice'+((c.active||0)===1?'':'s')+'</div>'
+      +'<div class="rs">'+(c.waiting_reply||0)+' awaiting a reply · '+(c.promised||0)+' promised a date · '+(c.on_the_phone||0)+' on the phone</div>'
+      // How she's GOING, off the paper trail rather than the status column
+      +'<div class="rs" style="color:var(--indtx);margin-top:3px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Last 30 days: '
+      +(c.emails_30d||0)+' email'+((c.emails_30d||0)===1?'':'s')+' sent · '+(c.replies_30d||0)+' repl'+((c.replies_30d||0)===1?'y':'ies')+' read'
+      +((c.calls_30d||0)?' · '+c.calls_30d+' call'+(c.calls_30d===1?'':'s'):'')
+      +' · <b>'+(c.collected_30d||0)+' paid up</b></div></div>'+st+'</div>';
+    if(!ac.ready&&!ac.paused){
+      var miss=[];var s=ac.setup||{};
+      if(!s.xero)miss.push("Xero isn't connected");
+      if(!s.gmail_send)miss.push("no mailbox with send permission");
+      if(miss.length)body+='<div class="muted" style="color:var(--amb);margin-bottom:10px"><i class="ti ti-alert-triangle" style="vertical-align:-2px"></i> Switched on but not chasing: '+esc(miss.join(" · "))+'.</div>';
+    }
+    if(needs.length){
+      body+='<div class="sec" style="margin-top:4px;color:var(--red)">Ava\'s handed these back <span class="cnt">she\'s out of moves — the owner has been told, and so have we</span></div>'
+        +'<div class="list">'+needs.map(function(x){return acRow(x,true);}).join("")+'</div>';
+    }
+    if(rest.length){
+      body+='<div class="sec" style="color:var(--ink2)">Ava\'s still on these <span class="cnt">no action needed — here so you can see it moving</span></div>'
+        +'<div class="list">'+rest.map(function(x){return acRow(x,false);}).join("")+'</div>';
+    }
+    if(won.length){
+      body+='<div class="sec" style="color:var(--grn)">Ava got these paid <span class="cnt">chased, replied to, and settled — open the trail to see how</span></div>'
+        +'<div class="list">'+won.map(function(x){return acRow(x,false);}).join("")+'</div>';
+    }
+    if(!chases.length&&!won.length)body+='<div class="muted">Nothing overdue right now — or her next Xero sweep (25 past the hour) hasn\'t run yet.</div>';
+  }
+  body+='<div style="margin-top:12px"><a href="collect.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Auto Collect board ↗</a></div>';
+  // Defaults open only when a human is owed something; an explicit fold wins.
+  var stored=FOLDS[id+"|ac"];
+  var open=stored===undefined?(needs.length>0):(stored===false);
+  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Collect <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
 function renderPanel(id){
   var p=document.getElementById("p-"+id),cl=CACHE[id];
   if(!cl){p.innerHTML='<div class="muted">Couldn\'t load this client.</div>';return;}
@@ -461,7 +646,7 @@ function renderPanel(id){
   // Elastic touches (upload the report, reconcile & tick off) — the rest run
   // themselves. Each feature block collapses on its header.
   var bkFold=!!FOLDS[id+"|bk"]; // bookkeeping defaults open
-  var html='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
+  var html='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Auto Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
   html+='<div class="fbody"'+(bkFold?' style="display:none"':'')+'>';
   html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
     +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
@@ -499,9 +684,10 @@ function renderPanel(id){
   }
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
   html+='</div>';
+  html+=acBlock(id);
   var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
   html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
-    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
+    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
