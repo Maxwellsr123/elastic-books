@@ -214,14 +214,17 @@ h1{letter-spacing:-.03em}
       if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
       // tasks only on the hero — the money lives in Usage & billing
       var tasks=d.tasks||{week:0,month:0,year:0};
+      var toks=d.tokens||{week:0,month:0,year:0};
       var CAP={week:"Resets every Monday",month:"This calendar month",year:"This year"};
       document.getElementById("hero-stats").innerHTML=
-        '<div class="stat" style="min-width:190px"><div class="k">Tasks Ava ran</div><div class="n" id="task-n"></div></div>'
+        '<div class="stat" style="min-width:170px"><div class="k">Tasks Ava ran</div><div class="n" id="task-n"></div></div>'
+        +'<div class="stat" style="min-width:150px"><div class="k">Tokens</div><div class="n" id="token-n"></div></div>'
         +'<div style="display:flex;flex-direction:column;justify-content:flex-end"><div class="seg" id="task-seg">'
         +'<button data-k="week" class="on">Week</button><button data-k="month">Month</button><button data-k="year">Year</button>'
         +'</div></div>';
       function pick(k){
         document.getElementById("task-n").textContent=(tasks[k]||0).toLocaleString();
+        document.getElementById("token-n").textContent=fmtT(toks[k]||0);
         document.getElementById("hero-feats").textContent=CAP[k]+(tasks[k]?"":" — connect Xero and Gmail and Ava gets to work.");
         var bs=document.querySelectorAll("#task-seg button");
         for(var i=0;i<bs.length;i++)bs[i].className=bs[i].getAttribute("data-k")===k?"on":"";
