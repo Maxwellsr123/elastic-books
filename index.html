@@ -151,22 +151,26 @@ h1{letter-spacing:-.03em}
         <span class="open" id="bk-open">Open <i class="ti ti-arrow-right"></i></span>
       </a>
 
-      <a class="card" href="scheduling.html">
-        <div class="row"><div class="ico cal"><i class="ti ti-calendar-event"></i></div><span class="pill live">● Live · Beta</span></div>
-        <div><div class="h">Auto Scheduling</div><div class="d">Ava books jobs, schedules the crew and keeps the calendar full — no double-handling.</div></div>
-        <span class="open">Open <i class="ti ti-arrow-right"></i></span>
-      </a>
-
-      <a class="card" href="collect.html">
-        <div class="row"><div class="ico inv"><i class="ti ti-cash"></i></div><span class="pill live">● Live · Beta</span></div>
+      <a class="card" href="collect.html" id="collect-card">
+        <div class="row"><div class="ico inv"><i class="ti ti-cash"></i></div><span class="pill live" id="collect-pill">● Live · Beta</span></div>
         <div><div class="h">Auto Collect</div><div class="d">Ava chases overdue invoices for you — a polite email from your address, a call if they go quiet — and holds them to the promised date until it&rsquo;s paid.</div></div>
-        <span class="open">Open <i class="ti ti-arrow-right"></i></span>
+        <span class="open" id="collect-open">Open <i class="ti ti-arrow-right"></i></span>
       </a>
 
-      <a class="card" href="gst.html">
-        <div class="row"><div class="ico gst"><i class="ti ti-pig-money"></i></div><span class="pill live">● Live · Beta</span></div>
+      <a class="card" href="gst.html" id="gst-card">
+        <div class="row"><div class="ico gst"><i class="ti ti-pig-money"></i></div><span class="pill live" id="gst-pill">● Live · Beta</span></div>
         <div><div class="h">GST put-away</div><div class="d">How much to set aside each week so GST day never stings — worked out from your own Xero year, not a rule of thumb.</div></div>
-        <span class="open">Open <i class="ti ti-arrow-right"></i></span>
+        <span class="open" id="gst-open">Open <i class="ti ti-arrow-right"></i></span>
+      </a>
+
+      <!-- Auto Scheduling: shut down 2026-07-31 while we nail the money features.
+           Under construction by DEFAULT — sched-open/sched-pill are upgraded back
+           to a working link below, but only for a company on the allow-list
+           (KPA). The server gate in _shared/sched_gate.ts is the real one. -->
+      <a class="card soon" id="sched-card" style="cursor:default">
+        <div class="row"><div class="ico cal"><i class="ti ti-tools"></i></div><span class="pill soon" id="sched-pill">Under construction</span></div>
+        <div><div class="h">Auto Scheduling</div><div class="d">Ava books jobs, schedules the crew and keeps the calendar full — no double-handling. We&rsquo;ve paused this one to get the money side right first.</div></div>
+        <span class="open" id="sched-open" style="color:var(--ink3)">Back soon</span>
       </a>
 
       <div class="card soon">
@@ -227,6 +231,62 @@ h1{letter-spacing:-.03em}
     for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
   }
   comp=comp||s.companies[0];
+  // Auto Scheduling: under construction unless this company is on the allow-list.
+  // Cosmetic only — ava-schedule-list/-action refuse on the server either way,
+  // so keep this in step with _shared/sched_gate.ts but never rely on it.
+  if(["5c829c7f-0b63-4bbc-87b9-c24b822a564d"].indexOf(comp.id)>=0){
+    var sc=document.getElementById("sched-card");
+    sc.className="card";sc.style.cursor="";sc.setAttribute("href","scheduling.html?c="+comp.id);
+    var sp=document.getElementById("sched-pill");sp.className="pill live";sp.textContent="● Live · Beta";
+    var so=document.getElementById("sched-open");so.style.color="";so.innerHTML='Open <i class="ti ti-arrow-right"></i>';
+  }
+  // ── which of their features are actually running ──────────────────────
+  // Features are opt-in (2026-07-31): a new client arrives with everything
+  // off. So the dashboard has to say which are on, and let them switch one
+  // on themselves — otherwise every card reads "Live · Beta" while nothing
+  // happens, and switching on is a support request. Same row The Desk flips.
+  var FCARDS={bookkeeping:["bk-card","bk-pill","bk-open"],
+              invoice_chaser:["collect-card","collect-pill","collect-open"],
+              gst_putaway:["gst-card","gst-pill","gst-open"]};
+  function setFeature(key,on,el){
+    el.textContent="…";
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:comp.id,key:key,on:on,by:s.email||"owner"})})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.features)paintFeatures(d.features);else loadFeatures();})
+      .catch(loadFeatures);
+  }
+  function paintFeatures(list){
+    list.forEach(function(f){
+      var ids=FCARDS[f.key];if(!ids)return;
+      var card=document.getElementById(ids[0]),pill=document.getElementById(ids[1]),open=document.getElementById(ids[2]);
+      if(!card||!pill)return;
+      pill.className="pill "+(f.on?"live":"soon");
+      pill.textContent=f.on?"● On":"Off";
+      // A card that isn't running shouldn't invite you in and show you nothing.
+      if(open)open.innerHTML=f.on?'Open <i class="ti ti-arrow-right"></i>':'Not running';
+      if(open)open.style.color=f.on?"":"var(--ink3)";
+      var row=card.querySelector(".row");if(!row)return;
+      var sw=row.querySelector(".fsw");
+      if(!sw){sw=document.createElement("span");sw.className="fsw";
+        sw.style.cssText="font-size:11.5px;font-weight:700;cursor:pointer;margin-left:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em";
+        row.appendChild(sw);}
+      sw.textContent=f.on?"Switch off":"Switch on";
+      sw.style.color=f.on?"var(--ink3)":"var(--ind)";
+      sw.onclick=function(e){
+        // the whole card is a link — the switch must not navigate
+        e.preventDefault();e.stopPropagation();
+        if(f.on&&!confirm("Switch "+f.key.replace(/_/g," ")+" off?\n\nAva stops doing it until you switch it back on."))return;
+        setFeature(f.key,!f.on,sw);
+      };
+    });
+  }
+  function loadFeatures(){
+    fetch(API+"/features?company="+comp.id).then(function(r){return r.json();})
+      .then(function(d){if(d&&d.features)paintFeatures(d.features);}).catch(function(){});
+  }
+  loadFeatures();
+
   // swap the marketing intro for the product hero
   document.getElementById("landing-h1").style.display="none";
   document.getElementById("landing-lede").style.display="none";
