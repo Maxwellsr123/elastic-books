@@ -96,6 +96,8 @@ var SKEY="ava_session";
 function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
 var SESSION=getS();
 var CACHE={};
+// folded feature sections, per client — survives re-renders and reloads
+var FOLDS={};try{FOLDS=JSON.parse(localStorage.getItem("desk_folds")||"{}")||{};}catch(e){}
 
 // ── auth: loopers only; dev is open ──
 function boot(){
@@ -206,7 +208,9 @@ function renderClients(rows){
 }
 document.addEventListener("click",function(e){
   var fh=e.target.closest(".fhead");
-  if(fh){var fb=fh.nextElementSibling;if(fb&&fb.classList.contains("fbody")){var open=fb.style.display!=="none";fb.style.display=open?"none":"";var ch=fh.querySelector("i");if(ch){ch.classList.toggle("ti-chevron-up",!open);ch.classList.toggle("ti-chevron-down",open);}}return;}
+  if(fh){var fb=fh.nextElementSibling;if(fb&&fb.classList.contains("fbody")){var open=fb.style.display!=="none";fb.style.display=open?"none":"";var ch=fh.querySelector("i");if(ch){ch.classList.toggle("ti-chevron-up",!open);ch.classList.toggle("ti-chevron-down",open);}
+    // remember the choice so re-renders (tick-offs, uploads, reloads) don't pop it back open
+    var fk=fh.getAttribute("data-fold");if(fk){FOLDS[fk]=open;try{localStorage.setItem("desk_folds",JSON.stringify(FOLDS));}catch(_e){}}}return;}
   var ic=e.target.closest(".bicopy");
   if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
   var ir=e.target.closest(".birevoke");
@@ -299,8 +303,9 @@ function renderPanel(id){
   // features are separated on the admin side: bookkeeping is the one with
   // Elastic touches (upload the report, reconcile & tick off) — the rest run
   // themselves. Each feature block collapses on its header.
-  var html='<div class="sec fhead" style="margin-top:0;color:var(--indtx);cursor:pointer">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-up" style="margin-left:auto;color:var(--ink3)"></i></div>';
-  html+='<div class="fbody">';
+  var bkFold=!!FOLDS[id+"|bk"]; // bookkeeping defaults open
+  var html='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
+  html+='<div class="fbody"'+(bkFold?' style="display:none"':'')+'>';
   html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
     +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
     +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
@@ -337,8 +342,9 @@ function renderPanel(id){
   }
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
   html+='</div>';
-  html+='<div class="sec fhead" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-down" style="margin-left:auto;color:var(--ink3)"></i></div>'
-    +'<div class="fbody" style="display:none"><div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
+  var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
+  html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">Auto Collect, GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';

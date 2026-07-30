@@ -887,7 +887,10 @@ h1{letter-spacing:-.03em}
   if(t){
     fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
       .then(function(r){return r.json();}).then(function(d){
-        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,companies:d.companies,token:d.token||t});
+        if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,partner:d.partner||null,companies:d.companies,token:d.token||t});
+        // a fresh sign-in lands on the features hub, not straight into the
+        // bookkeeping board — owners pick a feature from there (Max, 2026-07-30)
+        if(d&&d.ok&&!d.looper&&!hasC){location.replace("index.html");return;}
         history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
         route();
       }).catch(function(){route();});
