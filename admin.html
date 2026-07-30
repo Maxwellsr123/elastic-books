@@ -70,6 +70,9 @@ input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-fa
   </div>
   <div id="invlist"></div>
 
+  <div class="sec" style="margin-top:28px">Invoice run <span class="cnt" id="ir-hint">last closed fortnight — raise these, then record the payment with Top-up +</span></div>
+  <div id="ir-list" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 14px;margin-bottom:8px"><span class="muted">Loading…</span></div>
+
   <div class="sec">Needs Elastic <span class="cnt" id="workhint">loading clients…</span></div>
   <div id="worklist"></div>
   <div class="sec" style="margin-top:28px">Quiet <span class="cnt">nothing owed right now</span></div>
@@ -166,9 +169,29 @@ document.getElementById("iv-go").addEventListener("click",function(){
       loadInvites();})
     .catch(function(){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';m.textContent="Couldn't create the invite — try again.";});
 });
+function loadInvoiceRun(){
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&invoice_run=1")
+    .then(function(r){return r.json();}).then(function(d){
+      var el=document.getElementById("ir-list");
+      if(!d||!d.ok){el.innerHTML='<span class="muted">Couldn\'t load the run.</span>';return;}
+      if(!d.period||!(d.rows||[]).length){el.innerHTML='<span class="muted">Nothing to invoice for the last closed fortnight.</span>';return;}
+      function fd(ymd){var t=new Date(ymd+"T12:00:00");return t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}
+      document.getElementById("ir-hint").textContent=fd(d.period.start)+" – "+fd(d.period.end)+" · $"+Number(d.total).toFixed(2)+" USD across "+d.rows.length+" client"+(d.rows.length===1?"":"s");
+      el.innerHTML=d.rows.map(function(r){
+        var line=r.name+" — Elastic Admin usage "+fd(d.period.start)+"–"+fd(d.period.end)+" — USD $"+r.charge.toFixed(2);
+        return '<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #f1f1e9;font-size:13.5px">'
+          +'<span style="flex:1;min-width:0">'+esc(r.name)+(r.firm?' <span class="muted" style="font-size:11.5px">via '+esc(r.firm)+'</span>':'')+'</span>'
+          +'<span class="muted" style="font-size:12px;white-space:nowrap">'+r.tasks+' tasks</span>'
+          +'<span style="font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums">$'+r.charge.toFixed(2)+'</span>'
+          +'<a class="bicopy" data-link="'+esc(line)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" title="Copy an invoice line for Xero">copy</a>'
+          +'</div>';
+      }).join("");
+    }).catch(function(){document.getElementById("ir-list").innerHTML='<span class="muted">Couldn\'t load the run.</span>';});
+}
 function start(){
   document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
   loadInvites();
+  loadInvoiceRun();
   fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
     var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
     if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});

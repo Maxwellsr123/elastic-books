@@ -109,7 +109,6 @@ h1{letter-spacing:-.03em}
     <div class="hero" id="hero">
       <div class="hi"><span id="hero-greet">Welcome back</span><span id="hero-name"></span> <span class="co" id="hero-co"></span></div>
       <div class="sub">Here's what Ava's been doing for you.</div>
-      <div class="banner" id="hero-banner"></div>
       <div class="stats" id="hero-stats"></div>
       <div class="featline" id="hero-feats"></div>
       <div class="fine"><a href="usage.html" style="color:#b7b4c7;font-weight:600;text-decoration:none">Usage &amp; billing <i class="ti ti-arrow-right"></i></a></div>
@@ -234,16 +233,6 @@ h1{letter-spacing:-.03em}
         if(k)pick(k);
       });
       pick("week");
-      // account standing: Ava keeps working, but shortfalls get a banner
-      var acc=d.account||{state:"ok"};
-      var ban=document.getElementById("hero-banner");
-      if(acc.state==="warning"){
-        ban.className="banner warn";
-        ban.innerHTML='Your account needs a top-up — '+fmtC(acc.owing)+' owing. Clear it by '+fmtD(acc.deadline)+' and Ava keeps working without a pause. <a href="usage.html">See usage &amp; billing →</a>';
-      }else if(acc.state==="overdue"){
-        ban.className="banner overdue";
-        ban.innerHTML='Your account is overdue — '+fmtC(acc.owing)+' owing. Ava is still working for now, but work pauses unless it’s cleared. <a href="usage.html">See usage &amp; billing →</a>';
-      }
     }).catch(function(){
       document.getElementById("hero-stats").innerHTML='<div class="stat"><div class="k">Tasks Ava ran</div><div class="n">—</div></div>';
     });

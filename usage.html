@@ -102,9 +102,8 @@
       bal.className="bal "+((acc.balance||0)<-0.005?"neg":"pos");
       document.getElementById("bal-word").textContent=(acc.balance||0)<-0.005?"owing":"in credit";
       var st=document.getElementById("standing");
-      if(acc.state==="warning"){st.className="standing warn";st.textContent="Top up by "+fmtD(acc.deadline)+" and Ava keeps working without a pause.";}
-      else if(acc.state==="overdue"){st.className="standing overdue";st.textContent="Overdue — Ava is still working for now, but work pauses unless the account is cleared.";}
-      else{st.className="standing";st.textContent="All square. Ava's on the job.";}
+      st.className="standing";
+      st.textContent=(acc.balance||0)<-0.005?"We invoice fortnightly on the 1st & 16th — the Elastic team will send your invoice. Nothing you need to do.":"All square. Ava's on the job.";
       // fortnight periods, current first, with per-feature breakdown
       var ps=(d.periods||[]);
       var ph=ps.map(function(p,ix){
