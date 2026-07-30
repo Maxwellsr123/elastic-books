@@ -197,7 +197,7 @@ function renderClients(rows){
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
     if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
     if(!badges)badges='<span class="badge b-mut">all quiet</span>';
-    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
+    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
     if(c.ready||c.review||c.owner||c.pile){work+=html;working++;}else quiet+=html;
   });
   document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
@@ -215,6 +215,7 @@ document.addEventListener("click",function(e){
       .then(function(){loadInvites();}).catch(function(){ir.disabled=false;ir.textContent="Revoke";});
     return;}
   var h=e.target.closest(".cohead");
+  if(h&&e.target.closest("a"))return; // the Board link navigates; don't also toggle the panel
   if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
     var open=p.style.display==="block";
     document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
