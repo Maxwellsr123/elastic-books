@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Elastic Admin — your admin, handled</title>
-<meta name="description" content="Elastic Admin handles bookkeeping for trade businesses. Connect the Gmail inboxes where your receipts and bills land and Ava — our assistant — reads them, matches each document to the right bank transaction, chases suppliers for anything missing, and preps your books. A human bookkeeper reconciles.">
+<meta name="description" content="Elastic Admin handles bookkeeping for trade businesses. Connect the Gmail inboxes where your receipts and bills land and Ava — our assistant — reads them, matches each document to the right bank transaction, chases suppliers for anything missing, and preps your books. The Elastic team reconciles.">
 <script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var l=document.querySelector(".brand");if(l)l.insertAdjacentHTML("beforeend",' <span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px;vertical-align:middle">DEV</span>');document.title="DEV · "+document.title;});</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -66,6 +66,33 @@
   .hero .seg button{background:transparent;border:0;color:#8B8B98;font:inherit;font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer}
   .hero .seg button.on{background:rgba(255,255,255,.1);color:#fff}
   .top .out{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:4px;cursor:pointer;display:none}
+  /* Phone first: this is how most owners open it — thumb-sized targets, no
+     horizontal squeeze. Desktop then gets the room it deserves. */
+  @media (max-width:560px){
+    .wrap{padding:18px 14px 44px}
+    .top{gap:8px;flex-wrap:wrap;margin-bottom:22px}
+    .top .admin,.top .out{padding:9px 12px;font-size:12.5px}
+    .hero{padding:20px 18px 18px}
+    .hero .hi{font-size:19px;line-height:1.25}
+    /* two stats side by side, the period toggle full-width beneath them */
+    .hero .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .hero .stats>div:nth-child(3){grid-column:1/-1}
+    .hero .stat{min-width:0;padding:10px 13px 11px}
+    .hero .stat .n{font-size:19px}
+    .hero .seg{width:100%;margin-top:4px}
+    .hero .seg button{flex:1;padding:10px 8px;font-size:12.5px}
+    .grid{gap:11px}
+    .card{padding:16px}
+  }
+  /* Desktop: fill the screen instead of hiding in a 760px column */
+  @media (min-width:1000px){
+    .wrap{max-width:1080px}
+    .hero{padding:30px 34px 26px}
+    .hero .hi{font-size:26px}
+    .hero .stat{min-width:150px}
+    .hero .stat .n{font-size:23px}
+    .grid{grid-template-columns:repeat(3,1fr)}
+  }
 </style>
 
 <style id="sharpskin">
@@ -117,12 +144,12 @@ h1{letter-spacing:-.03em}
     </div>
 
     <h1 id="landing-h1">Elastic Admin — your admin, handled</h1>
-    <p class="lede" id="landing-lede"><b>Elastic Admin</b> runs the books for trade businesses. Connect the Gmail inboxes where your receipts and bills land, and <b>Ava</b> — the Elastic Admin assistant — reads them to find the paperwork, matches each document to the right bank transaction in Xero, and preps your books. With your permission she can also send from your inbox — only to chase a supplier for a missing receipt or reply where you’ve asked her to; she never deletes or modifies mail. A human bookkeeper checks and reconciles everything. You can disconnect an inbox at any time.</p>
+    <p class="lede" id="landing-lede"><b>Elastic Admin</b> runs the books for trade businesses. Connect the Gmail inboxes where your receipts and bills land, and <b>Ava</b> — the Elastic Admin assistant — reads them to find the paperwork, matches each document to the right bank transaction in Xero, and preps your books. With your permission she can also send from your inbox — only to chase a supplier for a missing receipt or reply where you’ve asked her to; she never deletes or modifies mail. The Elastic team checks and reconciles everything. You can disconnect an inbox at any time.</p>
 
     <div class="grid">
       <a class="card" href="app.html" id="bk-card">
         <div class="row"><div class="ico book"><i class="ti ti-book-2"></i></div><span class="pill live" id="bk-pill">● Live · Beta</span></div>
-        <div><div class="h">Auto Bookkeeping</div><div class="d">Ava does 80% — reads every receipt, matches it to the right spend, preps your books audit-ready. The last 20% is human: your bookkeeper, or the Elastic team, reconciles and signs off.</div></div>
+        <div><div class="h">Auto Bookkeeping</div><div class="d">Ava does 80% — reads every receipt, matches it to the right spend, preps your books audit-ready. The last 20% is human: the Elastic team reconciles and signs off.</div></div>
         <span class="open" id="bk-open">Open <i class="ti ti-arrow-right"></i></span>
       </a>
 
@@ -176,7 +203,7 @@ h1{letter-spacing:-.03em}
   </div>
 <script>
 // Signed out: marketing lede + Auto Bookkeeping locked (needs a human in the
-// loop, so it comes with a bookkeeper — ours or the client's firm).
+// loop, so it comes with the Elastic team).
 // Signed in: product hero — greeting, company, and THEIR billable Ava usage
 // for the current + previous fortnight, straight off the billing view.
 (function(){
@@ -189,8 +216,8 @@ h1{letter-spacing:-.03em}
   var member=!!(s&&((s.companies&&s.companies.length)||s.looper||s.partner));
   if(!member){
     var pill=document.getElementById("bk-pill");
-    pill.textContent="🔒 Live · comes with a bookkeeper";pill.className="pill soon";
-    document.getElementById("bk-open").innerHTML='Unlocked when Elastic or your bookkeeper runs your books <i class="ti ti-arrow-right"></i>';
+    pill.textContent="🔒 Live · comes with the Elastic team";pill.className="pill soon";
+    document.getElementById("bk-open").innerHTML='Unlocked when the Elastic team runs your books <i class="ti ti-arrow-right"></i>';
     document.getElementById("bk-card").setAttribute("href","https://elasticadmin.com");
     return;
   }

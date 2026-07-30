@@ -70,6 +70,17 @@ input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-fa
   </div>
   <div id="invlist"></div>
 
+  <div class="sec" style="margin-top:28px">Elastic team hours <span class="cnt">drop Jewel's Clockify PDF — it bills at each client's agreed rate</span></div>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px;margin-bottom:8px">
+    <div id="ck-drop" style="border:1.5px dashed var(--line);border-radius:5px;padding:18px;text-align:center;cursor:pointer;font-size:13.5px;color:var(--ink2)">
+      <i class="ti ti-file-time" style="font-size:20px;display:block;margin-bottom:5px"></i>
+      Drop the Clockify PDF here, or tap to choose
+      <input type="file" id="ck-file" accept="application/pdf,image/*" style="display:none">
+    </div>
+    <div class="muted" id="ck-msg" style="margin-top:8px;min-height:15px">Ava reads the hours per client, matches them to a company, and prices them at that client's rate. Nothing bills until you confirm.</div>
+    <div id="ck-preview"></div>
+  </div>
+
   <div class="sec" style="margin-top:28px">Invoice run <span class="cnt" id="ir-hint">last closed fortnight — raise these, then record the payment with Top-up +</span></div>
   <div id="ir-list" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 14px;margin-bottom:8px"><span class="muted">Loading…</span></div>
 
@@ -169,6 +180,57 @@ document.getElementById("iv-go").addEventListener("click",function(){
       loadInvites();})
     .catch(function(){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';m.textContent="Couldn't create the invite — try again.";});
 });
+// ---- Clockify drop: PDF in, priced hours out, confirm before anything bills
+var RATES={},CKROWS=null,CKDATE=null;
+function loadRates(){
+  return fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&rates=1")
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){RATES={};d.rates.forEach(function(x){RATES[x.id]=x;});
+        // headers may have rendered before rates landed — correct them in place
+        document.querySelectorAll(".setrate").forEach(function(a){
+          var c=RATES[a.getAttribute("data-co")];if(c)a.textContent="$"+c.rate+"/hr";});}
+      return RATES;});
+}
+function coOptions(sel){
+  var list=Object.keys(RATES).map(function(k){return RATES[k];}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  return '<option value="">— skip —</option>'+list.map(function(c){
+    return '<option value="'+c.id+'"'+(c.id===sel?" selected":"")+'>'+esc(c.name)+'</option>';}).join("");
+}
+function renderCkPreview(){
+  var el=document.getElementById("ck-preview");
+  if(!CKROWS||!CKROWS.length){el.innerHTML="";return;}
+  var total=CKROWS.reduce(function(n,r){return n+(r.company_id?r.hours*r.rate:0);},0);
+  el.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'
+    +CKROWS.map(function(r,i){
+      return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid #f1f1e9;font-size:13px">'
+        +'<span style="flex:1;min-width:120px">'+esc(r.client)+' <span class="muted">'+r.hours+'h</span></span>'
+        +'<select class="ck-co fi" data-i="'+i+'" style="flex:1;min-width:150px;padding:5px">'+coOptions(r.company_id)+'</select>'
+        +'<span style="white-space:nowrap">$<input class="ck-rate fi" data-i="'+i+'" value="'+r.rate+'" style="width:56px;padding:5px;text-align:right">/hr</span>'
+        +'<span style="font-weight:700;min-width:64px;text-align:right;font-variant-numeric:tabular-nums">'+(r.company_id?"$"+(r.hours*r.rate).toFixed(2):"—")+'</span>'
+        +'</div>';}).join("")
+    +'<div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">'
+    +'<span class="muted" style="flex:1;min-width:140px">Bills in the fortnight containing <b>'+esc(CKDATE)+'</b></span>'
+    +'<button class="btn btn-p" id="ck-commit">Log $'+total.toFixed(2)+' of hours</button></div></div>';
+}
+function ckUpload(file){
+  var msg=document.getElementById("ck-msg");
+  if(!file){return;}
+  msg.textContent="Reading "+file.name+"…";
+  var fr=new FileReader();
+  fr.onload=function(){
+    var b64=String(fr.result).split(",")[1];
+    loadRates().then(function(){
+      return fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({t:SESSION.token,action:"clockify",file_b64:b64,mime:file.type||"application/pdf"})});
+    }).then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){msg.textContent="Couldn't read it: "+(d&&d.error||"unknown");return;}
+      CKROWS=d.rows;CKDATE=d.worked_on;
+      msg.innerHTML=d.rows.length?("Found <b>"+d.rows.length+"</b> client"+(d.rows.length===1?"":"s")+" · "+d.matched+" matched"+(d.unmatched?", <b>"+d.unmatched+" need picking</b>":"")+" — check and confirm."):"No hours found in that file.";
+      renderCkPreview();
+    }).catch(function(){msg.textContent="Couldn't read it — network error.";});
+  };
+  fr.readAsDataURL(file);
+}
 function loadInvoiceRun(){
   fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&invoice_run=1")
     .then(function(r){return r.json();}).then(function(d){
@@ -178,10 +240,13 @@ function loadInvoiceRun(){
       function fd(ymd){var t=new Date(ymd+"T12:00:00");return t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}
       document.getElementById("ir-hint").textContent=fd(d.period.start)+" – "+fd(d.period.end)+" · $"+Number(d.total).toFixed(2)+" USD across "+d.rows.length+" client"+(d.rows.length===1?"":"s");
       el.innerHTML=d.rows.map(function(r){
-        var line=r.name+" — Elastic Admin usage "+fd(d.period.start)+"–"+fd(d.period.end)+" — USD $"+r.charge.toFixed(2);
+        var span=fd(d.period.start)+"–"+fd(d.period.end);
+        var line=r.name+" — Elastic Admin "+span+" — Ava usage $"+r.ava.toFixed(2)
+          +(r.hours?" + Elastic team "+r.hours+"h $"+r.human.toFixed(2):"")+" — USD $"+r.charge.toFixed(2);
+        var detail=r.tasks+' tasks'+(r.hours?' · '+r.hours+'h human':'');
         return '<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #f1f1e9;font-size:13.5px">'
           +'<span style="flex:1;min-width:0">'+esc(r.name)+(r.firm?' <span class="muted" style="font-size:11.5px">via '+esc(r.firm)+'</span>':'')+'</span>'
-          +'<span class="muted" style="font-size:12px;white-space:nowrap">'+r.tasks+' tasks</span>'
+          +'<span class="muted" style="font-size:12px;white-space:nowrap">'+detail+'</span>'
           +'<span style="font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums">$'+r.charge.toFixed(2)+'</span>'
           +'<a class="bicopy" data-link="'+esc(line)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" title="Copy an invoice line for Xero">copy</a>'
           +'</div>';
@@ -192,6 +257,23 @@ function start(){
   document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
   loadInvites();
   loadInvoiceRun();
+  loadRates();
+  // Clockify drop: click, tap, or drag a PDF onto the zone
+  var dz=document.getElementById("ck-drop"),fi=document.getElementById("ck-file");
+  dz.addEventListener("click",function(){fi.click();});
+  fi.addEventListener("change",function(){ckUpload(fi.files[0]);fi.value="";});
+  ["dragenter","dragover"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.style.borderColor="var(--ind)";});});
+  ["dragleave","drop"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.style.borderColor="var(--line)";});});
+  dz.addEventListener("drop",function(e){if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0])ckUpload(e.dataTransfer.files[0]);});
+  // preview edits: company pick + rate override
+  document.addEventListener("change",function(e){
+    var sc=e.target.closest?e.target.closest(".ck-co"):null;
+    if(sc&&CKROWS){var i=Number(sc.getAttribute("data-i"));CKROWS[i].company_id=sc.value||null;
+      if(sc.value&&RATES[sc.value])CKROWS[i].rate=RATES[sc.value].rate;renderCkPreview();return;}
+    var rr=e.target.closest?e.target.closest(".ck-rate"):null;
+    if(rr&&CKROWS){var j=Number(rr.getAttribute("data-i"));var v=Number(rr.value);
+      if(Number.isFinite(v)&&v>=0){CKROWS[j].rate=v;renderCkPreview();}return;}
+  });
   fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
     var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
     if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});
@@ -222,7 +304,7 @@ function renderClients(rows){
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
     if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
     if(!badges)badges='<span class="badge b-mut">all quiet</span>';
-    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
+    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="setrate" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--ink3)" title="Their agreed labour sell rate — click to change">$'+(RATES[r.c.id]?RATES[r.c.id].rate:20)+'/hr</a><a href="#" class="loghours" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Log Elastic team hours against this client">Hours +</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
     if(c.ready||c.review||c.owner||c.pile){work+=html;working++;}else quiet+=html;
   });
   document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
@@ -240,6 +322,47 @@ document.addEventListener("click",function(e){
   if(ir){ir.disabled=true;ir.textContent="…";
     fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"revoke",id:ir.getAttribute("data-id")})})
       .then(function(){loadInvites();}).catch(function(){ir.disabled=false;ir.textContent="Revoke";});
+    return;}
+  if(e.target&&e.target.id==="ck-commit"){
+    var btn=e.target;btn.disabled=true;btn.textContent="Logging…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({t:SESSION.token,action:"clockify_commit",worked_on:CKDATE,note:"Clockify report",rows:CKROWS.filter(function(r){return r.company_id;})})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){
+          document.getElementById("ck-msg").innerHTML="Logged <b>"+d.logged+"</b> client"+(d.logged===1?"":"s")+" — $"+d.charge.toFixed(2)+" added to the "+d.period.start+" fortnight.";
+          CKROWS=null;renderCkPreview();loadInvoiceRun();
+        }else{btn.disabled=false;btn.textContent="Try again";alert("Couldn't log: "+(d&&d.error||"unknown"));}})
+      .catch(function(){btn.disabled=false;btn.textContent="Try again";});
+    return;}
+  var lh=e.target.closest(".loghours");
+  if(lh){e.preventDefault();
+    var co=lh.getAttribute("data-co");
+    var known=RATES[co]?RATES[co].rate:20;
+    var hrs=prompt("Elastic team hours for "+lh.getAttribute("data-name")+" (bills at their agreed $"+known+"/hr):");
+    if(hrs===null)return;
+    var hn=Number(String(hrs).replace(/[^0-9.]/g,""));
+    if(!hn){alert("Enter hours, e.g. 1.5");return;}
+    var day=prompt("Date the work was done (YYYY-MM-DD) — sets which fortnight it bills in:",new Date().toISOString().slice(0,10));
+    if(day===null)return;
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"add_hours",id:co,hours:hn,worked_on:day,note:"logged on the Desk"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){alert("Logged "+hn+"h at $"+d.rate+"/hr = $"+d.charge.toFixed(2)+" — bills in the "+d.period.start+" fortnight.");loadInvoiceRun();}
+        else alert("Couldn't log hours: "+(d&&d.error||"unknown"));})
+      .catch(function(){alert("Couldn't log hours — network error.");});
+    return;}
+  var rt=e.target.closest(".setrate");
+  if(rt){e.preventDefault();
+    var rco=rt.getAttribute("data-co");
+    var cur=RATES[rco]?RATES[rco].rate:20;
+    var nr=prompt("Agreed labour sell rate for "+rt.getAttribute("data-name")+" (USD per hour) — OG clients keep their old price:",String(cur));
+    if(nr===null)return;
+    var nrn=Number(String(nr).replace(/[^0-9.]/g,""));
+    if(!Number.isFinite(nrn)){alert("Enter a rate, e.g. 20");return;}
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"set_rate",id:rco,rate_usd:nrn})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){if(RATES[rco])RATES[rco].rate=d.rate;rt.textContent="$"+d.rate+"/hr";}
+        else alert("Couldn't save: "+(d&&d.error||"unknown"));})
+      .catch(function(){alert("Couldn't save — network error.");});
     return;}
   var tu=e.target.closest(".topup");
   if(tu){e.preventDefault();

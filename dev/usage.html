@@ -42,6 +42,18 @@
   .rows{max-height:340px;overflow-y:auto}
   .fine{margin-top:20px;font-size:12px;color:var(--ink3);line-height:1.6}
   .empty{color:var(--ink3);font-size:13px}
+  /* phone first — the fortnight rows stack instead of squeezing */
+  @media (max-width:560px){
+    .wrap{padding:18px 14px 44px}
+    .prow{flex-wrap:wrap}
+    .prow .pw{min-width:100%;order:-1}
+    .prow .pf{flex:1 1 auto}
+    .frow{padding-left:0}
+    .lrow{flex-wrap:wrap}
+    .lrow .lw{min-width:100%}
+    .bal{font-size:23px}
+  }
+  @media (min-width:1000px){ .wrap{max-width:900px} }
 </style>
 </head>
 <body>
@@ -53,7 +65,7 @@
     </div>
 
     <h1>Usage &amp; billing</h1>
-    <p class="sub" id="co-sub">Everything Ava has done, and what it costs — itemised.</p>
+    <p class="sub" id="co-sub">Everything Ava and the Elastic team have done, and what it costs — itemised.</p>
 
     <div class="card">
       <div class="kt">Account</div>
@@ -71,8 +83,8 @@
       <div class="rows" id="ledger"><span class="empty">Loading…</span></div>
     </div>
 
-    <div class="fine">Usage-based billing · invoiced on the 1st &amp; 16th · USD ex-GST.<br>
-    To top up your account, reply to your latest invoice email or get the Elastic team on it — card payments are coming.</div>
+    <div class="fine">Ava's usage plus any Elastic team hours, billed together · invoiced on the 1st &amp; 16th · USD ex-GST.<br>
+    Questions about a line? Reply to your invoice email or ask the Elastic team.</div>
   </div>
 
 <script>
@@ -91,7 +103,7 @@
     for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
   }
   comp=comp||s.companies[0];
-  document.getElementById("co-sub").textContent=comp.name+" — everything Ava has done, and what it costs, itemised.";
+  document.getElementById("co-sub").textContent=comp.name+" — everything Ava and the Elastic team have done, and what it costs, itemised.";
   fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
     .then(function(r){return r.json();}).then(function(d){
       if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
@@ -110,7 +122,12 @@
         var label=fmtD(p.start)+" – "+fmtD(p.end)+(ix===0?" · current":"");
         var feats=(p.features||[]).filter(function(f){return f.charge>=0.005||f.tasks>0;})
           .map(function(f){return '<div class="frow"><b>'+esc(f.feature)+'</b> '+fmtC(f.charge)+' · '+f.tasks+' tasks · '+fmtT((f.tin||0)+(f.tout||0))+' tok</div>';}).join("");
-        return '<div class="prow"><span class="pw">'+label+'</span><span class="pf">'+(p.tasks||0)+' tasks · '+fmtT((p.tin||0)+(p.tout||0))+' tokens</span><span class="pc">'+fmtC(p.charge)+'</span></div>'+feats;
+        // human work sits alongside Ava's usage — same fortnight, same invoice
+        if(p.human&&p.human.hours)
+          feats+='<div class="frow"><b>Human work — the Elastic team</b> '+fmtC(p.human.charge)+' · '+p.human.hours+' hours</div>';
+        var summary=(p.tasks||0)+' tasks · '+fmtT((p.tin||0)+(p.tout||0))+' tokens'
+          +(p.human&&p.human.hours?' · '+p.human.hours+'h human':'');
+        return '<div class="prow"><span class="pw">'+label+'</span><span class="pf">'+summary+'</span><span class="pc">'+fmtC(p.charge)+'</span></div>'+feats;
       }).join("");
       document.getElementById("periods").innerHTML=ph||'<span class="empty">No billable activity yet — connect Xero and Gmail and Ava gets to work.</span>';
       document.getElementById("periods").className="";

@@ -77,8 +77,8 @@ else fetch(API+"/partner-desk?invite="+encodeURIComponent(TOKEN)).then(function(
   if(!d||d.error){dead("Invite not found","This link doesn't match an invite. Ask whoever sent it for a fresh one.");return;}
   var inv=d.invite;
   if(inv.status==="accepted"){dead("Already set up","This invite was already used. Sign in from your email link, or ask for a fresh invite.");return;}
-  if(inv.status==="revoked"){dead("Invite withdrawn","This invite was cancelled. Ask "+(inv.partner_name||"your bookkeeper")+" for a new one.");return;}
-  if(inv.status==="expired"){dead("Invite expired","Invites last 14 days. Ask "+(inv.partner_name||"your bookkeeper")+" to send a fresh one.");return;}
+  if(inv.status==="revoked"){dead("Invite withdrawn","This invite was cancelled. Ask "+(inv.partner_name||"the Elastic team")+" for a new one.");return;}
+  if(inv.status==="expired"){dead("Invite expired","Invites last 14 days. Ask "+(inv.partner_name||"the Elastic team")+" to send a fresh one.");return;}
   form(inv);
 }).catch(function(){dead("Couldn't check the invite","Give it a minute and reload this page.");});
 </script>
