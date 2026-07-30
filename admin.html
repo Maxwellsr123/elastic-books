@@ -726,11 +726,15 @@ function featBlock(id){
         +'<button class="btn bfeat" data-co="'+id+'" data-key="'+esc(x.key)+'" data-on="'+(on?'1':'0')+'" style="padding:6px 11px;font-size:12px'+(on?'':';color:var(--grn)')+'">'
         +(on?'Switch off':'Switch on')+'</button></div>';
     }).join("")+'</div>'
-    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. Auto Scheduling isn\'t here: it\'s under construction and gated separately.</div>';
+    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. New clients arrive with everything off, so switching them on is part of onboarding. Auto Scheduling isn\'t here: it\'s under construction and gated separately.</div>';
   }
+  // "never switched on" is not the same as "they turned it off", and the
+  // difference is the whole conversation when a new client's board is quiet.
   var offCount=f&&f.features?f.features.filter(function(x){return !x.on;}).length:0;
-  return '<div class="sec fhead" data-fold="'+id+'|feat" style="cursor:pointer">Feature switches <span class="cnt">'
-    +(f&&f.features?(offCount?offCount+' switched off':'all on'):'…')+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+  var untouched=f&&f.features&&f.features.every(function(x){return !x.on&&!x.set_by_owner;});
+  var hint=!f||!f.features?'…':(untouched?'not switched on yet':(offCount?offCount+' switched off':'all on'));
+  return '<div class="sec fhead" data-fold="'+id+'|feat" style="cursor:pointer'+(untouched?';color:var(--amb)':'')+'">Feature switches <span class="cnt">'
+    +esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
 function loadFeats(id,then){
