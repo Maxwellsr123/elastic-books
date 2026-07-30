@@ -249,6 +249,15 @@ var CO=null,CREW=[],JOBS=[],FERGUS=[],CALEVENTS=[],CALWEEK=0,OFFICE=null;
   window.avaToast=function(msg){if(!toastEl){toastEl=document.createElement("div");toastEl.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:10px 16px;border-radius:6px;box-shadow:0 6px 24px rgba(20,20,24,.25);z-index:1001;opacity:0;transition:opacity .18s;pointer-events:none;max-width:90vw;text-align:center";document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity="1";clearTimeout(toastT);toastT=setTimeout(function(){toastEl.style.opacity="0";},2600);};
 })();
 function gate(m){var g=document.getElementById("gate");g.style.display="flex";document.getElementById("gatemsg").textContent=m;}
+// Auto Scheduling is under construction (2026-07-31) for every company except
+// the allow-list in _shared/sched_gate.ts. The board only learns that from the
+// server's under_construction flag, so this reuses the gate overlay.
+function underConstruction(m){
+  document.getElementById("gatettl").textContent="Auto Scheduling is under construction";
+  gate(m||"We've paused this one while we get Auto Bookkeeping, Auto Collect and GST put-away right. We'll let you know the moment it's back.");
+  var back=document.querySelector("#gate a");
+  if(back){back.setAttribute("href","index.html");back.textContent="Back to your features →";}
+}
 function boot(){
   var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
   var qc=new URLSearchParams(location.search).get("c");
@@ -526,6 +535,7 @@ function post(body){fetch(API+"/ava-schedule-action",{method:"POST",headers:{"co
 
 function load(){
   fetch(API+"/ava-schedule-list?company="+CO).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.under_construction){underConstruction(d.message);return;}
     CREW=d.crew||[];var c=d.counts||{};
     if(d.company_name){var fw=document.querySelector(".side .foot .w");if(fw)fw.textContent=d.company_name;}
     document.getElementById("s_new").textContent=c.new||0;

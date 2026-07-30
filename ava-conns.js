@@ -21,6 +21,30 @@
 // Shapes differ (inboxes[] vs gmail_inboxes, connect urls present or not), so
 // everything is read defensively here rather than in four places.
 (function () {
+  // ── The Google warning, explained once ────────────────────────────────────
+  // Google's consent screen still says "Google hasn't verified this app": we're
+  // IN the verification review, and until it clears the app runs in Testing
+  // mode with a 100-seat test-user allow-list. Two things bite clients — the
+  // scare screen (harmless: Advanced → Continue) and, when the exact address
+  // they authorise with isn't allow-listed, a hard "Access blocked / Error 403"
+  // they cannot click past. Both are spelt out here rather than left to a Slack
+  // message, because they hit it alone at 7pm.
+  //
+  // It lives in this shared file because the connect modal is duplicated
+  // verbatim across app.html and connections.html — one copy, both surfaces.
+  // See docs/APP_APPROVALS.md; delete this the day verification lands.
+  window.AVA_GOOGLE_WARNING =
+      '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6">'
+    + '<b style="color:var(--ink)">Google will warn you — that&rsquo;s expected.</b> Elastic Admin is going through Google&rsquo;s verification review right now. Until it clears we run as a <b>test app</b> (100 seats), which is why Google shows a scare screen. It&rsquo;s about our review status, not about what Ava does.'
+    + '<ol style="margin:9px 0 0;padding-left:19px">'
+    + '<li style="margin-bottom:6px">Pick <b>the mailbox your receipts and bills land in</b> — not your personal or login email.</li>'
+    + '<li style="margin-bottom:6px">On &ldquo;Google hasn&rsquo;t verified this app&rdquo;, click <b>Advanced</b> &rarr; <b>Continue</b>.</li>'
+    + '<li style="margin-bottom:6px"><b>Tick every box</b> on the permissions screen. A box left unticked means Ava quietly can&rsquo;t read that inbox.</li>'
+    + '<li>See <b>&ldquo;Access blocked&rdquo;</b> or <b>Error 403</b> instead? That address isn&rsquo;t on our test list yet — tell us and we&rsquo;ll add it in a minute.</li>'
+    + '</ol>'
+    + '<div style="margin-top:9px;color:var(--ink3);font-size:11.5px">Ava only ever <b>reads and sends</b> — she never edits or deletes mail, and you can revoke her access from your Google account at any time.</div>'
+    + '</div>';
+
   var META = {
     gmail:  { name: "Gmail",  ic: "ti-mail",       col: "#EA4335" },
     xero:   { name: "Xero",   ic: "ti-calculator", col: "#13B5EA" },

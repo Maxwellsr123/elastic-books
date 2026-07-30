@@ -8,6 +8,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="ava-conns.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;--ind:#534AB7;--indbg:#EEEDFE;--indtx:#3F3795;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
@@ -94,7 +95,7 @@ function render(g){
     ? '<span class="pill p-ok">CONNECTED</span>'+(g.fergus_url?'<a class="lnk rec" href="'+esc(g.fergus_url)+'">Reconnect</a>':'')+'<button type="button" class="lnk disc" onclick="askDisc(this,\'fergus\',\'\')">Disconnect</button>'
     : (g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
   var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusAct+'</div>'
-    +'<div class="sub">Jobs, quotes and scheduling. Powers Auto Scheduling — assign a tradie and Ava books it here.</div></div>';
+    +'<div class="sub">Jobs and quotes. (Auto Scheduling is under construction &mdash; we&rsquo;re on the money features first.)</div></div>';
   box.innerHTML=gmailCard+xeroCard+fergusCard;
 }
 // Inline confirm → disconnect (no jarring native dialog). Cancel re-renders.
@@ -135,6 +136,7 @@ function boot(){
    +'<div style="background:var(--bg,#fff);border:1px solid var(--line);border-radius:8px;max-width:470px;width:100%;padding:24px;max-height:90vh;overflow:auto">'
    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px"><div class="ic" style="width:34px;height:34px;font-size:18px;color:#EA4335"><i class="ti ti-mail"></i></div><div style="font-size:17px;font-weight:600">Connect your inbox to Ava</div></div>'
    +'<div style="font-size:13px;color:var(--ink2);margin-bottom:16px">Ava reads your inbox to pull out bills and receipts, and can send replies from it when you ask — like confirming a booking or chasing a supplier. Ava never edits or deletes anything: <b>read and send only</b>. You’ll pick the mailbox and tick the boxes on Google’s screen.</div>'
+   +'<div style="border:1px solid #F0D8A8;background:#FBF1E2;border-radius:6px;padding:12px 14px;margin-bottom:14px">'+(window.AVA_GOOGLE_WARNING||"")+'</div>'
    +'<a id="gm-oauth" href="#" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Connect with Google</a>'
    +'<div style="font-size:11.5px;color:var(--ink3);margin:10px 0 16px;line-height:1.5">Read and send only — never edits or deletes. Revoke anytime from your Google account.</div>'
    +'<div style="border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink2);line-height:1.5">On a <b>Google Workspace</b> domain and want your admin to switch it on once for everyone? <a id="gm-admintoggle" style="color:var(--ind);font-weight:500;cursor:pointer">Set it up in the admin console instead</a></div>'

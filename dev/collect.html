@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="ava-conns.js"></script>
+<script src="ava-feature-switch.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -65,7 +66,7 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
   </aside>
   <main class="main">
     <div class="wrap">
-      <h1>Auto Collect</h1>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h1 style="flex:1;min-width:150px">Auto Collect</h1><span id="fsw"></span></div>
       <p class="lede">Ava chases your overdue invoices for you — a polite email from your own address, a friendly call if they go quiet, and she holds them to the date they promise until it&rsquo;s actually paid. Every reply lands in your Slack thread, and disputes come straight to you.</p>
       <div id="connrow" style="display:none;margin-bottom:16px"></div>
       <div class="card" id="acol"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading Auto Collect…</div></div></div>
@@ -80,6 +81,9 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
   // promised date and re-checks Xero until paid. Updates thread into Slack.
   var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/auto-collect";
   var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}location.replace("app.html");return "";})());
+  // the on/off switch belongs at the top of the page it governs, next to the name
+  if(CO&&window.avaFeatureSwitch)avaFeatureSwitch("fsw",{company:CO,key:"invoice_chaser",name:"Auto Collect",onChange:function(){load();}});
+
   var box=document.getElementById("acol");if(!box)return;
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
   function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -181,17 +185,14 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
         +'<a id="ac_toggle" style="font-size:12.5px;font-weight:500;color:var(--ink2);cursor:pointer;white-space:nowrap">'+(d.paused?"▶ Resume":"⏸ Pause")+'</a>'
         // Pause is "not this week". Off is "I don't want this feature" — and it
         // has to be here, not in a support email (Max, 31 Jul).
-        +'<a id="ac_off" style="font-size:12.5px;font-weight:500;color:var(--ink3);cursor:pointer;white-space:nowrap;margin-left:14px">Switch off</a></div>';
+        +'</div>';
     }
     box.innerHTML=h;
     var on=document.getElementById("ac_on");
     if(on)on.addEventListener("click",function(){on.disabled=true;on.textContent="…";post("enable").then(load).catch(load);});
     var tg=document.getElementById("ac_toggle");
     if(tg)tg.addEventListener("click",function(){tg.textContent="…";post(d.paused?"resume":"pause").then(load).catch(load);});
-    var off=document.getElementById("ac_off");
-    if(off)off.addEventListener("click",function(){
-      if(!confirm("Switch Auto Collect off?\n\nAva stops chasing your overdue invoices — no more emails or calls to your customers. You can switch it back on any time."))return;
-      off.textContent="…";post("disable").then(load).catch(load);});
+
     // Every chase opens into what was actually said — no Slack required.
     box.querySelectorAll(".acthread").forEach(function(a){
       a.addEventListener("click",function(){

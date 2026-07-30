@@ -26,7 +26,7 @@
 <main>
   <div class="brand">Elastic Admin <span>· privacy policy</span></div>
   <h1>Privacy Policy</h1>
-  <div class="sub">Elastic Admin · Aotearoa New Zealand · Effective 17 July 2026</div>
+  <div class="sub">Elastic Admin · Aotearoa New Zealand · Effective 31 July 2026</div>
 
   <p>Elastic Admin ("Elastic", "we") provides bookkeeping and back-office services for
   trade businesses. Our application — <b>Ava</b>, the Elastic Admin assistant — helps
@@ -70,6 +70,8 @@
     <li>Extracted document details and filed copies of financial documents are stored in
       our database and file storage (Supabase, hosted on AWS, ap-southeast-1 region),
       encrypted at rest and in transit.</li>
+    <li>Stored documents are served only through short-lived, signed links — they are not
+      publicly accessible.</li>
     <li>Google OAuth tokens are stored server-side only and are never exposed to browsers
       or third parties.</li>
     <li>Automated processing uses vetted service providers (e.g. Anthropic for document
@@ -85,11 +87,11 @@
   <h2>Retention and deletion</h2>
   <p>Data is kept while your account is active so your books retain their audit trail.
   When you disconnect an inbox we stop reading it immediately; you can also revoke access
-  anytime at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
-  On request, or when you leave the service, we delete stored mail-derived documents and
-  revoke and delete the associated tokens. Email
-  <a href="mailto:ava@elasticadmin.com">ava@elasticadmin.com</a> for deletion requests —
-  we action them within 30 days.</p>
+  anytime at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+  <p>On request, or when you leave the service, we revoke the Google authorisation, delete
+  the stored access and refresh tokens, and delete the documents we extracted from your
+  mail. Email <a href="mailto:ava@elasticadmin.com">ava@elasticadmin.com</a> to request
+  deletion — we action requests within 30 days.</p>
 
   <h2>Contact</h2>
   <p>Elastic Admin, Aotearoa New Zealand · <a href="mailto:ava@elasticadmin.com">ava@elasticadmin.com</a></p>

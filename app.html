@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="ava-conns.js"></script>
+<script src="ava-feature-switch.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -147,7 +148,7 @@ h1{letter-spacing:-.03em}
 
   <main class="main">
     <div class="top">
-      <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><h1 id="ptitle">Auto Bookkeeping</h1><span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:5px">BETA</span><span id="fsw" style="margin-left:auto"></span></div>
       <div style="display:flex;align-items:center;gap:14px;">
         <div id="clientpick" style="position:relative">
           <button id="clientbtn" class="btn" style="border:1px solid var(--line);font-weight:600"><i class="ti ti-building-store" style="font-size:15px"></i> <span id="clientname">…</span> <i class="ti ti-chevron-down" style="font-size:14px"></i></button>
@@ -382,14 +383,51 @@ h1{letter-spacing:-.03em}
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
   }
+  // The Google "hasn't verified this app" explainer — one copy, in ava-conns.js,
+  // shared with connections.html (the connect modal is duplicated verbatim).
+  var GOOGLE_WARNING_HTML=window.AVA_GOOGLE_WARNING||"";
+
+  // The dashboard's own setup panel. Ava can't do a thing until Xero and an
+  // inbox are connected, so while either is missing the board LEADS with this
+  // and says exactly what to do. Each step collapses to a green "connected" the
+  // moment it lands, and once both are in the whole panel disappears — all
+  // that's left is the compact status strip. (Max, 2026-07-31.)
+  function setupPanel(g){
+    function step(n,done,icon,col,title,sub,action,extra){
+      return '<div style="display:flex;gap:12px;padding:13px 0;border-top:1px solid var(--line)">'
+        +'<div style="width:26px;height:26px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;'
+        +(done?'background:#E7F6EE;color:#0E7A50':'background:var(--indbg);color:var(--indtx)')+'">'
+        +(done?'<i class="ti ti-check" style="font-size:15px"></i>':n)+'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">'
+        +'<i class="ti '+icon+'" style="font-size:16px;color:'+col+'"></i>'
+        +'<div style="font-size:14px;font-weight:600;flex:1;min-width:0">'+title+'</div>'
+        +(done?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':action)
+        +'</div>'
+        +(done?'':'<div style="font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:4px">'+sub+'</div>'+(extra||""))
+        +'</div></div>';
+    }
+    var xeroBtn=g.xero_url
+      ? '<a href="'+esc(g.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:8px 14px;text-decoration:none;white-space:nowrap">Connect Xero</a>'
+      : '<span class="pill p-warn" title="We set this one up at our end — no action needed from you">Elastic sets this one up</span>';
+    var gmailBtn='<button type="button" class="btn btn-p gmailconnect" data-gmailurl="'+esc(g.gmail_url||"")+'" data-dwdid="'+esc(g.gmail_dwd_client_id||"")+'" data-dwdscope="'+esc(g.gmail_dwd_scope||"")+'" data-dwdurl="'+esc(g.gmail_dwd_admin_url||"")+'" style="font-size:12.5px;padding:8px 14px;white-space:nowrap">Connect your inbox</button>';
+    var gmailExtra='<details style="margin-top:9px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--ind);list-style:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-alert-circle" style="font-size:15px"></i> Google shows a warning — read this first</summary>'
+      +'<div style="margin-top:9px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:#fff">'+GOOGLE_WARNING_HTML+'</div></details>';
+    var n=(g.inboxes&&g.inboxes.length)||0;
+    return '<div class="card" style="padding:4px 18px 16px">'
+      +'<div style="padding:14px 0 2px"><div style="font-size:15px;font-weight:600">Connect your accounts and Ava gets to work</div>'
+      +'<div style="font-size:12.5px;color:var(--ink2);margin-top:2px">Two connections, about a minute. Until both are in, there&rsquo;s nothing for Ava to read.</div></div>'
+      +step(1,!!g.xero,"ti-calculator","#13B5EA","Xero","Your bank lines — the spend Ava files each receipt against, and what Auto Collect and GST put-away run on.",xeroBtn)
+      +step(2,!!g.gmail,"ti-mail","#EA4335","Your inbox"+(g.gmail&&n?' <span style="font-weight:400;color:var(--ink3);font-size:12px">· '+n+' connected</span>':""),"Where your receipts, supplier invoices and bills land. Ava reads them, pulls out the paperwork and matches it to the right spend.",gmailBtn,gmailExtra)
+      +'</div>';
+  }
+
   function renderIntg(g){
     var box=document.getElementById("uintg");if(!box||!g)return;window.__INTG=g;   // stash for Settings
     box.style.display="block";
-    // nothing connected yet (a new client like Sam) → lead with a big connect prompt, in-app
-    if(!g.gmail && !g.xero){
-      box.innerHTML='<div class="card" style="text-align:center;padding:22px 16px"><div style="width:44px;height:44px;border-radius:4px;background:var(--indbg);color:var(--indtx);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px"><i class="ti ti-plug-connected"></i></div><div style="font-weight:600;font-size:15px;margin-bottom:3px">Connect your accounts to get started</div><div style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;max-width:340px;margin-left:auto;margin-right:auto">Link the inbox your receipts land in and your Xero, and Ava gets to work.</div><a class="btn btn-p" href="connections.html" style="text-decoration:none">Connect accounts</a></div>';
-      return;
-    }
+    // Anything missing → the instructions lead. Both in → they vanish and only
+    // the compact "connected" strip is left.
+    if(!g.gmail || !g.xero){box.innerHTML=setupPanel(g);return;}
     // Only what feeds the books. Fergus powers Auto Scheduling, not this — it
     // lives on that page and in Settings, not here. (avaConns → ava-conns.js)
     avaConns(box,g,[
@@ -410,6 +448,7 @@ h1{letter-spacing:-.03em}
      +'<div style="background:var(--bg,#fff);border:1px solid var(--line);border-radius:8px;max-width:470px;width:100%;padding:24px;max-height:90vh;overflow:auto">'
      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px"><div class="ic" style="width:34px;height:34px;font-size:18px;color:#EA4335"><i class="ti ti-mail"></i></div><div style="font-size:17px;font-weight:600">Connect your inbox to Ava</div></div>'
      +'<div style="font-size:13px;color:var(--ink2);margin-bottom:16px">Ava reads your inbox to pull out bills and receipts, and can send replies from it when you ask — like confirming a booking or chasing a supplier. Ava never edits or deletes anything: <b>read and send only</b>. You’ll pick the mailbox and tick the boxes on Google’s screen.</div>'
+     +'<div style="border:1px solid #F0D8A8;background:#FBF1E2;border-radius:6px;padding:12px 14px;margin-bottom:14px">'+GOOGLE_WARNING_HTML+'</div>'
      +'<a id="gm-oauth" href="#" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Connect with Google</a>'
      +'<div style="font-size:11.5px;color:var(--ink3);margin:10px 0 16px;line-height:1.5">Read and send only — never edits or deletes. Revoke anytime from your Google account.</div>'
      +'<div style="border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink2);line-height:1.5">On a <b>Google Workspace</b> domain and want your admin to switch it on once for everyone? <a id="gm-admintoggle" style="color:var(--ind);font-weight:500;cursor:pointer">Set it up in the admin console instead</a></div>'
@@ -750,6 +789,8 @@ h1{letter-spacing:-.03em}
 (function(){
   var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
   var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}return "";})());
+  if(CO&&window.avaFeatureSwitch)avaFeatureSwitch("fsw",{company:CO,key:"bookkeeping",name:"Auto Bookkeeping"});
+
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
   var UPAL=["#B5630F","#0E7A50","#B42318","#0E7490","#A21CAF","#C2410C","#4D7C0F","#BE123C"];
   function userColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return UPAL[h%UPAL.length];}
@@ -802,7 +843,7 @@ h1{letter-spacing:-.03em}
     var inHtml=inboxes.length?inboxes.map(function(e){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><i class="ti ti-mail" style="font-size:16px;color:#EA4335"></i><div style="flex:1;font-size:13.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(e)+'</div><span class="pill p-ok">connected</span></div>';}).join(""):'<div style="font-size:12.5px;color:var(--ink3);padding:6px 0">No inbox connected yet — Ava needs at least one to scan.</div>';
     var addGmail='<button type="button" class="btn gmailconnect" data-gmailurl="'+esc(g.gmail_url||"")+'" data-dwdid="'+esc(g.gmail_dwd_client_id||"")+'" data-dwdscope="'+esc(g.gmail_dwd_scope||"")+'" data-dwdurl="'+esc(g.gmail_dwd_admin_url||"")+'" style="margin-top:11px;border:1px dashed var(--border-stronger,#c9c9c2)"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Add an inbox</button>';
     var xero='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-calculator" style="font-size:18px;color:#13B5EA"></i><div style="flex:1;font-size:13.5px;font-weight:500">Xero</div>'+(g.xero?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.xero_url?'<a href="'+esc(g.xero_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Xero</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload.</div>';
-    var fergus='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-tools" style="font-size:18px;color:#C2410C"></i><div style="flex:1;font-size:13.5px;font-weight:500">Fergus</div>'+(g.fergus?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.fergus_url?'<a href="'+esc(g.fergus_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Fergus</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">Jobs, quotes and scheduling.</div>';
+    var fergus='<div style="display:flex;align-items:center;gap:10px;padding:11px 0 2px;border-top:1px solid var(--line);margin-top:14px"><i class="ti ti-tools" style="font-size:18px;color:#C2410C"></i><div style="flex:1;font-size:13.5px;font-weight:500">Fergus</div>'+(g.fergus?'<span class="pill p-ok"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> connected</span>':(g.fergus_url?'<a href="'+esc(g.fergus_url)+'" class="btn btn-p" style="font-size:12.5px;padding:7px 13px">Connect Fergus</a>':'<span class="pill p-warn">unavailable</span>'))+'</div><div style="font-size:11.5px;color:var(--ink3)">Jobs and quotes.</div>';
     box.innerHTML='<div style="font-size:12px;color:var(--ink2);margin-bottom:2px">Inboxes Ava scans</div>'+inHtml+addGmail+xero+fergus;
   }
   if(sb)sb.addEventListener("click",function(){ov.style.display="flex";msg.textContent="";load();renderIntg();});
