@@ -337,6 +337,19 @@ document.addEventListener("click",function(e){
     var fk=fh.getAttribute("data-fold");if(fk){FOLDS[fk]=open;try{localStorage.setItem("desk_folds",JSON.stringify(FOLDS));}catch(_e){}}}return;}
   var ic=e.target.closest(".bicopy");
   if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
+  var at=e.target.closest(".acthread");
+  if(at){var tid=at.getAttribute("data-id"),tco=at.getAttribute("data-co"),td=document.getElementById("th-"+tid);
+    if(!td)return;
+    if(td.style.display!=="none"){td.style.display="none";THREAD[tid]=null;at.textContent="Read the full thread";return;}
+    td.style.display="";at.textContent="Hide the full thread";
+    if(!THREAD[tid]){
+      td.innerHTML='<div class="muted" style="padding:8px 0">Loading the thread…</div>';
+      track(tco,"collect_thread");
+      fetch(API+"/auto-collect?company="+tco+"&thread="+tid).then(function(r){return r.json();})
+        .then(function(d){THREAD[tid]=acThreadHtml(d);td.innerHTML=THREAD[tid];})
+        .catch(function(){td.innerHTML='<div class="muted" style="padding:8px 0;color:var(--amb)">Couldn\'t reach the thread — try again.</div>';});
+    }
+    return;}
   var as=e.target.closest(".acstory");
   if(as){var aid=as.getAttribute("data-id"),sd=document.getElementById("st-"+aid);
     if(sd){var shut=sd.style.display==="none";sd.style.display=shut?"":"none";STORY[aid]=shut;
@@ -529,16 +542,67 @@ function acEvent(e){
     +'<div style="flex:1;min-width:0;color:'+col+'">'+txt+'</div>'
     +'<div style="white-space:nowrap;color:var(--ink2);font-size:11.5px">'+acWhen(e.at)+'</div></div>';
 }
-function acStory(ch){
+// ── Slack mrkdwn -> HTML ────────────────────────────────────────────────────
+// The thread is written for Slack, but it's read here. Links arrive as
+// <url|label>, user text arrives HTML-escaped, quoted email bodies arrive as
+// "> " lines carrying [cid:…] inline-image rubbish. Order matters: pull the
+// link tokens out (they use REAL angle brackets) before unescaping the rest.
+var EMOJI={moneybag:"💰",email:"✉️",raised_hand:"✋",speech_balloon:"💬",telephone_receiver:"📞",tada:"🎉",
+  warning:"⚠️",mag:"🔍",date:"📅",mailbox_with_mail:"📬",no_entry_sign:"🚫",rotating_light:"🚨",bell:"🔔",
+  "hand-stop":"✋",eyes:"👀",memo:"📝",white_check_mark:"✅"};
+function slackToHtml(raw){
+  var links=[],t=String(raw||"");
+  t=t.replace(/<(https?:\/\/[^>|]+)(?:\|([^>]*))?>/g,function(m,u,l){
+    links.push('<a href="'+u.replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(l||u)+'</a>');return "@@LNK"+(links.length-1)+"@@";});
+  t=t.replace(/<mailto:([^>|]+)(?:\|([^>]*))?>/g,function(m,a,l){links.push(esc(l||a));return "@@LNK"+(links.length-1)+"@@";});
+  t=t.replace(/&gt;/g,">").replace(/&lt;/g,"<").replace(/&amp;/g,"&");   // Slack's escaping of plain text
+  t=t.replace(/\[cid:[^\]]+\]/g,"");                                      // inline-image placeholders from quoted mail
+  t=esc(t);
+  t=t.replace(/@@LNK(\d+)@@/g,function(m,i){return links[Number(i)];});
+  t=t.replace(/:([a-z0-9_+-]+):/g,function(m,n){return EMOJI[n]||"";});
+  t=t.replace(/\*([^*\n]+)\*/g,"<b>$1</b>").replace(/`([^`\n]+)`/g,'<code style="background:#F1F1E9;padding:1px 4px;border-radius:2px">$1</code>');
+  // "> " runs are the quoted email — the actual words that were sent and sent back
+  var out="",quote=[];
+  function flush(){if(!quote.length)return;
+    out+='<div style="border-left:3px solid var(--line);background:#FBFBF8;padding:8px 11px;margin:6px 0;max-height:280px;overflow:auto;'
+      +'font-size:12.5px;color:var(--ink2);white-space:pre-wrap;word-break:break-word">'+quote.join("\n").trim()+'</div>';quote=[];}
+  t.split("\n").forEach(function(l){
+    if(/^&gt;\s?/.test(l)||/^>\s?/.test(l)){quote.push(l.replace(/^(&gt;|>)\s?/,""));return;}
+    flush();if(l.trim())out+='<div style="margin:3px 0">'+l+'</div>';
+  });
+  flush();
+  return out;
+}
+function acStory(ch,co){
   var h=(ch.history||[]);
   var body=h.length?h.map(acEvent).join("")
     :'<div class="muted" style="padding:6px 0">No trail on this one yet — she picked it up but hasn\'t sent anything.</div>';
-  var foot='<div style="display:flex;gap:12px;padding:8px 0 2px;font-size:12px;color:var(--ink3);flex-wrap:wrap">'
+  // The summaries above are Ava's read. The thread below is the actual words —
+  // the email she sent and what came back. Read it here; don't send anyone to
+  // Slack for it (Max, 31 Jul). Loaded on click: it's 200 messages a client.
+  var foot='<div style="display:flex;gap:12px;padding:8px 0 2px;font-size:12px;color:var(--ink3);flex-wrap:wrap;align-items:baseline">'
     +'<span>'+(ch.emails_sent||0)+' email'+((ch.emails_sent||0)===1?'':'s')+(ch.calls?' · '+ch.calls+' call'+(ch.calls===1?'':'s'):'')+' since '+esc(acDate(ch.started_at))+'</span>'
-    +(ch.slack_url?'<a href="'+esc(ch.slack_url)+'" target="_blank" style="font-weight:600;text-decoration:none;margin-left:auto">Full thread in Slack ↗</a>':'')+'</div>';
+    +'<a class="acthread" data-id="'+ch.id+'" data-co="'+co+'" style="cursor:pointer;font-weight:600;margin-left:auto;color:var(--indtx)">'
+    +(THREAD[ch.id]?'Hide the full thread':'Read the full thread')+'</a>'
+    +(ch.slack_url?'<a href="'+esc(ch.slack_url)+'" target="_blank" style="font-weight:500;text-decoration:none;color:var(--ink3)">in Slack ↗</a>':'')+'</div>'
+    +'<div class="acth" id="th-'+ch.id+'"'+(THREAD[ch.id]?'':' style="display:none"')+'>'+(THREAD[ch.id]||'')+'</div>';
   return '<div class="acst" id="st-'+ch.id+'"'+(STORY[ch.id]?'':' style="display:none"')+'>'+body+foot+'</div>';
 }
-function acRow(ch,withWhy){
+// Rendered threads, kept so a panel re-render doesn't drop what you were reading
+var THREAD={};
+function acThreadHtml(d){
+  if(!d||!d.ok)return '<div class="muted" style="padding:8px 0;color:var(--amb)">'+esc((d&&d.error)||"Couldn't load the thread.")+'</div>';
+  if(!(d.messages||[]).length)return '<div class="muted" style="padding:8px 0">The thread is empty.</div>';
+  return '<div style="border:1px solid var(--line);border-radius:4px;background:#fff;padding:4px 12px;margin:6px 0 2px">'
+    +d.messages.map(function(m){
+      var who=m.from==="ava"?'<span style="color:var(--indtx)">Ava</span>':'<span style="color:var(--grn)">Someone in Slack</span>';
+      return '<div style="padding:10px 0;border-top:1px solid #F1F1E9">'
+        +'<div style="display:flex;gap:8px;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px">'+who
+        +'<span style="margin-left:auto;font-weight:500">'+acWhen(m.at)+'</span></div>'
+        +'<div style="font-size:13px;line-height:1.55">'+slackToHtml(m.text)+'</div></div>';
+    }).join("")+'</div>';
+}
+function acRow(ch,withWhy,co){
   var overdue=0,paid=ch.state==="paid";
   if(ch.due_date){var d=new Date(String(ch.due_date).slice(0,10)+"T12:00:00");overdue=Math.floor((Date.now()-d.getTime())/864e5);}
   // Xero zeroes amount_due the moment it's paid, so a settled row must not read
@@ -567,7 +631,7 @@ function acRow(ch,withWhy){
     +'<div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">'
     +'<div class="rmain"><div class="rt">'+esc(ch.customer||"—")+(paid?'':' — '+money(ch.owing))
     +' <span class="muted" style="font-weight:400">'+esc(ch.invoice||"")+'</span></div><div class="rs">'+sub+'</div>'+why+'</div>'
-    +contact+toggle+acPill(ch)+'</div>'+acStory(ch)+'</div>';
+    +contact+toggle+acPill(ch)+'</div>'+acStory(ch,co)+'</div>';
 }
 function acBlock(id){
   var ac=ACOL[id];
@@ -606,15 +670,15 @@ function acBlock(id){
     }
     if(needs.length){
       body+='<div class="sec" style="margin-top:4px;color:var(--red)">Ava\'s handed these back <span class="cnt">she\'s out of moves — the owner has been told, and so have we</span></div>'
-        +'<div class="list">'+needs.map(function(x){return acRow(x,true);}).join("")+'</div>';
+        +'<div class="list">'+needs.map(function(x){return acRow(x,true,id);}).join("")+'</div>';
     }
     if(rest.length){
       body+='<div class="sec" style="color:var(--ink2)">Ava\'s still on these <span class="cnt">no action needed — here so you can see it moving</span></div>'
-        +'<div class="list">'+rest.map(function(x){return acRow(x,false);}).join("")+'</div>';
+        +'<div class="list">'+rest.map(function(x){return acRow(x,false,id);}).join("")+'</div>';
     }
     if(won.length){
       body+='<div class="sec" style="color:var(--grn)">Ava got these paid <span class="cnt">chased, replied to, and settled — open the trail to see how</span></div>'
-        +'<div class="list">'+won.map(function(x){return acRow(x,false);}).join("")+'</div>';
+        +'<div class="list">'+won.map(function(x){return acRow(x,false,id);}).join("")+'</div>';
     }
     if(!chases.length&&!won.length)body+='<div class="muted">Nothing overdue right now — or her next Xero sweep (25 past the hour) hasn\'t run yet.</div>';
   }
