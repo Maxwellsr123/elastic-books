@@ -39,8 +39,11 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .hdr .when{margin-left:auto;font-size:12.5px;color:var(--ink3)}
 .note{margin-top:10px;background:var(--indbg);border:1px solid #C9C4F2;border-radius:6px;padding:11px 14px;font-size:13.5px;line-height:1.55;color:var(--indtx);display:flex;gap:10px}
 .list{background:#fff;border:1px solid var(--line);border-radius:6px;margin-top:14px;overflow:hidden}
-.itm{display:flex;gap:13px;align-items:flex-start;padding:15px 17px;border-top:1px solid var(--line)}
+.itm{padding:15px 17px;border-top:1px solid var(--line)}
 .itm:first-child{border-top:0}
+.irow{display:flex;gap:13px;align-items:flex-start}
+.ibody{flex:1;min-width:0}
+.thr{margin-top:2px}
 .rank{width:22px;height:22px;border-radius:50%;background:var(--ink0);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
 .rank.q{background:#EFEFE8;color:var(--ink3)}
 .ic{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
@@ -100,6 +103,17 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   .main{width:100%;padding-bottom:64px}
   .wrap{padding:16px 13px 40px}
   .use{grid-template-columns:1fr 1fr}
+  /* A thread squeezed into the text column got about half the screen, with the
+     quoted email scrolling inside it. On a phone the row header stays compact
+     and everything else takes the full width of the card. */
+  .itm{padding:14px 13px}
+  .irow{flex-wrap:wrap;gap:10px}
+  .ibody{flex-basis:100%;order:3;min-width:100%}
+  .irow .pill{order:2;margin-left:auto}
+  .rank,.ic{order:1}
+  .thr{margin-left:-13px;margin-right:-13px}
+  .thr>div{border-radius:0!important;border-left:0!important;border-right:0!important}
+  .acts .btn{flex:1;justify-content:center;min-height:42px}
 }
 </style>
 </head>
@@ -173,13 +187,15 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         if(!a.external)href+=(href.indexOf("?")>=0?"&":"?")+"c="+CO;
         return '<a class="btn'+(a.primary?" p":"")+'" href="'+esc(href)+'"'+(a.external?' target="_blank" rel="noopener"':'')+'>'+esc(a.label)+(a.external?' <i class="ti ti-external-link"></i>':'')+'</a>';
       }).join("");
-      return '<div class="itm"><div class="rank">'+(i+1)+'</div>'
+      return '<div class="itm">'
+        +'<div class="irow"><div class="rank">'+(i+1)+'</div>'
         +'<div class="ic" style="background:'+tone[1]+';color:'+tone[2]+'"><i class="ti '+(TIER_ICON[x.tier]||"ti-point")+'"></i></div>'
-        +'<div style="flex:1;min-width:0"><div class="h">'+esc(x.title)+'</div>'
+        +'<div class="ibody"><div class="h">'+esc(x.title)+'</div>'
         +'<div class="d">'+esc(x.detail)+'</div>'
         +'<div class="why"><i class="ti ti-arrow-narrow-right"></i> '+esc(x.tier_why)+'</div>'
-        +'<div class="acts">'+acts+'</div><div class="thr" id="thr-'+esc(x.id)+'" style="display:none"></div></div>'
-        +'<span class="pill '+tone[0]+'">'+esc(x.tier_label)+'</span></div>';
+        +'<div class="acts">'+acts+'</div></div>'
+        +'<span class="pill '+tone[0]+'">'+esc(x.tier_label)+'</span></div>'
+        +'<div class="thr" id="thr-'+esc(x.id)+'" style="display:none"></div></div>';
     }).join("")+'</div>'
       :'<div class="list"><div class="itm"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'
        +'<div style="flex:1"><div class="h">Nothing needs you right now</div><div class="d">Everything’s either running or waiting on someone else. I’ll put it here the moment that changes.</div></div></div></div>';
@@ -189,10 +205,10 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       document.getElementById("hsec").style.display="";
       document.getElementById("handled").innerHTML='<div class="list">'+handled.map(function(x){
         var tone=TONE[x.tone||"mut"];
-        return '<div class="itm quiet"><div class="rank q">·</div>'
+        return '<div class="itm quiet"><div class="irow"><div class="rank q">·</div>'
           +'<div class="ic" style="background:'+tone[1]+';color:'+tone[2]+'"><i class="ti '+(HICON[x.icon]||"ti-point")+'"></i></div>'
-          +'<div style="flex:1;min-width:0"><div class="h" style="font-weight:500">'+esc(x.title)+'</div><div class="d">'+esc(x.detail)+'</div></div>'
-          +(x.board?'<a class="btn" href="'+esc(x.board)+'?c='+CO+'">Open</a>':'')+'</div>';
+          +'<div class="ibody"><div class="h" style="font-weight:500">'+esc(x.title)+'</div><div class="d">'+esc(x.detail)+'</div></div>'
+          +(x.board?'<a class="btn" href="'+esc(x.board)+'?c='+CO+'">Open</a>':'')+'</div></div>';
       }).join("")+'</div>';
     }
 
@@ -225,7 +241,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       .replace(/\*([^*\n]+)\*/g,"<b>$1</b>");
     var out="",q=[];
     function flush(){if(!q.length)return;
-      out+='<div style="border-left:3px solid var(--line);background:var(--bg);padding:8px 11px;margin:6px 0;max-height:260px;overflow:auto;font-size:12.5px;color:var(--ink2);white-space:pre-wrap;word-break:break-word">'+q.join("\n").trim()+'</div>';q=[];}
+      out+='<div style="border-left:3px solid var(--line);background:var(--bg);padding:8px 11px;margin:6px 0;max-height:min(260px,45vh);overflow:auto;font-size:12.5px;color:var(--ink2);white-space:pre-wrap;word-break:break-word">'+q.join("\n").trim()+'</div>';q=[];}
     t.split("\n").forEach(function(l){
       if(/^(&gt;|>)\s?/.test(l)){q.push(l.replace(/^(&gt;|>)\s?/,""));return;}
       flush();if(l.trim())out+='<div style="margin:3px 0">'+l+'</div>';});
