@@ -118,6 +118,22 @@
     }
 
     // Take over from whatever the page had.
+    // The chat bubble is injected by ava-chat.js, which may land before or
+    // after us and carries its own bottom:20px. A stylesheet rule here is a
+    // race and a cache problem; setting it on the element is neither. Poll
+    // briefly, since we can't know which script wins.
+    if (matchMedia("(max-width:820px)").matches) {
+      var tries = 0, lift = setInterval(function () {
+        var b = document.getElementById("avacb"), p = document.getElementById("avacp");
+        if (b) b.style.setProperty("bottom", "calc(80px + env(safe-area-inset-bottom, 0px))", "important");
+        if (p) {
+          p.style.setProperty("bottom", "calc(144px + env(safe-area-inset-bottom, 0px))", "important");
+          p.style.setProperty("height", "min(520px, calc(100vh - 220px))", "important");
+        }
+        if ((b && p) || ++tries > 20) clearInterval(lift);
+      }, 150);
+    }
+
     var old = document.querySelector("aside.side");
     var app = document.querySelector(".app");
     if (old && old.parentNode) old.parentNode.removeChild(old);
