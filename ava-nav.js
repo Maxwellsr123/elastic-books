@@ -81,6 +81,11 @@
       "#avanav .nvn{position:absolute;transform:translate(14px,-9px);margin:0;font-size:10px;padding:0 5px}" +
       "body.avanav-pad{padding-left:0}" +
       "body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}" +
+      // The chat bubble sat on top of the last nav item. This bar owns the
+      // bottom of the screen now, so it owns getting everything else out of
+      // the way — including the panel, which otherwise runs off the bottom.
+      "#avacb{bottom:calc(78px + env(safe-area-inset-bottom))!important}" +
+      "#avacp{bottom:calc(142px + env(safe-area-inset-bottom))!important;height:min(520px,calc(100vh - 220px))!important}" +
       "}";
     document.head.appendChild(s);
   }
