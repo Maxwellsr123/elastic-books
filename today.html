@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Today — Ava</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+--ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2;--org:#FF6A1A;--ink0:#100F15}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.app{display:flex;min-height:100vh}
+.side{width:212px;flex:none;background:var(--ink0);color:#fff;display:flex;flex-direction:column;padding:16px 12px;position:sticky;top:0;height:100vh;gap:2px}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 16px}
+.lg{width:28px;height:28px;border-radius:5px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.side a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:4px;color:#A7A7B4;text-decoration:none;font-size:13px;font-weight:500}
+.side a:hover{background:#1F1E26;color:#fff}
+.side a.on{background:#262533;color:#fff;box-shadow:inset 2px 0 0 var(--ind2)}
+.side a i{font-size:17px}
+.side .n{margin-left:auto;font-size:11px;font-weight:700;background:#33313f;color:#cfccdb;padding:1px 7px;border-radius:9px;font-variant-numeric:tabular-nums}
+.side .n.hot{background:var(--ambbg);color:var(--amb)}
+.side .grp{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5f5c70;padding:14px 10px 5px}
+.side .foot{margin-top:auto;padding:10px;font-size:11.5px;color:#77748a}
+.side .foot a{padding:0;color:#8B8B98;display:inline}
+.main{flex:1;min-width:0}
+.wrap{max-width:840px;padding:22px 26px 70px}
+.ask{display:flex;align-items:center;gap:11px;border:1px solid #C9C4F2;border-radius:6px;padding:11px 13px;background:#fff;cursor:text}
+.ask input{flex:1;border:0;outline:0;font:inherit;font-size:14.5px;background:transparent}
+.ask input::placeholder{color:var(--ink3)}
+.mic{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;display:flex;align-items:center;justify-content:center;flex:none;font-size:17px;cursor:pointer}
+h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
+.hdr{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:22px 0 0}
+.hdr .s{font-size:12.5px;color:var(--ink2)}
+.hdr .when{margin-left:auto;font-size:12.5px;color:var(--ink3)}
+.note{margin-top:10px;background:var(--indbg);border:1px solid #C9C4F2;border-radius:6px;padding:11px 14px;font-size:13.5px;line-height:1.55;color:var(--indtx);display:flex;gap:10px}
+.list{background:#fff;border:1px solid var(--line);border-radius:6px;margin-top:14px;overflow:hidden}
+.itm{display:flex;gap:13px;align-items:flex-start;padding:15px 17px;border-top:1px solid var(--line)}
+.itm:first-child{border-top:0}
+.rank{width:22px;height:22px;border-radius:50%;background:var(--ink0);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+.rank.q{background:#EFEFE8;color:var(--ink3)}
+.ic{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.h{font-weight:600;font-size:14.5px;line-height:1.35}
+.d{font-size:13.5px;color:var(--ink2);margin-top:3px;line-height:1.55}
+.why{font-size:12px;color:var(--ink3);margin-top:6px;display:flex;align-items:center;gap:6px}
+.acts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.btn{font:inherit;font-size:12.5px;font-weight:600;padding:7px 12px;border:1px solid var(--line);background:#fff;border-radius:3px;color:var(--ink);white-space:nowrap;display:inline-flex;align-items:center;gap:6px;text-decoration:none;cursor:pointer}
+.btn:hover{background:var(--bg)}
+.btn.p{background:var(--org);border-color:var(--org);color:#fff}.btn.p:hover{background:#D2530F}
+.pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.p-amb{background:var(--ambbg);color:var(--amb)}.p-red{background:var(--redbg);color:var(--red)}
+.p-grn{background:var(--grnbg);color:var(--grn)}.p-ind{background:var(--indbg);color:var(--indtx)}
+.p-mut{background:#EFEFE8;color:var(--ink3)}
+.quiet{background:#FCFCF9}
+.num{font-variant-numeric:tabular-nums}
+.sec{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:26px 0 0;display:flex;align-items:center;gap:8px}
+.sec .c{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;color:var(--ink3)}
+.use{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.u{background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px 15px}
+.u .k{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.u .n{font-size:21px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.u .t{font-size:12px;color:var(--ink2);margin-top:2px;font-variant-numeric:tabular-nums}
+.feats{margin-top:10px;font-size:12.5px;color:var(--ink3);line-height:1.7}
+.feats b{color:var(--ink2);font-weight:600}
+@media(max-width:820px){
+  html,body{overflow-x:hidden;max-width:100vw}
+  .app{flex-direction:column}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:5px 6px;z-index:30;overflow-x:auto;gap:3px}
+  .brand,.side .grp,.side .foot{display:none}
+  .side a{flex-direction:column;gap:3px;font-size:10.5px;padding:6px 9px;text-align:center;white-space:nowrap}
+  .side .n{margin:0}
+  .main{width:100%;padding-bottom:64px}
+  .wrap{padding:16px 13px 40px}
+  .use{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="lg">A</div><div><div style="font-weight:600;font-size:14px">Ava <span id="envbadge"></span></div><div style="font-size:11px;color:#8B8B98" id="conm">—</div></div></div>
+    <a class="on" href="today.html"><i class="ti ti-inbox"></i> Today <span class="n" id="n-today">·</span></a>
+    <div class="grp">Boards</div>
+    <a id="b-books" href="app.html"><i class="ti ti-book-2"></i> Bookkeeping <span class="n" id="n-books">·</span></a>
+    <a id="b-collect" href="collect.html"><i class="ti ti-cash"></i> Auto Collect <span class="n" id="n-collect">·</span></a>
+    <a id="b-gst" href="gst.html"><i class="ti ti-pig-money"></i> GST</a>
+    <div class="grp">Set up</div>
+    <a href="connections.html"><i class="ti ti-plug"></i> Connections</a>
+    <a href="index.html?hub=1"><i class="ti ti-toggle-right"></i> Features</a>
+    <a href="usage.html"><i class="ti ti-chart-bar"></i> Usage &amp; billing</a>
+    <div class="foot">Elastic Admin · <a href="index.html?hub=1" style="text-decoration:none">All features</a></div>
+  </aside>
+
+  <main class="main"><div class="wrap">
+    <div class="ask" id="askbox">
+      <input id="askin" placeholder="Tell Ava what to do…">
+      <div class="mic" id="micbtn" title="Voice notes are coming — tap to open the chat"><i class="ti ti-microphone"></i></div>
+    </div>
+
+    <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
+    <div class="note" id="tnote" style="display:none"><i class="ti ti-arrow-badge-down" style="font-size:17px;position:relative;top:1px"></i><div id="tnotet"></div></div>
+    <div id="needs"></div>
+
+    <div class="sec" id="hsec" style="display:none">Handled <span class="c">running — nothing needed from you</span></div>
+    <div id="handled"></div>
+
+    <div class="sec">What Ava's done <span class="c">tasks and tokens</span></div>
+    <div class="use" id="use"></div>
+    <div class="feats" id="feats"></div>
+  </div></main>
+</div>
+
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){
+    try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}
+    location.replace("index.html");return "";})());
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function money(n){return "$"+Math.round(Number(n)||0).toLocaleString("en-NZ");}
+  function tok(n){n=Number(n)||0;return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);}
+  var TONE={red:["p-red","var(--redbg)","var(--red)"],amb:["p-amb","var(--ambbg)","var(--amb)"],
+            ind:["p-ind","var(--indbg)","var(--indtx)"],grn:["p-grn","var(--grnbg)","var(--grn)"],
+            mut:["p-mut","#EFEFE8","var(--ink3)"]};
+  var TIER_TONE={blocked:"red",waiting_on_you:"amb",holding_books:"ind"};
+  var TIER_ICON={blocked:"ti-alert-triangle",waiting_on_you:"ti-message-2",holding_books:"ti-help-circle"};
+  var HICON={checks:"ti-checks",inbox:"ti-inbox",clock:"ti-clock",happy:"ti-mood-happy",pig:"ti-pig-money"};
+
+  function render(d){
+    if(!d||d.error){document.getElementById("hd").textContent="Couldn't load your day — refresh to retry.";return;}
+    document.getElementById("conm").textContent=d.company||"";
+    var needs=d.needs||[],handled=d.handled||[],b=d.boards||{};
+
+    // ── the rail keeps the boards one click away, with live counts ──
+    var t=document.getElementById("n-today");
+    t.textContent=needs.length||"0";t.className="n"+(needs.length?" hot":"");
+    var bk=b.bookkeeping||{};
+    document.getElementById("n-books").textContent=(bk.ready||0)+(bk.owner||0)||"0";
+    document.getElementById("n-collect").textContent=b.collect?(b.collect.active||0):"0";
+
+    document.getElementById("hd").textContent=needs.length?(needs.length===1?"One thing needs you":needs.length+" things need you"):"Nothing needs you";
+    document.getElementById("hs").textContent=needs.length?"· everything else is handled":"· Ava's got the lot";
+    document.getElementById("hw").textContent=new Date().toLocaleDateString("en-NZ",{weekday:"short",day:"numeric",month:"short"})+", "+new Date().toLocaleTimeString("en-NZ",{hour:"numeric",minute:"2-digit"});
+    if(d.note){document.getElementById("tnote").style.display="";document.getElementById("tnotet").textContent=d.note;}
+
+    // ── the triage: ranked by the server, never reordered here ──
+    document.getElementById("needs").innerHTML=needs.length?'<div class="list">'+needs.map(function(x,i){
+      var tone=TONE[TIER_TONE[x.tier]||"ind"];
+      var acts=(x.actions||[]).map(function(a){
+        return '<a class="btn'+(a.primary?" p":"")+'" href="'+esc(x.board||"index.html")+'?c='+CO+'">'+esc(a.label)+'</a>';}).join("");
+      return '<div class="itm"><div class="rank">'+(i+1)+'</div>'
+        +'<div class="ic" style="background:'+tone[1]+';color:'+tone[2]+'"><i class="ti '+(TIER_ICON[x.tier]||"ti-point")+'"></i></div>'
+        +'<div style="flex:1;min-width:0"><div class="h">'+esc(x.title)+'</div>'
+        +'<div class="d">'+esc(x.detail)+'</div>'
+        +'<div class="why"><i class="ti ti-arrow-narrow-right"></i> '+esc(x.tier_why)+'</div>'
+        +'<div class="acts">'+acts+'</div></div>'
+        +'<span class="pill '+tone[0]+'">'+esc(x.tier_label)+'</span></div>';
+    }).join("")+'</div>'
+      :'<div class="list"><div class="itm"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'
+       +'<div style="flex:1"><div class="h">Nothing needs you right now</div><div class="d">Everything’s either running or waiting on someone else. I’ll put it here the moment that changes.</div></div></div></div>';
+
+    // ── below the line: running, unranked, so the top stays short ──
+    if(handled.length){
+      document.getElementById("hsec").style.display="";
+      document.getElementById("handled").innerHTML='<div class="list">'+handled.map(function(x){
+        var tone=TONE[x.tone||"mut"];
+        return '<div class="itm quiet"><div class="rank q">·</div>'
+          +'<div class="ic" style="background:'+tone[1]+';color:'+tone[2]+'"><i class="ti '+(HICON[x.icon]||"ti-point")+'"></i></div>'
+          +'<div style="flex:1;min-width:0"><div class="h" style="font-weight:500">'+esc(x.title)+'</div><div class="d">'+esc(x.detail)+'</div></div>'
+          +(x.board?'<a class="btn" href="'+esc(x.board)+'?c='+CO+'">Open</a>':'')+'</div>';
+      }).join("")+'</div>';
+    }
+
+    // ── tasks and tokens: day, week, month, year ──
+    var u=d.usage||{};
+    document.getElementById("use").innerHTML=[["day","Today"],["week","This week"],["month","This month"],["year","This year"]]
+      .map(function(p){var v=u[p[0]]||{};
+        return '<div class="u"><div class="k">'+p[1]+'</div><div class="n">'+(Number(v.tasks)||0).toLocaleString("en-NZ")+'</div>'
+          +'<div class="t">tasks · '+tok(v.tokens)+' tokens</div></div>';}).join("");
+    var tf=(u.top_features||[]);
+    document.getElementById("feats").innerHTML=tf.length
+      ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
+      :"";
+  }
+
+  // The ask bar hands over to the chat widget — Ava can't act on the money
+  // features yet (ava-chat has no tools for them), so this opens the real
+  // conversation rather than pretending to be one. Voice notes land here next.
+  function openChat(){var b=document.getElementById("avacb");if(b)b.click();}
+  document.getElementById("askbox").addEventListener("click",openChat);
+  document.getElementById("askin").addEventListener("focus",function(){this.blur();openChat();});
+
+  fetch(API+"/ava-triage?company="+CO).then(function(r){return r.json();}).then(render)
+    .catch(function(){render(null);});
+})();
+</script>
+<script src="ava-chat.js"></script>
+</body>
+</html>

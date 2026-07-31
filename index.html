@@ -194,7 +194,7 @@ h1{letter-spacing:-.03em}
       </div>
     </div>
 
-    <div class="foot">Powered by Ava · Elastic Admin · Aotearoa NZ &nbsp;·&nbsp; <a href="privacy.html" style="color:inherit;font-weight:600">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://elasticadmin.com" style="color:inherit;font-weight:600">elasticadmin.com</a><br>
+    <div class="foot">Powered by Ava · Elastic Admin · Aotearoa NZ &nbsp;·&nbsp; <a href="https://elasticadmin.com/privacy" style="color:inherit;font-weight:600">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://elasticadmin.com" style="color:inherit;font-weight:600">elasticadmin.com</a><br>
     Our use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.</div>
   </div>
 <script>
@@ -240,6 +240,20 @@ h1{letter-spacing:-.03em}
     var sp=document.getElementById("sched-pill");sp.className="pill live";sp.textContent="● Live · Beta";
     var so=document.getElementById("sched-open");so.style.color="";so.innerHTML='Open <i class="ti ti-arrow-right"></i>';
   }
+  // ── Ava is the front door ───────────────────────────────────────────────
+  // A signed-in owner lands on Ava's triage, not a menu of features: she's
+  // already done the work and the screen's job is to hand back the few things
+  // that need a person (Max, 2026-07-31). The card grid below is still the
+  // features hub — reachable from the rail, and where the switches live — but
+  // it stops being the first thing a working owner sees.
+  // ?hub=1 opts out, so this page stays reachable without fighting the redirect.
+  // Loopers keep the hub as their landing — they hop between clients and the
+  // Desk, so a redirect into one company's day would be in the way.
+  if(!s.looper && !new URLSearchParams(location.search).get("hub")){
+    location.replace("today.html?c="+encodeURIComponent(comp.id));
+    return;
+  }
+
   // ── which of their features are actually running ──────────────────────
   // Features are opt-in (2026-07-31): a new client arrives with everything
   // off. So the dashboard has to say which are on, and let them switch one
