@@ -546,6 +546,16 @@ h1{letter-spacing:-.03em}
     }).catch(function(){});
   }
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});});});
+  // ?focus=need — Ava's triage sends people straight to the questions waiting
+  // on them, rather than to the top of the board to go hunting (Max, 31 Jul).
+  (function(){
+    var f=new URLSearchParams(location.search).get("focus");
+    if(!f)return;
+    setTimeout(function(){
+      var h=document.getElementById("usechead");
+      if(h)h.scrollIntoView({behavior:"smooth",block:"start"});
+    },700);
+  })();
   document.addEventListener("click",function(e){if(e.target.closest(".backneed")){U_FILTER="need";renderHome();}});
   // action feedback: when something leaves the owner's list, SAY so + allow undo
   function toast(msg, undoAction, undoId){
