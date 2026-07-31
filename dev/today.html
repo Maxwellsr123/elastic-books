@@ -47,6 +47,11 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .reply{border-top:1px solid var(--line);padding:12px 13px;background:#FCFCF9;display:flex;flex-direction:column;gap:9px}
 .reply .rtx{width:100%;border:1px solid var(--line);border-radius:5px;padding:10px 11px;font:inherit;font-size:13.5px;resize:vertical;outline:none;background:#fff}
 .reply .rtx:focus{border-color:var(--ind);box-shadow:0 0 0 3px rgba(83,74,183,.09)}
+.own{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.ol{font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;white-space:nowrap}
+.ol:hover{color:var(--ink)}
+.clrbar{margin-top:10px;font-size:12.5px;color:var(--ink3);display:flex;gap:7px;flex-wrap:wrap;align-items:baseline}
+.clrbar .ol{color:var(--indtx)}
 .jump{display:flex;gap:8px;flex-wrap:wrap}
 .jump .btn{flex:1;min-width:150px;justify-content:center}
 .racts{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -141,6 +146,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
     <div class="note" id="tnote" style="display:none"><i class="ti ti-arrow-badge-down" style="font-size:17px;position:relative;top:1px"></i><div id="tnotet"></div></div>
     <div id="needs"></div>
+    <div id="clr"></div>
 
     <div class="sec" id="hsec" style="display:none">Handled <span class="c">running — nothing needed from you</span></div>
     <div id="handled"></div>
@@ -200,14 +206,27 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         +'<div class="ibody"><div class="h">'+esc(x.title)+'</div>'
         +'<div class="d">'+esc(x.detail)+'</div>'
         +'<div class="why"><i class="ti ti-arrow-narrow-right"></i> '+esc(x.tier_why)+'</div>'
-        +'<div class="acts">'+acts+'</div></div>'
-        +'<span class="pill '+tone[0]+'">'+esc(x.tier_label)+'</span></div>'
+        +'<div class="acts">'+acts+'</div>'
+        +'<div class="own">'
+        +(x.snoozed
+          ?'<a class="ol" data-act="restore" data-id="'+esc(x.id)+'">↑ Bring back up</a>'
+          :'<a class="ol" data-act="later" data-id="'+esc(x.id)+'" data-sig="'+esc(x.signature||"")+'">↓ Push to the back</a>')
+        +'<a class="ol" data-act="clear" data-id="'+esc(x.id)+'" data-sig="'+esc(x.signature||"")+'">✕ Clear from the board</a>'
+        +'</div></div>'
+        +'<span class="pill '+tone[0]+'">'+esc(x.tier_label)+(x.snoozed?' · later':'')+'</span></div>'
         +'<div class="thr" id="thr-'+esc(x.id)+'" style="display:none"></div></div>';
     }).join("")+'</div>'
       :'<div class="list"><div class="itm"><div class="ic" style="background:var(--grnbg);color:var(--grn)"><i class="ti ti-circle-check"></i></div>'
        +'<div style="flex:1"><div class="h">Nothing needs you right now</div><div class="d">Everything’s either running or waiting on someone else. I’ll put it here the moment that changes.</div></div></div></div>';
 
     // ── below the line: running, unranked, so the top stays short ──
+    // Cleared things aren't gone-gone — you can always see what you shifted.
+    var cl=d.cleared||[];
+    document.getElementById("clr").innerHTML=cl.length
+      ?'<div class="clrbar">'+cl.length+' cleared from the board · '
+        +cl.map(function(c){return '<a class="ol" data-act="restore" data-id="'+esc(c.id)+'">'+esc(c.title.slice(0,38))+'</a>';}).join(" · ")
+        +'</div>':"";
+
     if(handled.length){
       document.getElementById("hsec").style.display="";
       document.getElementById("handled").innerHTML='<div class="list">'+handled.map(function(x){
@@ -230,6 +249,25 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
       :"";
   }
+
+  // ── the owner's own say on the order ────────────────────────────────────
+  // Ava ranks it; you get the last word. "Later" drops one to the bottom,
+  // "Clear" takes it off the board — and neither touches the chase itself, so
+  // tidying your screen never changes what Ava does next.
+  document.addEventListener("click",function(e){
+    var o=e.target.closest&&e.target.closest(".ol");
+    if(!o)return;
+    e.preventDefault();
+    var act=o.getAttribute("data-act");
+    if(act==="clear"&&!confirm("Clear this off your board?\n\nAva keeps working on it — this just stops it asking you. It comes back if anything changes."))return;
+    o.textContent="…";
+    fetch(API+"/ava-triage",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,item_id:o.getAttribute("data-id"),action:act,
+                           signature:o.getAttribute("data-sig")||undefined})})
+      .then(function(){return fetch(API+"/ava-triage?company="+CO);})
+      .then(function(r){return r.json();}).then(render)
+      .catch(function(){o.textContent="Didn't save";});
+  });
 
   // ── read the thread where you're standing ───────────────────────────────
   // "Read the thread" used to drop you on the Auto Collect board to go find it
