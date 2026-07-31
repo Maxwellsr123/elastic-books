@@ -47,6 +47,8 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .reply{border-top:1px solid var(--line);padding:12px 13px;background:#FCFCF9;display:flex;flex-direction:column;gap:9px}
 .reply .rtx{width:100%;border:1px solid var(--line);border-radius:5px;padding:10px 11px;font:inherit;font-size:13.5px;resize:vertical;outline:none;background:#fff}
 .reply .rtx:focus{border-color:var(--ind);box-shadow:0 0 0 3px rgba(83,74,183,.09)}
+.jump{display:flex;gap:8px;flex-wrap:wrap}
+.jump .btn{flex:1;min-width:150px;justify-content:center}
 .racts{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
 .rmsg{font-size:12.5px;color:var(--ink2)}
 .rank{width:22px;height:22px;border-radius:50%;background:var(--ink0);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
@@ -270,7 +272,13 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       // Reading it and then having to go find it in Gmail to answer is half a
       // feature. Reply here, from your own mailbox, into the same thread.
       +'<div class="reply">'
-      +(t.gmail_url?'<a class="btn" href="'+esc(t.gmail_url)+'" target="_blank" rel="noopener"><i class="ti ti-brand-gmail"></i> Open in Gmail <i class="ti ti-external-link"></i></a>':'')
+      // The two places you'd go from here: the email thread, and the invoice
+      // itself if something on it needs fixing.
+      +((t.gmail_url||t.xero_invoice_url)?'<div class="jump">'
+        +(t.gmail_url?'<a class="btn" href="'+esc(t.gmail_url)+'" target="_blank" rel="noopener"><i class="ti ti-brand-gmail"></i> Open in Gmail <i class="ti ti-external-link"></i></a>':'')
+        +(t.xero_invoice_url?'<a class="btn" href="'+esc(t.xero_invoice_url)+'" target="_blank" rel="noopener"><i class="ti ti-file-invoice"></i> Open in Xero <i class="ti ti-external-link"></i></a>':'')
+        +(t.xero_contact_url?'<a class="btn" href="'+esc(t.xero_contact_url)+'" target="_blank" rel="noopener"><i class="ti ti-user"></i> Their contact <i class="ti ti-external-link"></i></a>':'')
+        +'</div>':'')
       +(t.can_reply
         ?'<textarea class="rtx" rows="2" placeholder="Reply to '+esc(t.customer||"them")+'… Ava sends it from your address, in this thread."></textarea>'
          +'<div class="racts"><button class="btn p rsend" data-chase="'+esc(chase||"")+'">Send reply</button>'
