@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start with Elastic Admin</title>
+<meta name="description" content="Set up your Elastic Admin books in about a minute. No card, no call.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#FAF8F4;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;--ind:#534AB7;--ind2:#6F66DB;--grn:#0E7A50;--red:#B42318}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:430px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:32px 30px;box-shadow:0 12px 40px rgba(20,20,24,.06)}
+.logo{width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:20px;margin-bottom:16px}
+h1{font-size:19px;font-weight:600;letter-spacing:-.02em;margin-bottom:5px}
+.sub{font-size:13.5px;color:var(--ink2);line-height:1.55;margin-bottom:20px}
+label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin:14px 0 5px}
+input{width:100%;border:1px solid var(--line);border-radius:4px;padding:11px 12px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--ind2)}
+.btn{width:100%;margin-top:20px;font-family:inherit;font-size:14.5px;font-weight:600;padding:13px;border-radius:6px;border:0;background:#FF6A1A;color:#fff;cursor:pointer}
+.btn:hover{background:#D2530F}
+.btn:disabled{opacity:.6;cursor:default}
+.msg{font-size:12.5px;margin-top:12px;min-height:16px;color:var(--ink2)}
+.msg.err{color:var(--red)}
+.fine{font-size:11.5px;color:var(--ink3);line-height:1.5;margin-top:18px}
+.fine a{color:var(--ink2)}
+.done{text-align:center;padding:8px 0}
+.done .tick{width:52px;height:52px;border-radius:50%;background:#E7F6EE;color:var(--grn);font-size:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.hp{position:absolute;left:-9999px}
+.alt{font-size:12.5px;color:var(--ink3);margin-top:16px;text-align:center}
+.alt a{color:var(--ind);font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">E</div>
+  <div id="body">
+    <h1>Start with Elastic Admin</h1>
+    <div class="sub">Set your books up yourself — about a minute, no card, no call. Every receipt matched to the right spend, missing paperwork chased for you.</div>
+    <label>Business name</label><input id="f-biz" placeholder="Dave's Plumbing Ltd" autocomplete="organization">
+    <label>Your name</label><input id="f-name" placeholder="First and last name" autocomplete="name">
+    <label>Your email</label><input id="f-email" type="email" placeholder="you@yourbusiness.co.nz" autocomplete="email">
+    <label>Phone <span style="font-weight:400;color:var(--ink3)">(optional)</span></label><input id="f-phone" placeholder="021 …" autocomplete="tel">
+    <!-- honeypot: hidden from humans, catches bots. do not remove. -->
+    <input class="hp" id="f-co" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" id="f-go">Create my board</button>
+    <div class="msg" id="f-msg"></div>
+    <div class="fine">Your sign-in link arrives by email — no password to remember. Nothing switches on until you say so, and read-only where it counts: nothing is ever sent or edited in your inbox. <a href="privacy.html">Privacy</a></div>
+    <div class="alt">Already with us? <a id="alt-login" href="app.html">Log in</a></div>
+  </div>
+</div>
+
+<script>
+var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var APP=location.href.replace(/signup\.html.*$/,"app.html");
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function el(id){return document.getElementById(id);}
+// where the button was clicked from — "hero", "pricing", … so Max can see what converts
+var SOURCE=(new URLSearchParams(location.search).get("source")||"website").slice(0,60);
+el("alt-login").href=APP;
+
+function done(title,text){
+  el("body").innerHTML='<div class="done"><div class="tick">✓</div><h1>'+esc(title)+'</h1><div class="sub">'+text+'</div></div>';
+}
+
+function submit(){
+  var biz=el("f-biz").value.trim(),name=el("f-name").value.trim(),
+      email=el("f-email").value.trim().toLowerCase(),phone=el("f-phone").value.trim();
+  var m=el("f-msg");m.className="msg err";
+  if(!biz){m.textContent="What's the business called?";el("f-biz").focus();return;}
+  if(!name){m.textContent="Your name too.";el("f-name").focus();return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){m.textContent="That email doesn't look right.";el("f-email").focus();return;}
+  var b=el("f-go");b.disabled=true;b.textContent="Setting up…";m.className="msg";m.textContent="";
+  fetch(API+"/web-signup",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({action:"create_account",business:biz,name:name,email:email,phone:phone,
+      company:el("f-co").value,source:SOURCE,redirect:APP})})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+    .then(function(res){
+      if(!res.ok||!res.d||res.d.error){
+        b.disabled=false;b.textContent="Create my board";
+        m.className="msg err";m.textContent=(res.d&&res.d.error)||"Something hiccuped — try again.";
+        return;
+      }
+      if(res.d.existing){
+        done("You're already with us","We've sent a sign-in link to <b>"+esc(email)+"</b> — it opens the board you already have.");
+        return;
+      }
+      done("You're in — check your email",
+        "Your sign-in link is on its way to <b>"+esc(email)+"</b>. It opens the "+esc(biz)+" board. "+
+        "Connect Xero and Gmail there, switch on what you want Ava doing, and the books start sorting themselves.");
+    })
+    .catch(function(){
+      b.disabled=false;b.textContent="Create my board";
+      m.className="msg err";m.textContent="Couldn't reach us — try again in a moment.";
+    });
+}
+el("f-go").addEventListener("click",submit);
+["f-biz","f-name","f-email","f-phone"].forEach(function(id){
+  el(id).addEventListener("keydown",function(e){if(e.key==="Enter")submit();});
+});
+</script>
+</body>
+</html>
