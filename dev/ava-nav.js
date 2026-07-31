@@ -36,7 +36,7 @@
 
   // Five on the phone bar; the rest live in the rail and behind "More".
   var ITEMS = [
-    { key: "today",   href: "today.html",       icon: "ti-inbox",        label: "Today",   phone: true },
+    { key: "today",   href: "today.html",       icon: "ti-inbox",        label: "Today",   phone: true, wip: true },
     { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Books",   full: "Bookkeeping", phone: true },
     { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Collect", full: "Auto Collect", phone: true },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST",     phone: true },
@@ -67,10 +67,9 @@
       "#avanav a.nvi i{font-size:17px}" +
       "#avanav .nvn{margin-left:auto;font-size:11px;font-weight:700;background:#33313f;color:#cfccdb;padding:1px 7px;border-radius:9px;font-variant-numeric:tabular-nums}" +
       "#avanav .nvn.hot{background:#FBF1E2;color:#9A5B12}" +
+      "#avanav .nvw{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9A5B12;background:#FBF1E2;padding:2px 6px;border-radius:2px}" +
       "#avanav .nvg{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5f5c70;padding:14px 10px 5px}" +
       "#avanav .nvf{margin-top:auto;padding:10px;font-size:11.5px;color:#77748a}" +
-      "#avanav .nvo{margin-top:6px;padding:9px 10px;border-radius:4px;color:#8B8B98;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:9px}" +
-      "#avanav .nvo:hover{background:#1F1E26;color:#fff}" +
       "#avash{position:fixed;inset:0;background:rgba(16,15,21,.55);z-index:60;display:none;align-items:flex-end}" +
       "#avash.open{display:flex}" +
       "#avash .sh{background:#fff;width:100%;border-radius:12px 12px 0 0;padding:8px 8px calc(14px + env(safe-area-inset-bottom));font-family:'Plus Jakarta Sans',system-ui,sans-serif}" +
@@ -85,7 +84,7 @@
       "@media(max-width:820px){" +
       "html,body{overflow-x:hidden;max-width:100vw}" +
       "#avanav{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom));gap:2px;border-top:1px solid #26242f;justify-content:space-around}" +
-      "#avanav .nvb,#avanav .nvg,#avanav .nvf,#avanav a.nvi.deskonly{display:none}" +
+      "#avanav .nvb,#avanav .nvg,#avanav .nvf,#avanav .nvw,#avanav a.nvi.deskonly{display:none}" +
       "#avanav a.nvi{flex-direction:column;gap:3px;font-size:10.5px;font-weight:600;padding:8px 4px 6px;flex:1;min-width:0;justify-content:center;text-align:center;border-radius:6px;min-height:52px}" +
       "#avanav a.nvi.on{box-shadow:none;background:#262533}" +
       "#avanav a.nvi i{font-size:21px}" +
@@ -115,9 +114,9 @@
       if (i.group && i.group !== lastGroup) { html += '<div class="nvg">' + i.group + "</div>"; lastGroup = i.group; }
       html += '<a class="nvi' + (i.key === cur ? " on" : "") + (i.phone ? "" : " deskonly") + '" href="' + url(i) + '">' +
         '<i class="ti ' + i.icon + '"></i> <span>' + (i.full || i.label) + "</span>" +
+        (i.wip ? '<span class="nvw">beta</span>' : "") +
         '<span class="nvn" id="avanav-n-' + i.key + '" style="display:none"></span></a>';
     });
-    html += '<a class="nvo" id="avanav-out"><i class="ti ti-logout"></i> Sign out</a>';
     html += '<div class="nvf">Elastic Admin</div>';
     nav.innerHTML = html;
 
@@ -171,7 +170,7 @@
       var a = e.target.closest && e.target.closest("a.nvi");
       if (!a) return;
       var it = ITEMS.filter(function (i) { return url(i) === a.getAttribute("href"); })[0];
-      if (it && it.sheet && matchMedia("(max-width:820px)").matches) {
+      if (it && it.sheet) {
         e.preventDefault();
         sheet.classList.add("open");
       }
