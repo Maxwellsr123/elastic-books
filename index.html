@@ -163,24 +163,19 @@ h1{letter-spacing:-.03em}
         <span class="open" id="gst-open">Open <i class="ti ti-arrow-right"></i></span>
       </a>
 
-      <!-- Auto Scheduling: shut down 2026-07-31 while we nail the money features.
-           Under construction by DEFAULT — sched-open/sched-pill are upgraded back
-           to a working link below, but only for a company on the allow-list
-           (KPA). The server gate in _shared/sched_gate.ts is the real one. -->
-      <a class="card soon" id="sched-card" style="cursor:default">
-        <div class="row"><div class="ico cal"><i class="ti ti-tools"></i></div><span class="pill soon" id="sched-pill">Under construction</span></div>
-        <div><div class="h">Auto Scheduling</div><div class="d">Ava books jobs, schedules the crew and keeps the calendar full — no double-handling. We&rsquo;ve paused this one to get the money side right first.</div></div>
-        <span class="open" id="sched-open" style="color:var(--ink3)">Back soon</span>
-      </a>
-
       <div class="card soon">
         <div class="row"><div class="ico inv"><i class="ti ti-file-invoice"></i></div><span class="pill soon">Coming soon</span></div>
         <div><div class="h">Auto Invoicing</div><div class="d">Quote → invoice → chased automatically, straight off the job. Cash in faster.</div></div>
       </div>
 
       <div class="card soon">
-        <div class="row"><div class="ico call"><i class="ti ti-phone"></i></div><span class="pill soon">Coming soon</span></div>
-        <div><div class="h">Call Centre</div><div class="d">Ava answers your calls, books the work and handles customers — even after hours.</div></div>
+        <div class="row"><div class="ico book"><i class="ti ti-file-dollar"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Auto AP</div><div class="d">Supplier bills in, checked against the job and the quote, queued for payment on the day they&rsquo;re due — nothing paid twice, nothing paid early.</div></div>
+      </div>
+
+      <div class="card soon">
+        <div class="row"><div class="ico inv"><i class="ti ti-receipt-2"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Auto AR</div><div class="d">The whole receivables side: invoice the moment the job&rsquo;s done, watch what lands, and hand anything overdue to Auto Collect.</div></div>
       </div>
 
       <div class="card soon">
@@ -188,11 +183,7 @@ h1{letter-spacing:-.03em}
         <div><div class="h">Profit pulse</div><div class="d">How&rsquo;s the business actually doing? What came in, what went out, what you&rsquo;re really making — in plain English, no spreadsheets.</div></div>
       </div>
 
-      <div class="card soon">
-        <div class="row"><div class="ico mkt"><i class="ti ti-speakerphone"></i></div><span class="pill soon">Coming soon</span></div>
-        <div><div class="h">Auto Marketing</div><div class="d">Ava keeps your name in front of past customers — review requests, follow-ups and reminders that bring repeat work.</div></div>
       </div>
-    </div>
 
     <div class="foot">Powered by Ava · Elastic Admin · Aotearoa NZ &nbsp;·&nbsp; <a href="https://elasticadmin.com/privacy" style="color:inherit;font-weight:600">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://elasticadmin.com" style="color:inherit;font-weight:600">elasticadmin.com</a><br>
     Our use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.</div>
@@ -231,15 +222,6 @@ h1{letter-spacing:-.03em}
     for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
   }
   comp=comp||s.companies[0];
-  // Auto Scheduling: under construction unless this company is on the allow-list.
-  // Cosmetic only — ava-schedule-list/-action refuse on the server either way,
-  // so keep this in step with _shared/sched_gate.ts but never rely on it.
-  if(["5c829c7f-0b63-4bbc-87b9-c24b822a564d"].indexOf(comp.id)>=0){
-    var sc=document.getElementById("sched-card");
-    sc.className="card";sc.style.cursor="";sc.setAttribute("href","scheduling.html?c="+comp.id);
-    var sp=document.getElementById("sched-pill");sp.className="pill live";sp.textContent="● Live · Beta";
-    var so=document.getElementById("sched-open");so.style.color="";so.innerHTML='Open <i class="ti ti-arrow-right"></i>';
-  }
   // ── Ava is the front door ───────────────────────────────────────────────
   // A signed-in owner lands on Ava's triage, not a menu of features: she's
   // already done the work and the screen's job is to hand back the few things
