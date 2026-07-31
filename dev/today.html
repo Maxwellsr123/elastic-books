@@ -44,6 +44,11 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .irow{display:flex;gap:13px;align-items:flex-start}
 .ibody{flex:1;min-width:0}
 .thr{margin-top:2px}
+.reply{border-top:1px solid var(--line);padding:12px 13px;background:#FCFCF9;display:flex;flex-direction:column;gap:9px}
+.reply .rtx{width:100%;border:1px solid var(--line);border-radius:5px;padding:10px 11px;font:inherit;font-size:13.5px;resize:vertical;outline:none;background:#fff}
+.reply .rtx:focus{border-color:var(--ind);box-shadow:0 0 0 3px rgba(83,74,183,.09)}
+.racts{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.rmsg{font-size:12.5px;color:var(--ink2)}
 .rank{width:22px;height:22px;border-radius:50%;background:var(--ink0);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
 .rank.q{background:#EFEFE8;color:var(--ink3)}
 .ic{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
@@ -249,7 +254,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   }
   function when(at){if(!at)return "";var dt=new Date(at),n=Math.floor((Date.now()-dt.getTime())/864e5);
     return dt.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" · "+(n<=0?"today":n===1?"yesterday":n+"d ago");}
-  function threadHtml(t){
+  function threadHtml(t,chase){
     if(!t||!t.ok)return '<div class="d" style="color:var(--amb)">'+esc((t&&t.error)||"Couldn\'t load it.")+'</div>';
     if(!(t.messages||[]).length)return '<div class="d">Nothing in the thread yet.</div>';
     return '<div style="border:1px solid var(--line);border-radius:6px;padding:2px 13px;margin-top:10px;background:#fff">'
@@ -261,9 +266,36 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
           +'<div style="display:flex;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px">'+who
           +'<span style="margin-left:auto;font-weight:500">'+when(m.at)+'</span></div>'
           +'<div style="font-size:13px;line-height:1.55">'+slackToHtml(m.text)+'</div></div>';
-      }).join("")+'</div>';
+      }).join("")
+      // Reading it and then having to go find it in Gmail to answer is half a
+      // feature. Reply here, from your own mailbox, into the same thread.
+      +'<div class="reply">'
+      +(t.gmail_url?'<a class="btn" href="'+esc(t.gmail_url)+'" target="_blank" rel="noopener"><i class="ti ti-brand-gmail"></i> Open in Gmail <i class="ti ti-external-link"></i></a>':'')
+      +(t.can_reply
+        ?'<textarea class="rtx" rows="2" placeholder="Reply to '+esc(t.customer||"them")+'… Ava sends it from your address, in this thread."></textarea>'
+         +'<div class="racts"><button class="btn p rsend" data-chase="'+esc(chase||"")+'">Send reply</button>'
+         +'<span class="rmsg"></span></div>'
+        :'<div class="d">No email address on this customer, so there\'s nothing to reply to yet.</div>')
+      +'</div></div>';
   }
   document.addEventListener("click",function(e){
+    var rs=e.target.closest&&e.target.closest(".rsend");
+    if(rs){
+      var wrap=rs.closest(".reply"),ta=wrap.querySelector(".rtx"),msg=wrap.querySelector(".rmsg");
+      var text=(ta.value||"").trim();
+      if(!text){msg.textContent="Type something first.";return;}
+      rs.disabled=true;rs.textContent="Sending…";msg.textContent="";
+      fetch(API+"/auto-collect",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,action:"reply",chase_id:rs.getAttribute("data-chase"),text:text})})
+        .then(function(r){return r.json();})
+        .then(function(o){
+          rs.disabled=false;rs.textContent="Send reply";
+          if(o&&o.ok){ta.value="";msg.innerHTML='<b style="color:var(--grn)">Sent</b> from '+esc(o.sent_from)+'.';}
+          else msg.innerHTML='<span style="color:var(--red)">'+esc((o&&o.error)||"Didn\'t send.")+'</span>';
+        })
+        .catch(function(){rs.disabled=false;rs.textContent="Send reply";msg.innerHTML='<span style="color:var(--red)">Couldn\'t reach it.</span>';});
+      return;
+    }
     var a=e.target.closest&&e.target.closest(".athr");
     if(!a)return;
     e.preventDefault();
@@ -274,9 +306,10 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     a.textContent="Hide the thread";
     if(box.getAttribute("data-loaded"))return;
     box.innerHTML='<div class="d">Loading…</div>';
-    fetch(API+"/auto-collect?company="+CO+"&thread="+a.getAttribute("data-chase"))
+    var chase=a.getAttribute("data-chase");
+    fetch(API+"/auto-collect?company="+CO+"&thread="+chase)
       .then(function(r){return r.json();})
-      .then(function(t){box.setAttribute("data-loaded","1");box.innerHTML=threadHtml(t);})
+      .then(function(t){box.setAttribute("data-loaded","1");box.innerHTML=threadHtml(t,chase);})
       .catch(function(){box.innerHTML='<div class="d" style="color:var(--amb)">Couldn\'t reach it — try again.</div>';});
   });
 
