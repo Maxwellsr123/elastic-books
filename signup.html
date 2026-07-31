@@ -82,12 +82,21 @@ function submit(){
         m.className="msg err";m.textContent=(res.d&&res.d.error)||"Something hiccuped — try again.";
         return;
       }
+      // The account is made either way. Only promise email we know went out —
+      // sign_in_sent is false when the send was rejected, and telling someone
+      // to check an inbox that will never receive anything just strands them.
+      if(res.d.sign_in_sent===false){
+        done("Account created — but we couldn't email you",
+          "Your "+esc(biz)+" board is ready, but the sign-in link to <b>"+esc(email)+"</b> wouldn't send. "+
+          "Email <b>max@elasticadmin.com</b> and we'll get you in — we've been told too.");
+        return;
+      }
       if(res.d.existing){
-        done("You're already with us","We've sent a sign-in link to <b>"+esc(email)+"</b> — it opens the board you already have.");
+        done("You're already with us","We've sent a sign-in link to <b>"+esc(email)+"</b> — it opens the board you already have. Check your junk folder if it's not there in a minute.");
         return;
       }
       done("You're in — check your email",
-        "Your sign-in link is on its way to <b>"+esc(email)+"</b>. It opens the "+esc(biz)+" board. "+
+        "Your sign-in link is on its way to <b>"+esc(email)+"</b> — check your junk folder if it's not there in a minute. It opens the "+esc(biz)+" board. "+
         "Connect Xero and Gmail there, switch on what you want Ava doing, and the books start sorting themselves.");
     })
     .catch(function(){
