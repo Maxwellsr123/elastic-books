@@ -85,7 +85,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   <main class="main"><div class="wrap">
     <div class="ask" id="askbox">
       <input id="askin" placeholder="Tell Ava what to do…">
-      <div class="mic" id="micbtn" title="Voice notes are coming — tap to open the chat"><i class="ti ti-microphone"></i></div>
+      <div class="mic" id="micbtn" title="Tap to record a voice note"><i class="ti ti-microphone"></i></div>
     </div>
 
     <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
@@ -174,17 +174,30 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       :"";
   }
 
-  // The ask bar hands over to the chat widget — Ava can't act on the money
-  // features yet (ava-chat has no tools for them), so this opens the real
-  // conversation rather than pretending to be one. Voice notes land here next.
-  function openChat(){var b=document.getElementById("avacb");if(b)b.click();}
-  document.getElementById("askbox").addEventListener("click",openChat);
-  document.getElementById("askin").addEventListener("focus",function(){this.blur();openChat();});
+  // The ask bar IS the chat on this page — there's no floating bubble here, and
+  // it opens rather than toggles. Tapping the input used to fire focus AND
+  // click, which opened the panel twice on a phone (Max, 31 Jul).
+  function openChat(){ if(window.avaChat) avaChat.open(true); }
+  document.getElementById("askbox").addEventListener("click",function(e){
+    if(e.target.closest("#micbtn"))return;   // the mic has its own job
+    openChat();
+  });
+  document.getElementById("askin").addEventListener("focus",function(){this.blur();});
+  // Mic: open the chat and start recording straight away, so a voice note is
+  // one tap from the home screen.
+  document.getElementById("micbtn").addEventListener("click",function(e){
+    e.stopPropagation();
+    if(!window.avaChat){return;}
+    avaChat.open(false);
+    var m=document.getElementById("avacmic");
+    if(m&&!avaChat.recording())setTimeout(function(){m.click();},80);
+  });
 
   fetch(API+"/ava-triage?company="+CO).then(function(r){return r.json();}).then(render)
     .catch(function(){render(null);});
 })();
 </script>
+<script>window.AVA_CHAT_NO_BUBBLE=true;</script>
 <script src="ava-chat.js"></script>
 <script src="ava-nav.js"></script>
 </body>

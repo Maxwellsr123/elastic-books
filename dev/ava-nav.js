@@ -40,7 +40,7 @@
     { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Books",   full: "Bookkeeping", phone: true },
     { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Collect", full: "Auto Collect", phone: true },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST",     phone: true },
-    { key: "hub",     href: "index.html?hub=1", icon: "ti-apps",         label: "More",    full: "All features", phone: true, group: "Set up" },
+    { key: "hub",     href: "index.html?hub=1", icon: "ti-apps",         label: "More",    full: "All features", phone: true, group: "Set up", sheet: true },
     { key: "conns",   href: "connections.html", icon: "ti-plug",         label: "Connections" },
     { key: "usage",   href: "usage.html",       icon: "ti-chart-bar",    label: "Usage & billing" },
   ];
@@ -69,6 +69,17 @@
       "#avanav .nvn.hot{background:#FBF1E2;color:#9A5B12}" +
       "#avanav .nvg{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5f5c70;padding:14px 10px 5px}" +
       "#avanav .nvf{margin-top:auto;padding:10px;font-size:11.5px;color:#77748a}" +
+      "#avanav .nvo{margin-top:6px;padding:9px 10px;border-radius:4px;color:#8B8B98;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:9px}" +
+      "#avanav .nvo:hover{background:#1F1E26;color:#fff}" +
+      "#avash{position:fixed;inset:0;background:rgba(16,15,21,.55);z-index:60;display:none;align-items:flex-end}" +
+      "#avash.open{display:flex}" +
+      "#avash .sh{background:#fff;width:100%;border-radius:12px 12px 0 0;padding:8px 8px calc(14px + env(safe-area-inset-bottom));font-family:'Plus Jakarta Sans',system-ui,sans-serif}" +
+      "#avash .gr{width:38px;height:4px;border-radius:2px;background:#D9D9CC;margin:8px auto 12px}" +
+      "#avash a,#avash button{display:flex;align-items:center;gap:12px;width:100%;padding:15px 14px;border:0;background:none;font:inherit;font-size:15px;font-weight:600;color:#141418;text-decoration:none;text-align:left;cursor:pointer;border-radius:8px}" +
+      "#avash a:active,#avash button:active{background:#F1F1E9}" +
+      "#avash i{font-size:21px;color:#534AB7}" +
+      "#avash .out{color:#B42318;border-top:1px solid #ECECE4;border-radius:0;margin-top:6px}" +
+      "#avash .out i{color:#B42318}" +
       "body.avanav-pad{padding-left:212px}" +
       // ── phone first: bottom bar, thumb targets, safe area ──
       "@media(max-width:820px){" +
@@ -106,6 +117,7 @@
         '<i class="ti ' + i.icon + '"></i> <span>' + (i.full || i.label) + "</span>" +
         '<span class="nvn" id="avanav-n-' + i.key + '" style="display:none"></span></a>';
     });
+    html += '<a class="nvo" id="avanav-out"><i class="ti ti-logout"></i> Sign out</a>';
     html += '<div class="nvf">Elastic Admin</div>';
     nav.innerHTML = html;
 
@@ -133,6 +145,37 @@
         if ((b && p) || ++tries > 20) clearInterval(lift);
       }, 150);
     }
+
+    // ── sign out, from anywhere ──────────────────────────────────────────
+    // There was no way out of the app once the hub stopped being the landing
+    // page: today.html had no sign-out and the phone bar had no room for one.
+    function signOut(){ try{ localStorage.removeItem("ava_session"); }catch(e){} location.replace("index.html"); }
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("#avanav-out")) { e.preventDefault(); signOut(); }
+    });
+
+    // ── phone: "More" opens a sheet, not a page you can't get back from ──
+    var sheet = document.createElement("div");
+    sheet.id = "avash";
+    sheet.innerHTML = '<div class="sh"><div class="gr"></div>' +
+      ITEMS.filter(function (i) { return !i.phone || i.key === "hub"; }).map(function (i) {
+        return '<a href="' + url(i) + '"><i class="ti ' + i.icon + '"></i> ' + (i.full || i.label) + "</a>";
+      }).join("") +
+      '<button class="out" id="avash-out"><i class="ti ti-logout"></i> Sign out</button></div>';
+    document.body.appendChild(sheet);
+    sheet.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("#avash-out")) { signOut(); return; }
+      if (e.target === sheet) sheet.classList.remove("open");
+    });
+    nav.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.nvi");
+      if (!a) return;
+      var it = ITEMS.filter(function (i) { return url(i) === a.getAttribute("href"); })[0];
+      if (it && it.sheet && matchMedia("(max-width:820px)").matches) {
+        e.preventDefault();
+        sheet.classList.add("open");
+      }
+    });
 
     var old = document.querySelector("aside.side");
     var app = document.querySelector(".app");
