@@ -81,19 +81,6 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 </head>
 <body>
 <div class="app">
-  <aside class="side">
-    <div class="brand"><div class="lg">A</div><div><div style="font-weight:600;font-size:14px">Ava <span id="envbadge"></span></div><div style="font-size:11px;color:#8B8B98" id="conm">—</div></div></div>
-    <a class="on" href="today.html"><i class="ti ti-inbox"></i> Today <span class="n" id="n-today">·</span></a>
-    <div class="grp">Boards</div>
-    <a id="b-books" href="app.html"><i class="ti ti-book-2"></i> Bookkeeping <span class="n" id="n-books">·</span></a>
-    <a id="b-collect" href="collect.html"><i class="ti ti-cash"></i> Auto Collect <span class="n" id="n-collect">·</span></a>
-    <a id="b-gst" href="gst.html"><i class="ti ti-pig-money"></i> GST</a>
-    <div class="grp">Set up</div>
-    <a href="connections.html"><i class="ti ti-plug"></i> Connections</a>
-    <a href="index.html?hub=1"><i class="ti ti-toggle-right"></i> Features</a>
-    <a href="usage.html"><i class="ti ti-chart-bar"></i> Usage &amp; billing</a>
-    <div class="foot">Elastic Admin · <a href="index.html?hub=1" style="text-decoration:none">All features</a></div>
-  </aside>
 
   <main class="main"><div class="wrap">
     <div class="ask" id="askbox">
@@ -132,15 +119,15 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 
   function render(d){
     if(!d||d.error){document.getElementById("hd").textContent="Couldn't load your day — refresh to retry.";return;}
-    document.getElementById("conm").textContent=d.company||"";
     var needs=d.needs||[],handled=d.handled||[],b=d.boards||{};
 
-    // ── the rail keeps the boards one click away, with live counts ──
-    var t=document.getElementById("n-today");
-    t.textContent=needs.length||"0";t.className="n"+(needs.length?" hot":"");
+    // ── the shared nav keeps the boards one click away; we own the counts ──
     var bk=b.bookkeeping||{};
-    document.getElementById("n-books").textContent=(bk.ready||0)+(bk.owner||0)||"0";
-    document.getElementById("n-collect").textContent=b.collect?(b.collect.active||0):"0";
+    if(window.avaNav){
+      avaNav.company(d.company||"");
+      avaNav.counts({today:needs.length,books:(bk.ready||0)+(bk.owner||0),
+                     collect:b.collect?(b.collect.active||0):0});
+    }
 
     document.getElementById("hd").textContent=needs.length?(needs.length===1?"One thing needs you":needs.length+" things need you"):"Nothing needs you";
     document.getElementById("hs").textContent=needs.length?"· everything else is handled":"· Ava's got the lot";
@@ -199,5 +186,6 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 })();
 </script>
 <script src="ava-chat.js"></script>
+<script src="ava-nav.js"></script>
 </body>
 </html>

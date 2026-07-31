@@ -4,99 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Privacy Policy — Elastic Admin</title>
+<!--
+  Canonical privacy policy lives on the marketing site: https://elasticadmin.com/privacy
+
+  This page used to hold a SECOND, separately-maintained copy of the policy. The
+  two had already drifted — the marketing one is longer, has the full Google
+  Limited Use bullets, and is the one the OAuth consent screen points at. Two
+  divergent privacy policies is a live compliance hazard (a Google reviewer
+  finding the weaker one is a rejection), so this is now a redirect.
+
+  Edit the policy in ONE place: the marketing site. See docs/PRIVACY_POLICY_SOURCE.md
+-->
+<link rel="canonical" href="https://elasticadmin.com/privacy">
+<meta http-equiv="refresh" content="0; url=https://elasticadmin.com/privacy">
+<script>location.replace("https://elasticadmin.com/privacy");</script>
 <style>
-  :root{--bg:#F7F7F4;--ink:#141418;--ink2:#4A4A52;--ink3:#67676E;--line:#D9D9CC;--ind:#5B54E6}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;padding:40px 18px 80px}
-  main{max-width:720px;margin:0 auto}
-  .brand{font-weight:800;letter-spacing:-.02em;font-size:15px;margin-bottom:34px}
-  .brand span{color:var(--ink3);font-weight:500}
-  h1{font-size:28px;letter-spacing:-.02em;margin-bottom:6px}
-  .sub{color:var(--ink3);font-size:13px;margin-bottom:30px}
-  h2{font-size:17px;letter-spacing:-.01em;margin:30px 0 8px}
-  p,li{color:var(--ink2);font-size:14.5px}
-  ul{padding-left:22px;margin:8px 0}
-  li{margin:5px 0}
-  .card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:14px 0;font-size:14px;color:var(--ink2)}
-  a{color:var(--ind);text-decoration:none;font-weight:600}
-  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  body{background:#F7F7F4;color:#141418;font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;padding:60px 18px;margin:0}
+  main{max-width:520px;margin:0 auto;text-align:center}
+  a{color:#5B54E6;font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
 <main>
-  <div class="brand">Elastic Admin <span>· privacy policy</span></div>
-  <h1>Privacy Policy</h1>
-  <div class="sub">Elastic Admin · Aotearoa New Zealand · Effective 31 July 2026</div>
-
-  <p>Elastic Admin ("Elastic", "we") provides bookkeeping and back-office services for
-  trade businesses. Our application — <b>Ava</b>, the Elastic Admin assistant — helps
-  prepare your business's books by gathering the paperwork (receipts, tax invoices and
-  bills) that belongs with your bank transactions. This policy explains what data the
-  application accesses, how it is used, stored and shared, and how to have it deleted.</p>
-
-  <h2>What we access</h2>
-  <ul>
-    <li><b>Google user data (Gmail):</b> with your explicit permission via Google sign-in,
-      the application can <b>read</b> messages and attachments in the Gmail inboxes you
-      choose to connect, and <b>send email on your behalf</b> from those inboxes. The
-      application never modifies, labels or deletes your mail.</li>
-    <li><b>Accounting data (Xero):</b> with your permission, bank transaction details,
-      invoices and attachments in your Xero organisation.</li>
-    <li><b>Documents you give us directly:</b> receipts, statements and reports you upload
-      into the app or share with us in your team's messaging channels.</li>
-  </ul>
-
-  <h2>What we use it for</h2>
-  <p><b>Reading:</b> identifying financial documents (receipts, tax invoices, bills and
-  statements) and extracting the details on them — supplier, date, amount, tax — so each
-  document can be filed against the matching bank transaction and your books can be
-  prepared for reconciliation. We do not read, analyse or retain email content that is not
-  a financial document.</p>
-  <p><b>Sending:</b> where you have granted it, Ava sends email from your connected inbox
-  for one purpose: bookkeeping correspondence on your behalf — asking a supplier for a
-  missing receipt or invoice, and replying in conversations you have asked her to handle.
-  She never sends marketing or bulk mail, and every message she sends sits in your own
-  Sent folder where you can see it.</p>
-
-  <div class="card"><b>Limited Use disclosure.</b> Elastic Admin's use and transfer of
-  information received from Google APIs to any other app will adhere to the
-  <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API
-  Services User Data Policy</a>, including the Limited Use requirements. Google user data
-  is never sold, never used for advertising, and never used to train generalised
-  artificial-intelligence or machine-learning models.</p></div>
-
-  <h2>How it is stored and secured</h2>
-  <ul>
-    <li>Extracted document details and filed copies of financial documents are stored in
-      our database and file storage (Supabase, hosted on AWS, ap-southeast-1 region),
-      encrypted at rest and in transit.</li>
-    <li>Stored documents are served only through short-lived, signed links — they are not
-      publicly accessible.</li>
-    <li>Google OAuth tokens are stored server-side only and are never exposed to browsers
-      or third parties.</li>
-    <li>Automated processing uses vetted service providers (e.g. Anthropic for document
-      reading) under terms that prohibit training on your data.</li>
-  </ul>
-
-  <h2>Who can see it</h2>
-  <p>Access is limited to Elastic Admin's bookkeeping staff, strictly for preparing your
-  own business's books. We do not sell or share your data with third parties for their own
-  purposes. A human bookkeeper — never the application — commits entries in your
-  accounting system.</p>
-
-  <h2>Retention and deletion</h2>
-  <p>Data is kept while your account is active so your books retain their audit trail.
-  When you disconnect an inbox we stop reading it immediately; you can also revoke access
-  anytime at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
-  <p>On request, or when you leave the service, we revoke the Google authorisation, delete
-  the stored access and refresh tokens, and delete the documents we extracted from your
-  mail. Email <a href="mailto:ava@elasticadmin.com">ava@elasticadmin.com</a> to request
-  deletion — we action requests within 30 days.</p>
-
-  <h2>Contact</h2>
-  <p>Elastic Admin, Aotearoa New Zealand · <a href="mailto:ava@elasticadmin.com">ava@elasticadmin.com</a></p>
-
-  <div class="foot">Elastic Admin · <a href="https://elasticadmin.com">elasticadmin.com</a> · This policy may be updated as the product evolves; material changes will be notified to account owners by email.</div>
+  <p>Our privacy policy has moved to
+  <a href="https://elasticadmin.com/privacy">elasticadmin.com/privacy</a>.</p>
+  <p>Redirecting you now…</p>
 </main>
 </body>
 </html>
