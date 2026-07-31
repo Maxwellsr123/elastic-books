@@ -65,6 +65,7 @@
       "#avanav a.nvi:hover{background:#1F1E26;color:#fff}" +
       "#avanav a.nvi.on{background:#262533;color:#fff;box-shadow:inset 2px 0 0 #6F66DB}" +
       "#avanav a.nvi i{font-size:17px}" +
+      "#avanav .nvs{display:none}" +
       "#avanav .nvn{margin-left:auto;font-size:11px;font-weight:700;background:#33313f;color:#cfccdb;padding:1px 7px;border-radius:9px;font-variant-numeric:tabular-nums}" +
       "#avanav .nvn.hot{background:#FBF1E2;color:#9A5B12}" +
       "#avanav .nvw{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9A5B12;background:#FBF1E2;padding:2px 6px;border-radius:2px}" +
@@ -88,6 +89,7 @@
       "#avanav a.nvi{flex-direction:column;gap:3px;font-size:10.5px;font-weight:600;padding:8px 4px 6px;flex:1;min-width:0;justify-content:center;text-align:center;border-radius:6px;min-height:52px}" +
       "#avanav a.nvi.on{box-shadow:none;background:#262533}" +
       "#avanav a.nvi i{font-size:21px}" +
+      "#avanav .nvl{display:none}#avanav .nvs{display:inline}" +
       "#avanav .nvn{position:absolute;transform:translate(14px,-9px);margin:0;font-size:10px;padding:0 5px}" +
       "body.avanav-pad{padding-left:0}" +
       "body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}" +
@@ -113,20 +115,14 @@
       if (idx === 1 && lastGroup !== "Boards") { html += '<div class="nvg">Boards</div>'; lastGroup = "Boards"; }
       if (i.group && i.group !== lastGroup) { html += '<div class="nvg">' + i.group + "</div>"; lastGroup = i.group; }
       html += '<a class="nvi' + (i.key === cur ? " on" : "") + (i.phone ? "" : " deskonly") + '" href="' + url(i) + '">' +
-        '<i class="ti ' + i.icon + '"></i> <span>' + (i.full || i.label) + "</span>" +
+        '<i class="ti ' + i.icon + '"></i>' +
+        '<span class="nvl">' + (i.full || i.label) + "</span>" +
+        '<span class="nvs">' + i.label + "</span>" +
         (i.wip ? '<span class="nvw">beta</span>' : "") +
         '<span class="nvn" id="avanav-n-' + i.key + '" style="display:none"></span></a>';
     });
     html += '<div class="nvf">Elastic Admin</div>';
     nav.innerHTML = html;
-
-    // Phone shows the short label; the rail shows the full one.
-    if (matchMedia("(max-width:820px)").matches) {
-      ITEMS.forEach(function (i) {
-        var a = nav.querySelector('a[href="' + url(i) + '"] span');
-        if (a && a.className !== "nvn") a.textContent = i.label;
-      });
-    }
 
     // Take over from whatever the page had.
     // The chat bubble is injected by ava-chat.js, which may land before or
