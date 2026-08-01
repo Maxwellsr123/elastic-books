@@ -55,6 +55,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .jump{display:flex;gap:8px;flex-wrap:wrap}
 .jump .btn{flex:1;min-width:150px;justify-content:center}
 .racts{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.reply .rtx[data-mode="send"]{border-color:var(--ind);background:#fff}
 .rmsg{font-size:12.5px;color:var(--ink2)}
 .rank{width:22px;height:22px;border-radius:50%;background:var(--ink0);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
 .rank.q{background:#EFEFE8;color:var(--ink3)}
@@ -318,28 +319,59 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         +(t.xero_contact_url?'<a class="btn" href="'+esc(t.xero_contact_url)+'" target="_blank" rel="noopener"><i class="ti ti-user"></i> Their contact <i class="ti ti-external-link"></i></a>':'')
         +'</div>':'')
       +(t.can_reply
-        ?'<textarea class="rtx" rows="2" placeholder="Reply to '+esc(t.customer||"them")+'… Ava sends it from your address, in this thread."></textarea>'
-         +'<div class="racts"><button class="btn p rsend" data-chase="'+esc(chase||"")+'">Send reply</button>'
+        ?'<textarea class="rtx" rows="2" data-chase="'+esc(chase||"")+'" data-mode="instruct" placeholder="Tell Ava what you want '+esc(t.customer||"them")+' to hear—she\'ll draft it for you to check first."></textarea>'
+         +'<div class="racts"><button class="btn p rgo" data-chase="'+esc(chase||"")+'">Draft it</button>'
          +'<span class="rmsg"></span></div>'
         :'<div class="d">No email address on this customer, so there\'s nothing to reply to yet.</div>')
       +'</div></div>';
   }
   document.addEventListener("click",function(e){
-    var rs=e.target.closest&&e.target.closest(".rsend");
-    if(rs){
-      var wrap=rs.closest(".reply"),ta=wrap.querySelector(".rtx"),msg=wrap.querySelector(".rmsg");
+    var rg=e.target.closest&&e.target.closest(".rgo");
+    if(rg){
+      var wrap=rg.closest(".reply"),ta=wrap.querySelector(".rtx"),msg=wrap.querySelector(".rmsg");
+      var chase=rg.getAttribute("data-chase");
+      var mode=ta.getAttribute("data-mode");
+
+      if(mode==="instruct"){
+        var instruction=(ta.value||"").trim();
+        if(!instruction){msg.textContent="Tell Ava what you want it to say.";return;}
+        rg.disabled=true;rg.textContent="Drafting…";msg.textContent="";
+        fetch(API+"/auto-collect",{method:"POST",headers:{"content-type":"application/json"},
+          body:JSON.stringify({company_id:CO,action:"draft",chase_id:chase,instruction:instruction})})
+          .then(function(r){return r.json();})
+          .then(function(o){
+            rg.disabled=false;
+            if(o&&o.ok){
+              ta.value=o.draft;ta.setAttribute("data-mode","send");ta.rows=Math.max(4,Math.ceil(o.draft.length/60));
+              rg.textContent="Send this";rg.className="btn p rgo";
+              msg.innerHTML='<i class="ti ti-pencil" style="vertical-align:-2px"></i> Check it, edit anything, then send.';
+            }else{
+              rg.textContent="Draft it";
+              msg.innerHTML='<span style="color:var(--red)">'+esc((o&&o.error)||"Couldn\'t draft that.")+'</span>';
+            }
+          })
+          .catch(function(){rg.disabled=false;rg.textContent="Draft it";msg.innerHTML='<span style="color:var(--red)">Couldn\'t reach it.</span>';});
+        return;
+      }
+
+      // mode === "send": this is the reviewed draft, sent exactly as it reads.
       var text=(ta.value||"").trim();
-      if(!text){msg.textContent="Type something first.";return;}
-      rs.disabled=true;rs.textContent="Sending…";msg.textContent="";
+      if(!text){msg.textContent="There's nothing to send.";return;}
+      rg.disabled=true;rg.textContent="Sending…";msg.textContent="";
       fetch(API+"/auto-collect",{method:"POST",headers:{"content-type":"application/json"},
-        body:JSON.stringify({company_id:CO,action:"reply",chase_id:rs.getAttribute("data-chase"),text:text})})
+        body:JSON.stringify({company_id:CO,action:"reply",chase_id:chase,text:text})})
         .then(function(r){return r.json();})
         .then(function(o){
-          rs.disabled=false;rs.textContent="Send reply";
-          if(o&&o.ok){ta.value="";msg.innerHTML='<b style="color:var(--grn)">Sent</b> from '+esc(o.sent_from)+'.';}
-          else msg.innerHTML='<span style="color:var(--red)">'+esc((o&&o.error)||"Didn\'t send.")+'</span>';
+          rg.disabled=false;
+          if(o&&o.ok){
+            ta.value="";ta.setAttribute("data-mode","instruct");ta.rows=2;rg.textContent="Draft it";
+            msg.innerHTML='<b style="color:var(--grn)">Sent</b> from '+esc(o.sent_from)+'.';
+          }else{
+            rg.textContent="Send this";
+            msg.innerHTML='<span style="color:var(--red)">'+esc((o&&o.error)||"Didn\'t send.")+'</span>';
+          }
         })
-        .catch(function(){rs.disabled=false;rs.textContent="Send reply";msg.innerHTML='<span style="color:var(--red)">Couldn\'t reach it.</span>';});
+        .catch(function(){rg.disabled=false;rg.textContent="Send this";msg.innerHTML='<span style="color:var(--red)">Couldn\'t reach it.</span>';});
       return;
     }
     var a=e.target.closest&&e.target.closest(".athr");
