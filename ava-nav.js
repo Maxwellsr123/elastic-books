@@ -40,6 +40,10 @@
     { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Books",   full: "Bookkeeping", phone: true },
     { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Collect", full: "Auto Collect", phone: true },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST",     phone: true },
+    // Reports, not phone-bar destinations — the bar's five slots are full.
+    // Reachable from the rail and the phone's More sheet, same as Team.
+    { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Aged Receivables" },
+    { key: "ap",      href: "payables.html",    icon: "ti-arrow-up-circle",   label: "Aged Payables" },
     { key: "hub",     href: "index.html?hub=1", icon: "ti-apps",         label: "More",    full: "All features", phone: true, group: "Set up", sheet: true },
     // Team management lives inside app.html's own Settings modal (built
     // 2026-07-08, owner-only, already handles invite emails). Rather than

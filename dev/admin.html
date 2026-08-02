@@ -111,6 +111,7 @@ function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch
 var SESSION=getS();
 var CACHE={};   // chase-list per company (Auto Bookkeeping)
 var ACOL={};    // auto-collect per company (Auto Collect)
+var APCACHE={}; // ava-aged-payables per company (Aged Payables)
 // folded feature sections, per client — survives re-renders and reloads
 var FOLDS={};try{FOLDS=JSON.parse(localStorage.getItem("desk_folds")||"{}")||{};}catch(e){}
 
@@ -281,11 +282,16 @@ function start(){
     // Both features per client, in one pass. Auto Collect runs owner-side, but
     // when Ava hands a chase back it's a human's job — and that human can be us
     // (Max, 31 Jul). So the Desk reads it too and surfaces the handovers.
+    // Third leg: Aged Payables' "flagged for Elastic" queue. A flag with
+    // nobody looking at it isn't a control, it's a checkbox — this is the
+    // side that closes the loop (Max, 2 Aug: draft the bill, never send it
+    // without a human, and that human is us).
     Promise.all(cs.map(function(c){
       return Promise.all([
         fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
-        fetch(API+"/auto-collect?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;})
-      ]).then(function(both){CACHE[c.id]=both[0];ACOL[c.id]=both[1];return {c:c,cl:both[0],ac:both[1]};});
+        fetch(API+"/auto-collect?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch(API+"/ava-aged-payables?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;})
+      ]).then(function(all){CACHE[c.id]=all[0];ACOL[c.id]=all[1];APCACHE[c.id]=all[2];return {c:c,cl:all[0],ac:all[1],ap:all[2]};});
     })).then(renderClients);
   }).catch(function(){document.getElementById("workhint").textContent="couldn't load clients";});
 }
@@ -307,14 +313,22 @@ function acCounts(ac){
   var c=ac.counts||{};
   return {on:true,needs:c.needs_you||0,active:c.active||0,owing:c.owing_total||0,paused:!!ac.paused,ready:!!ac.ready};
 }
+// Aged Payables, boiled down the same way: how many bills someone flagged
+// for us to actually enter in Xero. Anything still 'new' (unreviewed) isn't
+// Elastic's job yet — only a flag is a request for our time.
+function apCounts(ap){
+  if(!ap||ap.error)return {flagged:0,flaggedTotal:0};
+  var f=(ap.email_found&&ap.email_found.unmatched||[]).filter(function(x){return x.status==="flagged";});
+  return {flagged:f.length,flaggedTotal:f.reduce(function(s,x){return s+(x.amount||0);},0)};
+}
 function renderClients(rows){
   // handovers outrank bookkeeping: an invoice nobody's chasing costs the client
   // more than a receipt nobody's filed.
-  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac);
-    return (ab.needs-aa.needs)||(cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
+  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac),pa=apCounts(a.ap),pb=apCounts(b.ap);
+    return ((ab.needs+pb.flagged)-(aa.needs+pa.flagged))||(cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
   var work="",quiet="",working=0;
   rows.forEach(function(r){
-    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac);
+    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac),ap=apCounts(r.ap);
     var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
     var badges="";
     if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
@@ -322,9 +336,10 @@ function renderClients(rows){
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
     if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
     if(ac.needs)badges+='<span class="badge b-red" title="Auto Collect: Ava has handed these back — email sent, no reply, or a dispute">'+ac.needs+' collect</span> ';
+    if(ap.flagged)badges+='<span class="badge b-red" title="Aged Payables: bills someone flagged for us to enter in Xero">'+ap.flagged+' to enter</span> ';
     if(!badges)badges='<span class="badge b-mut">all quiet</span>';
     var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="setrate" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--ink3)" title="Their agreed labour sell rate — click to change">$'+(RATES[r.c.id]?RATES[r.c.id].rate:20)+'/hr</a><a href="#" class="loghours" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Log Elastic team hours against this client">Hours +</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
-    if(c.ready||c.review||c.owner||c.pile||ac.needs){work+=html;working++;}else quiet+=html;
+    if(c.ready||c.review||c.owner||c.pile||ac.needs||ap.flagged){work+=html;working++;}else quiet+=html;
   });
   document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
   document.getElementById("quietlist").innerHTML=quiet;
@@ -349,6 +364,24 @@ document.addEventListener("click",function(e){
         .then(function(d){THREAD[tid]=acThreadHtml(d);td.innerHTML=THREAD[tid];})
         .catch(function(){td.innerHTML='<div class="muted" style="padding:8px 0;color:var(--amb)">Couldn\'t reach the thread — try again.</div>';});
     }
+    return;}
+  var ape=e.target.closest(".bapenter");
+  if(ape){var eco=ape.getAttribute("data-co"),eid=ape.getAttribute("data-id");ape.disabled=true;ape.textContent="…";
+    fetch(API+"/ava-aged-payables",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:eco,id:eid,action:"enter"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){toast("Marked as entered in Xero");fetch(API+"/ava-aged-payables?company="+eco).then(function(r){return r.json();}).then(function(fresh){APCACHE[eco]=fresh;var p=document.getElementById("p-"+eco);if(p&&p.style.display==="block")renderPanel(eco);});}
+        else{ape.disabled=false;ape.textContent="Entered ✓";alert((d&&d.error)||"Couldn't save.");}
+      }).catch(function(){ape.disabled=false;ape.textContent="Entered ✓";});
+    return;}
+  var api=e.target.closest(".bapignore");
+  if(api){var ico=api.getAttribute("data-co"),iid=api.getAttribute("data-id");
+    if(!confirm("Not actually a bill to pay? This removes it from Aged Payables."))return;
+    api.disabled=true;api.textContent="…";
+    fetch(API+"/ava-aged-payables",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:ico,id:iid,action:"ignore"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){toast("Removed from Aged Payables");fetch(API+"/ava-aged-payables?company="+ico).then(function(r){return r.json();}).then(function(fresh){APCACHE[ico]=fresh;var p=document.getElementById("p-"+ico);if(p&&p.style.display==="block")renderPanel(ico);});}
+        else{api.disabled=false;api.textContent="Not real";alert((d&&d.error)||"Couldn't save.");}
+      }).catch(function(){api.disabled=false;api.textContent="Not real";});
     return;}
   var bf=e.target.closest(".bfeat");
   if(bf){var fco=bf.getAttribute("data-co"),fkey=bf.getAttribute("data-key"),turningOff=bf.getAttribute("data-on")==="1";
@@ -706,6 +739,44 @@ function acBlock(id){
   return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Collect <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
+// ── Aged Payables: the flag queue ──────────────────────────────────────────
+// Ava never creates a Xero bill herself — same rule as attach-never-reconcile.
+// A flag is a human (owner or Ava) asking us to enter it; this is where that
+// request actually lands. "Entered" and "Not real" both clear it — the first
+// because the job's done, the second because it never was a bill.
+function apRow(x,id){
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(x.supplier||"—")+(x.invoice_number?' <span class="muted" style="font-weight:400">· '+esc(x.invoice_number)+'</span>':'')+'</div>'
+    +'<div class="rs">'+(x.due_date?"due "+esc(x.due_date):"no due date found")+' · found '+esc((x.found_at||"").slice(0,10))
+    +(x.flagged_by?' · flagged by '+esc(x.flagged_by.split("@")[0]):'')+'</div></div>'
+    +(x.doc_url?'<a href="'+esc(x.doc_url)+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>':'')
+    +'<button class="btn bapenter" data-id="'+esc(x.id)+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px" title="You\'ve created this bill in Xero">Entered ✓</button>'
+    +'<button class="btn bapignore" data-id="'+esc(x.id)+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px;color:var(--ink3)" title="Not actually a bill — credit note, duplicate, already paid">Not real</button>'
+    +'<div class="rt" style="min-width:76px;text-align:right">'+money(x.amount)+'</div></div>';
+}
+function apBlock(id){
+  var ap=APCACHE[id];
+  var flagged=[],hint="",body="";
+  if(!ap||ap.error){
+    hint="couldn't load";
+    body='<div class="muted">Couldn\'t read Aged Payables for this client — refresh to retry.</div>';
+  }else{
+    var u=(ap.email_found&&ap.email_found.unmatched)||[];
+    flagged=u.filter(function(x){return x.status==="flagged";});
+    var pending=u.filter(function(x){return x.status==="new";});
+    hint=flagged.length?flagged.length+' to enter':(pending.length?pending.length+' unreviewed, not flagged yet':'nothing outstanding');
+    if(flagged.length){
+      body+='<div class="sec" style="margin-top:4px;color:var(--red)">Flagged for us <span class="cnt">the owner (or Ava) asked us to enter these in Xero</span></div>'
+        +'<div class="list">'+flagged.map(function(x){return apRow(x,id);}).join("")+'</div>';
+    }else{
+      body+='<div class="muted">Nothing flagged right now. '+(pending.length?pending.length+' invoice'+(pending.length===1?'':'s')+' found in email '+(pending.length===1?'is':'are')+" sitting unreviewed on their Aged Payables page — the owner hasn't asked us to touch "+(pending.length===1?'it':'them')+' yet.':'')+'</div>';
+    }
+  }
+  body+='<div style="margin-top:12px"><a href="payables.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Aged Payables ↗</a></div>';
+  var stored=FOLDS[id+"|ap"];
+  var open=stored===undefined?(flagged.length>0):(stored===false);
+  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Aged Payables <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
 // ── feature switches ───────────────────────────────────────────────────────
 // Every feature arrives switched on; a client who doesn't want one switches it
 // off and the ENGINE stops — the cron skips them, not just the page (Max, 31
@@ -802,6 +873,7 @@ function renderPanel(id){
   if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
   html+='</div>';
   html+=acBlock(id);
+  html+=apBlock(id);
   html+=featBlock(id);
   var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
   html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
