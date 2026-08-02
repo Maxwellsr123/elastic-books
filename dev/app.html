@@ -448,6 +448,12 @@ h1{letter-spacing:-.03em}
     ]);
   }
   document.addEventListener("click",function(e){if(e.target.closest(".opensettings")){var sb=document.getElementById("settingsbtn");if(sb)sb.click();}});
+  // Arriving with ?settings=1 (from the shared nav's Team link, since this
+  // modal only lives here) opens Settings straight away — someone clicking
+  // "Team" from Collect or GST shouldn't have to find the gear icon too.
+  if(new URLSearchParams(location.search).get("settings")==="1"){
+    setTimeout(function(){var sb=document.getElementById("settingsbtn");if(sb)sb.click();},400);
+  }
 
   // "Get Elastic on it" → connections action:"request_setup". Pings the dev
   // channel AND sends the welcome email (Jewel + Max to:, owner cc:), then

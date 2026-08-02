@@ -67,8 +67,17 @@ function submit(){
     body:JSON.stringify({action:"accept",invite:TOKEN,business:{name:biz,owner_name:name,owner_email:email,phone:phone},redirect:APP})})
     .then(function(r){return r.json();}).then(function(d){
       if(d&&d.error){b.disabled=false;b.textContent="Open my board";m.textContent=d.error;return;}
+      // The board is made either way. Only promise email we know went out —
+      // sign_in_sent is false when the send was rejected, and telling someone
+      // to check an inbox that will never receive anything just strands them.
+      if(d&&d.sign_in_sent===false){
+        el("body").innerHTML='<div class="done"><div class="tick">✓</div><h1>Board created — but we couldn\'t email you</h1>'
+          +'<div class="sub">Your '+esc(biz)+' board is ready, but the sign-in link to <b>'+esc(email)+'</b> wouldn\'t send. '
+          +'Email <b>max@elasticadmin.com</b> and we\'ll get you in — we\'ve been told too.</div></div>';
+        return;
+      }
       el("body").innerHTML='<div class="done"><div class="tick">✓</div><h1>You\'re in — check your email</h1>'
-        +'<div class="sub">Your sign-in link is on its way to <b>'+esc(email)+'</b>. It signs you straight in to the '+esc(biz)+' board — connect your Gmail and Xero there and the books start sorting themselves.</div></div>';
+        +'<div class="sub">Your sign-in link is on its way to <b>'+esc(email)+'</b> — check your junk folder if it\'s not there in a minute. It signs you straight in to the '+esc(biz)+' board — connect your Gmail and Xero there and the books start sorting themselves.</div></div>';
     })
     .catch(function(){b.disabled=false;b.textContent="Open my board";m.textContent="Something hiccuped — try again.";});
 }

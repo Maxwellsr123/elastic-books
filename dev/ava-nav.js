@@ -41,6 +41,11 @@
     { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Collect", full: "Auto Collect", phone: true },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST",     phone: true },
     { key: "hub",     href: "index.html?hub=1", icon: "ti-apps",         label: "More",    full: "All features", phone: true, group: "Set up", sheet: true },
+    // Team management lives inside app.html's own Settings modal (built
+    // 2026-07-08, owner-only, already handles invite emails). Rather than
+    // duplicate that modal on every page, this just deep-links into it —
+    // ?settings=1 opens Settings straight away wherever you clicked from.
+    { key: "team",    href: "app.html?settings=1", icon: "ti-users",       label: "Team" },
     { key: "conns",   href: "connections.html", icon: "ti-plug",         label: "Connections" },
     { key: "usage",   href: "usage.html",       icon: "ti-chart-bar",    label: "Usage & billing" },
   ];
