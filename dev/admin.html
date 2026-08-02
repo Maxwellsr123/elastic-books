@@ -111,7 +111,8 @@ function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch
 var SESSION=getS();
 var CACHE={};   // chase-list per company (Auto Bookkeeping)
 var ACOL={};    // auto-collect per company (Auto Collect)
-var APCACHE={}; // ava-aged-payables per company (Aged Payables)
+var APCACHE={}; // ava-aged-payables FULL view per company — loaded lazily, on panel open
+var APCOUNT={}; // {flagged,flagged_total} per company — the cheap upfront badge check
 // folded feature sections, per client — survives re-renders and reloads
 var FOLDS={};try{FOLDS=JSON.parse(localStorage.getItem("desk_folds")||"{}")||{};}catch(e){}
 
@@ -286,12 +287,14 @@ function start(){
     // nobody looking at it isn't a control, it's a checkbox — this is the
     // side that closes the loop (Max, 2 Aug: draft the bill, never send it
     // without a human, and that human is us).
+    // Aged Payables' badge uses ?count=1 — a plain ap_pile count, no Xero call.
+    // The full Xero-matched view (apBlock) only loads when a panel opens.
     Promise.all(cs.map(function(c){
       return Promise.all([
         fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
         fetch(API+"/auto-collect?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
-        fetch(API+"/ava-aged-payables?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;})
-      ]).then(function(all){CACHE[c.id]=all[0];ACOL[c.id]=all[1];APCACHE[c.id]=all[2];return {c:c,cl:all[0],ac:all[1],ap:all[2]};});
+        fetch(API+"/ava-aged-payables?company="+c.id+"&count=1").then(function(r){return r.json();}).catch(function(){return null;})
+      ]).then(function(all){CACHE[c.id]=all[0];ACOL[c.id]=all[1];APCOUNT[c.id]=all[2];return {c:c,cl:all[0],ac:all[1],apc:all[2]};});
     })).then(renderClients);
   }).catch(function(){document.getElementById("workhint").textContent="couldn't load clients";});
 }
@@ -315,20 +318,20 @@ function acCounts(ac){
 }
 // Aged Payables, boiled down the same way: how many bills someone flagged
 // for us to actually enter in Xero. Anything still 'new' (unreviewed) isn't
-// Elastic's job yet — only a flag is a request for our time.
-function apCounts(ap){
-  if(!ap||ap.error)return {flagged:0,flaggedTotal:0};
-  var f=(ap.email_found&&ap.email_found.unmatched||[]).filter(function(x){return x.status==="flagged";});
-  return {flagged:f.length,flaggedTotal:f.reduce(function(s,x){return s+(x.amount||0);},0)};
+// Elastic's job yet — only a flag is a request for our time. Reads the cheap
+// ?count=1 result (no Xero call) — see apBlock for the full, lazy-loaded view.
+function apCounts(apc){
+  if(!apc||apc.error)return {flagged:0,flaggedTotal:0};
+  return {flagged:apc.flagged||0,flaggedTotal:apc.flagged_total||0};
 }
 function renderClients(rows){
   // handovers outrank bookkeeping: an invoice nobody's chasing costs the client
   // more than a receipt nobody's filed.
-  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac),pa=apCounts(a.ap),pb=apCounts(b.ap);
+  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac),pa=apCounts(a.apc),pb=apCounts(b.apc);
     return ((ab.needs+pb.flagged)-(aa.needs+pa.flagged))||(cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
   var work="",quiet="",working=0;
   rows.forEach(function(r){
-    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac),ap=apCounts(r.ap);
+    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac),ap=apCounts(r.apc);
     var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
     var badges="";
     if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
@@ -472,6 +475,12 @@ document.addEventListener("click",function(e){
         if(!ac||ac.error)return;
         if(JSON.stringify(ac)===JSON.stringify(ACOL[id]))return;
         ACOL[id]=ac;if(p.style.display==="block")renderPanel(id);
+      }).catch(function(){});
+      // Aged Payables' full Xero-matched view is the expensive one (a live
+      // Xero read) — load it only now, on open, never upfront for every
+      // client (Max, 2 Aug: The Desk was doing 24 of these on every load).
+      if(!APCACHE[id])fetch(API+"/ava-aged-payables?company="+id).then(function(r){return r.json();}).then(function(ap){
+        APCACHE[id]=ap;if(p.style.display==="block")renderPanel(id);
       }).catch(function(){});}
     return;}
   var b=e.target.closest(".bdrop");
@@ -756,7 +765,10 @@ function apRow(x,id){
 function apBlock(id){
   var ap=APCACHE[id];
   var flagged=[],hint="",body="";
-  if(!ap||ap.error){
+  if(ap===undefined){
+    hint="loading…";
+    body='<div class="muted">Reading their Aged Payables…</div>';
+  }else if(!ap||ap.error){
     hint="couldn't load";
     body='<div class="muted">Couldn\'t read Aged Payables for this client — refresh to retry.</div>';
   }else{
