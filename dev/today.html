@@ -295,6 +295,11 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   function fmtC(n){n=Number(n)||0;return n>0&&n<0.01?"<$0.01":"$"+n.toFixed(2);}
   var FBOARD={bookkeeping:"app.html",invoice_chaser:"collect.html",gst_putaway:"gst.html"};
   function renderFeatures(fs){
+    // Invoice nudges is hidden from owners for now (Max, 2026-08-03): it's
+    // Slack-only with no board to open and its cost can't be isolated, so the
+    // card reads as broken next to the real meters. The switch stays alive in
+    // the backend and The Desk. Comes back as a real card with Auto Invoicing.
+    fs=fs.filter(function(f){return f.key!=="invoicing";});
     if(!fs.length)return;
     var allOff=fs.every(function(f){return !f.on;});
     document.getElementById("coach").style.display=allOff?"":"none";
