@@ -34,24 +34,26 @@
   var CO = companyId();
   var q = CO ? "?c=" + encodeURIComponent(CO) : "";
 
-  // Five on the phone bar; the rest live in the rail and behind "More".
+  // TWO on the phone bar — Today | More (Max, 2026-08-03). Today IS the
+  // dashboard: triage on top, feature switches + token meters below. There is
+  // no separate dashboard page for owners; everything else is one tap away
+  // behind More. The desktop rail still shows the full list.
   var ITEMS = [
     { key: "today",   href: "today.html",       icon: "ti-inbox",        label: "Today",   phone: true, wip: true },
-    { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Books",   full: "Bookkeeping", phone: true },
-    { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Collect", full: "Auto Collect", phone: true },
-    { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST",     phone: true },
-    // Reports, not phone-bar destinations — the bar's five slots are full.
-    // Reachable from the rail and the phone's More sheet, same as Team.
-    { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Aged Receivables" },
+    { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Bookkeeping", group: "Boards" },
+    { key: "collect", href: "collect.html",     icon: "ti-cash",         label: "Auto Collect" },
+    { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "GST" },
+    { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Aged Receivables", group: "Reports" },
     { key: "ap",      href: "payables.html",    icon: "ti-arrow-up-circle",   label: "Aged Payables" },
-    { key: "hub",     href: "index.html?hub=1", icon: "ti-apps",         label: "More",    full: "All features", phone: true, group: "Set up", sheet: true },
     // Team management lives inside app.html's own Settings modal (built
     // 2026-07-08, owner-only, already handles invite emails). Rather than
     // duplicate that modal on every page, this just deep-links into it —
     // ?settings=1 opens Settings straight away wherever you clicked from.
-    { key: "team",    href: "app.html?settings=1", icon: "ti-users",       label: "Team" },
+    { key: "team",    href: "app.html?settings=1", icon: "ti-users",       label: "Team", group: "Set up" },
     { key: "conns",   href: "connections.html", icon: "ti-plug",         label: "Connections" },
     { key: "usage",   href: "usage.html",       icon: "ti-chart-bar",    label: "Usage & billing" },
+    // Phone-only: opens the sheet holding everything not on the bar.
+    { key: "more",    href: "#more",            icon: "ti-menu-2",       label: "More", phone: true, phoneOnly: true, sheet: true },
   ];
 
   function here() {
@@ -60,7 +62,10 @@
     var hit = ITEMS.filter(function (i) { return i.href.split("?")[0] === f; })[0];
     return hit ? hit.key : "";
   }
-  function url(i) { return i.href.indexOf("?") >= 0 ? i.href + (q ? "&" + q.slice(1) : "") : i.href + q; }
+  function url(i) {
+    if (i.href.charAt(0) === "#") return i.href;   // sheet triggers, not pages
+    return i.href.indexOf("?") >= 0 ? i.href + (q ? "&" + q.slice(1) : "") : i.href + q;
+  }
 
   function css() {
     if (document.getElementById("avanav-css")) return;
@@ -80,6 +85,7 @@
       "#avanav .nvw{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9A5B12;background:#FBF1E2;padding:2px 6px;border-radius:2px}" +
       "#avanav .nvg{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5f5c70;padding:14px 10px 5px}" +
       "#avanav .nvf{margin-top:auto;padding:10px;font-size:11.5px;color:#77748a}" +
+      "#avanav a.nvi.phoneonly{display:none}" +
       "#avash{position:fixed;inset:0;background:rgba(16,15,21,.55);z-index:60;display:none;align-items:flex-end}" +
       "#avash.open{display:flex}" +
       "#avash .sh{background:#fff;width:100%;border-radius:12px 12px 0 0;padding:8px 8px calc(14px + env(safe-area-inset-bottom));font-family:'Plus Jakarta Sans',system-ui,sans-serif}" +
@@ -95,6 +101,7 @@
       "html,body{overflow-x:hidden;max-width:100vw}" +
       "#avanav{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom));gap:2px;border-top:1px solid #26242f;justify-content:space-around}" +
       "#avanav .nvb,#avanav .nvg,#avanav .nvf,#avanav .nvw,#avanav a.nvi.deskonly{display:none}" +
+      "#avanav a.nvi.phoneonly{display:flex}" +
       "#avanav a.nvi{flex-direction:column;gap:3px;font-size:10.5px;font-weight:600;padding:8px 4px 6px;flex:1;min-width:0;justify-content:center;text-align:center;border-radius:6px;min-height:52px}" +
       "#avanav a.nvi.on{box-shadow:none;background:#262533}" +
       "#avanav a.nvi i{font-size:21px}" +
@@ -120,10 +127,9 @@
       '<div><div style="font-weight:600;font-size:14px">Ava</div>' +
       '<div style="font-size:11px;color:#8B8B98" id="avanav-co">Elastic Admin</div></div></a>';
     var lastGroup = null;
-    ITEMS.forEach(function (i, idx) {
-      if (idx === 1 && lastGroup !== "Boards") { html += '<div class="nvg">Boards</div>'; lastGroup = "Boards"; }
+    ITEMS.forEach(function (i) {
       if (i.group && i.group !== lastGroup) { html += '<div class="nvg">' + i.group + "</div>"; lastGroup = i.group; }
-      html += '<a class="nvi' + (i.key === cur ? " on" : "") + (i.phone ? "" : " deskonly") + '" href="' + url(i) + '">' +
+      html += '<a class="nvi' + (i.key === cur ? " on" : "") + (i.phone ? "" : " deskonly") + (i.phoneOnly ? " phoneonly" : "") + '" href="' + url(i) + '">' +
         '<i class="ti ' + i.icon + '"></i>' +
         '<span class="nvl">' + (i.full || i.label) + "</span>" +
         '<span class="nvs">' + i.label + "</span>" +
@@ -162,7 +168,7 @@
     var sheet = document.createElement("div");
     sheet.id = "avash";
     sheet.innerHTML = '<div class="sh"><div class="gr"></div>' +
-      ITEMS.filter(function (i) { return !i.phone || i.key === "hub"; }).map(function (i) {
+      ITEMS.filter(function (i) { return !i.phone; }).map(function (i) {
         return '<a href="' + url(i) + '"><i class="ti ' + i.icon + '"></i> ' + (i.full || i.label) + "</a>";
       }).join("") +
       '<button class="out" id="avash-out"><i class="ti ti-logout"></i> Sign out</button></div>';

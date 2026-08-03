@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
 --ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
 --grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2;--org:#FF6A1A;--ink0:#100F15}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
@@ -82,6 +82,49 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .u .t{font-size:12px;color:var(--ink2);margin-top:2px;font-variant-numeric:tabular-nums}
 .feats{margin-top:10px;font-size:12.5px;color:var(--ink3);line-height:1.7}
 .feats b{color:var(--ink2);font-weight:600}
+/* ── V3: one next action, always ──
+   A stepper with exactly one button at any moment: Gmail → Xero → Start.
+   The features stay a quiet promise underneath until Ava's running. */
+.coach{background:#fff;border:1px solid #C9C4F2;border-radius:6px;padding:19px 21px;margin-top:14px;font-size:13.5px;line-height:1.6;color:var(--ink2)}
+.coach b{color:var(--ink)}
+.coach a{text-decoration:none}
+.s3top{display:flex;align-items:center;gap:5px;margin-bottom:10px}
+.s3n{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-right:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#E5E5DE;display:inline-block}
+.dot.done{background:var(--grn)}
+.dot.cur{background:var(--ind);box-shadow:0 0 0 3px rgba(83,74,183,.18)}
+.s3t{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.s3tick{color:var(--grn)}
+.s3d{margin-top:5px;font-size:13px;line-height:1.55}
+.s3b{display:inline-block;margin-top:13px;background:var(--ind);color:#fff;font:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:3px;border:0;cursor:pointer;text-decoration:none}
+.s3b:hover{background:#463DA4}
+.s3f{margin-top:16px;border-top:1px solid #efefef;padding-top:11px;font-size:12.5px;color:var(--ink3);line-height:1.9}
+.s3f b{color:var(--ink2)}
+.fttl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:#fff;border:1px solid var(--line);border-radius:6px;padding:11px 16px;margin-top:12px;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.fttl b{color:var(--ink)}
+.fttl .cr{color:var(--grn);font-weight:600}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.fcard{background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px 15px}
+.fcard.foff{opacity:.75}
+.fcard .fh{display:flex;align-items:center;gap:8px}
+.fcard .fn{font-size:13.5px;font-weight:700}
+.fcard .fp{margin-left:auto}
+.fcard .fb{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.5}
+.fcard .fm{font-size:12px;color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+.fcard .fm b{color:var(--ink)}
+.fcard .fm .fr{color:var(--grn);font-weight:600}
+.fcard .fa{display:flex;gap:12px;margin-top:9px;align-items:center}
+.fcard .fa a,.fcard .fa span.fsw2{font-size:11.5px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;text-decoration:none}
+.fcard .fa a{color:#D2530F}
+.fcard .fsw2{color:var(--ind)}
+.fcard .fsw2.soff{color:var(--ink3)}
+/* switching ON is the invitation — a real button; switching OFF stays quiet */
+.fcard .fsw2.bon{background:var(--ind);color:#fff;padding:9px 16px;border-radius:3px;letter-spacing:.05em}
+.fcard .fsw2.bon:hover{background:#463DA4}
+/* not connectable yet: the button's job is to point at Connections */
+.fcard .fa a.bcon{background:#fff;border:1px solid var(--line);color:var(--ink2);padding:8px 14px;border-radius:3px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-decoration:none}
+.fcard .fa a.bcon:hover{border-color:var(--ind);color:var(--ind)}
+@media(max-width:820px){.fgrid{grid-template-columns:1fr}}
 .wip{display:flex;gap:11px;align-items:flex-start;background:var(--ambbg);border:1px solid #EBD7B4;color:#7A4A10;border-radius:6px;padding:11px 14px;font-size:13px;line-height:1.55;margin-bottom:12px}
 .wip i{font-size:17px;position:relative;top:1px}
 .wip b{color:#5E3808}
@@ -144,6 +187,8 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       <div class="mic" id="micbtn" title="Tap to record a voice note"><i class="ti ti-microphone"></i></div>
     </div>
 
+    <div class="coach" id="coach" style="display:none"></div>
+
     <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
     <div class="note" id="tnote" style="display:none"><i class="ti ti-arrow-badge-down" style="font-size:17px;position:relative;top:1px"></i><div id="tnotet"></div></div>
     <div id="needs"></div>
@@ -155,6 +200,10 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     <div class="sec">What Ava's done <span class="c">tasks and tokens</span></div>
     <div class="use" id="use"></div>
     <div class="feats" id="feats"></div>
+
+    <div class="sec" id="fsec" style="display:none">Features <span class="c">running · watch the burn</span></div>
+    <div class="fttl" id="fttl" style="display:none"></div>
+    <div class="fgrid" id="fgrid"></div>
   </div></main>
 </div>
 
@@ -249,7 +298,152 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     document.getElementById("feats").innerHTML=tf.length
       ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
       :"";
+
+    if(d.conns)CONNS=d.conns;
+    renderFeatures(d.features||[]);
   }
+
+  // ── the feature switches + meters: Today IS the dashboard ───────────────
+  // Each card: on/off pill, its own tasks·tokens meter, the $ (or Free), a
+  // switch, and an Open link into its board. The total bar rolls it all up
+  // and carries the $100 starter-credit countdown (account-level pool).
+  function fmtC(n){n=Number(n)||0;return n>0&&n<0.01?"<$0.01":"$"+n.toFixed(2);}
+  var FBOARD={bookkeeping:"app.html",invoice_chaser:"collect.html",gst_putaway:"gst.html"};
+  // What each feature actually runs off — a card that's ON but missing its
+  // inputs says "waiting on…" instead of an empty meter that reads as broken.
+  var FNEEDS={bookkeeping:{gmail:true,xero:true},invoice_chaser:{xero:true,gmail:true},gst_putaway:{xero:true}};
+  var CONNS={gmail_inboxes:[],xero:false};
+  // V3: the stepper. One next action at a time — Gmail, then Xero, then one
+  // Start button that switches everything on. The three features sit
+  // underneath as a quiet promise, not a decision to make yet.
+  function coachHtml(){
+    var g=CONNS.gmail_inboxes.length,x=CONNS.xero;
+    var gmailUrl=API+"/gmail-auth?company_id="+CO;
+    var xeroUrl=CONNS.xero_url||("connections.html?c="+CO);
+    var step=!g?1:!x?2:3;
+    var dots="";
+    for(var i=1;i<=3;i++)dots+='<span class="dot'+(i<step?" done":i===step?" cur":"")+'"></span>';
+    var body=step===1
+      ?'<div class="s3t">Connect your inbox</div>'
+        +'<div class="s3d">Every inbox where receipts, bills and supplier invoices land — Ava reads them all. You can add more inboxes after.</div>'
+        +'<a class="s3b" href="'+gmailUrl+'">Connect Gmail</a>'
+      :step===2
+      ?'<div class="s3t"><span class="s3tick">✓ Inbox in.</span> Now Xero</div>'
+        +'<div class="s3d">Your books, invoices and bank feed. This is the last connection.</div>'
+        +'<a class="s3b" href="'+xeroUrl+'">Connect Xero</a>'
+      :'<div class="s3t"><span class="s3tick">✓ All connected.</span> Start Ava</div>'
+        +'<div class="s3d">One tap switches on all three. Your first <b>$100</b> of her work is free, every feature meters itself as it runs, and you can switch any of them off whenever you like.</div>'
+        +'<button class="s3b bstart">Start Ava — first $100 free</button>';
+    return '<div class="s3top"><span class="s3n">Step '+step+' of 3</span>'+dots+'</div>'+body
+      +'<div class="s3f">'
+      +'<div><b>Auto Bookkeeping</b> — receipts read out of email, matched to the right spend in Xero</div>'
+      +'<div><b>Auto Collect</b> — overdue invoices chased politely, from your own address</div>'
+      +'<div><b>GST put-away</b> — what to set aside each week so GST day never stings · free forever</div>'
+      +'</div>';
+  }
+  document.addEventListener("click",function(e){
+    if(!(e.target.closest&&e.target.closest(".bstart")))return;
+    var b=document.querySelector(".bstart");
+    b.disabled=true;b.textContent="Starting…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    var by=(sess&&sess.email)||"owner";
+    var chain=Promise.resolve();
+    ["bookkeeping","invoice_chaser","gst_putaway"].forEach(function(k){
+      chain=chain.then(function(){return fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,key:k,on:true,by:by})});});
+    });
+    chain.then(function(){return fetch(API+"/ava-triage?company="+CO);})
+      .then(function(r){return r.json();}).then(render)
+      .catch(function(){b.disabled=false;b.textContent="Start Ava — first $100 free";});
+  });
+  function waitingOn(f){
+    if(!f.on)return null;
+    var need=FNEEDS[f.key]||{};
+    var missing=[];
+    if(need.gmail&&!CONNS.gmail_inboxes.length)missing.push("your Gmail inboxes");
+    if(need.xero&&!CONNS.xero)missing.push("Xero");
+    return missing.length?missing.join(" and "):null;
+  }
+  function renderFeatures(fs){
+    // Invoice nudges is hidden from owners for now (Max, 2026-08-03): it's
+    // Slack-only with no board to open and its cost can't be isolated, so the
+    // card reads as broken next to the real meters. The switch stays alive in
+    // the backend and The Desk. Comes back as a real card with Auto Invoicing.
+    fs=fs.filter(function(f){return f.key!=="invoicing";});
+    if(!fs.length)return;
+    var allOff=fs.every(function(f){return !f.on;});
+    // The stepper stays up until the accounts are connected AND Ava's on;
+    // the features section only exists once she's actually running.
+    var setupDone=CONNS.gmail_inboxes.length&&CONNS.xero&&!allOff;
+    var coach=document.getElementById("coach");
+    coach.style.display=setupDone?"none":"";
+    if(!setupDone)coach.innerHTML=coachHtml();
+    document.getElementById("fsec").style.display=allOff?"none":"";
+    if(allOff){document.getElementById("fttl").style.display="none";document.getElementById("fgrid").innerHTML="";return;}
+    // The charge-up bar (Max, 2026-08-03: no fortnight roll-up — each card
+    // already carries its own meter). While the starter credit lasts, count
+    // it down; once it's spent, show what this fortnight is costing and the
+    // way to pay. Usage & billing stays the detailed view.
+    var charge=0,creditLeft=null;
+    fs.forEach(function(f){
+      charge+=Number(f.charge_usd)||0;
+      if(f.on_credit&&f.free_credit_left!=null)creditLeft=f.free_credit_left;
+    });
+    var tt=document.getElementById("fttl");
+    tt.style.display="";
+    tt.innerHTML=creditLeft!=null
+      ?'<span class="cr" style="font-size:13.5px">⚡ '+fmtC(creditLeft)+' of your $100 free credit left</span>'
+        +'<span style="margin-left:auto;color:var(--ink3)">then it’s pay-as-you-go — <a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">top up any time</a></span>'
+      :'<span><b>'+fmtC(charge)+'</b> this fortnight</span>'
+        +'<span style="margin-left:auto"><a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">Top up / pay →</a></span>';
+    // cards
+    document.getElementById("fgrid").innerHTML=fs.map(function(f){
+      var pill=!f.on?'<span class="pill p-mut">Off</span>'
+        :f.on_credit?'<span class="pill p-ind">On · free credit</span>'
+        :'<span class="pill p-grn">On</span>';
+      var waiting=waitingOn(f);
+      // An OFF paid card says the starter credit covers it BEFORE they commit
+      // — "is this going to cost me?" is the exact hesitation at this button.
+      var offHint=f.free?' <span style="color:var(--grn);font-weight:600">Free.</span>'
+        :f.on_credit?' <span style="color:var(--grn);font-weight:600">Covered by your free $100 starter credit.</span>':'';
+      var meter=!f.on
+        ?'<div class="fb">'+esc(f.blurb)+offHint+'</div>'
+        :waiting
+        ?'<div class="fm" style="color:var(--amb)">Waiting on '+esc(waiting)+' — <a href="connections.html?c='+CO+'" style="color:var(--amb);font-weight:700">connect it</a> and Ava gets to work.</div>'
+        :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this fortnight · '
+          +(f.free?'<span class="fr">Free</span>'
+            :f.on_credit?'<span class="fr">Free — on your starter credit</span>'
+            :'<b>'+fmtC(f.charge_usd||0)+'</b>')+'</div>';
+      // No switching ON until the accounts it runs off are connected (Max,
+      // 2026-08-03) — the button becomes the pointer to Connections instead.
+      // UI-level only: The Desk still uses the raw endpoint, so Elastic can
+      // pre-flip a feature during onboarding before the client connects.
+      var missOff=[];
+      if(!f.on){var nd=FNEEDS[f.key]||{};
+        if(nd.gmail&&!CONNS.gmail_inboxes.length)missOff.push("your inbox");
+        if(nd.xero&&!CONNS.xero)missOff.push("Xero");}
+      var acts='<div class="fa">'
+        +(f.on&&FBOARD[f.key]?'<a href="'+FBOARD[f.key]+'?c='+CO+'">Open</a>':'')
+        +(!f.on&&missOff.length
+          ?'<a class="bcon" href="connections.html?c='+CO+'">Connect '+esc(missOff.join(" + "))+' to switch on</a>'
+          :'<span class="fsw2'+(f.on?" soff":" bon")+'" data-key="'+esc(f.key)+'" data-on="'+(f.on?"1":"")+'">'+(f.on?"Switch off":"Switch on")+'</span>')
+        +'</div>';
+      return '<div class="fcard'+(f.on?"":" foff")+'"><div class="fh"><span class="fn">'+esc(f.name)+'</span><span class="fp">'+pill+'</span></div>'+meter+acts+'</div>';
+    }).join("");
+  }
+  document.addEventListener("click",function(e){
+    var sw=e.target.closest&&e.target.closest(".fsw2");
+    if(!sw)return;
+    var key=sw.getAttribute("data-key"),on=!!sw.getAttribute("data-on");
+    if(on&&!confirm("Switch "+key.replace(/_/g," ")+" off?\n\nAva stops doing it until you switch it back on."))return;
+    sw.textContent="…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,key:key,on:!on,by:(sess&&sess.email)||"owner"})})
+      .then(function(){return fetch(API+"/ava-triage?company="+CO);})
+      .then(function(r){return r.json();}).then(render)
+      .catch(function(){sw.textContent="Didn't save";});
+  });
 
   // ── the owner's own say on the order ────────────────────────────────────
   // Ava ranks it; you get the last word. "Later" drops one to the bottom,

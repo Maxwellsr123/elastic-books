@@ -29,7 +29,7 @@
     "#avacp.open{display:flex}" +
     "#avach{display:flex;align-items:center;gap:9px;padding:12px 14px;background:linear-gradient(135deg,#141418,#242432);color:#fff}" +
     "#avach .t{font-size:14px;font-weight:600}#avach .s{font-size:11px;color:#b9b9c9}" +
-    "#avacm{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;background:#FAF8F4}" +
+    "#avacm{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;background:#FFFFFF}" +
     ".avamsg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}" +
     ".avamsg.u{align-self:flex-end;background:#534AB7;color:#fff;border-bottom-right-radius:4px}" +
     ".avamsg.a{align-self:flex-start;background:#fff;border:1px solid #D9D9CC;color:#141418;border-bottom-left-radius:4px}" +
@@ -65,7 +65,7 @@
   function render(){
     var m=box();if(!m)return;
     var h=hist();
-    m.innerHTML=h.length?"":'<div class="avamsg a">Hey, I run the scheduling here. Ask me anything: "find the job I think you missed from Dave", "what\'s on the board?", "did William get booked?"</div>';
+    m.innerHTML=h.length?"":'<div class="avamsg a">Hey, I run the books here. Ask me anything: "what\'s still waiting on a receipt?", "who owes us the most?", "how much GST should I put aside?"</div>';
     h.forEach(function(x){var d=document.createElement("div");d.className="avamsg "+(x.role==="user"?"u":"a");d.textContent=x.content;m.appendChild(d);});
     m.scrollTop=m.scrollHeight;
   }

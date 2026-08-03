@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <style>
-  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FAF8F4;--line:#D9D9CC;--card:#fff;
+  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff;
         --grn:#0e7a50;--grnbg:#e7f6ee}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
@@ -222,15 +222,11 @@ h1{letter-spacing:-.03em}
     for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
   }
   comp=comp||s.companies[0];
-  // ── Ava is the front door ───────────────────────────────────────────────
-  // A signed-in owner lands on Ava's triage, not a menu of features: she's
-  // already done the work and the screen's job is to hand back the few things
-  // that need a person (Max, 2026-07-31). The card grid below is still the
-  // features hub — reachable from the rail, and where the switches live — but
-  // it stops being the first thing a working owner sees.
-  // ?hub=1 opts out, so this page stays reachable without fighting the redirect.
-  // Loopers keep the hub as their landing — they hop between clients and the
-  // Desk, so a redirect into one company's day would be in the way.
+  // ── Today IS the home ───────────────────────────────────────────────────
+  // Triage, the feature switches, the token meters and the first-time setup
+  // coaching all live on today.html now (Max, 2026-08-03: "today is the
+  // dashboard"). A signed-in owner never lands here; this page survives as
+  // the signed-out marketing face, the loopers' hub, and behind ?hub=1.
   if(!s.looper && !new URLSearchParams(location.search).get("hub")){
     location.replace("today.html?c="+encodeURIComponent(comp.id));
     return;
@@ -249,7 +245,7 @@ h1{letter-spacing:-.03em}
     fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
       body:JSON.stringify({company_id:comp.id,key:key,on:on,by:s.email||"owner"})})
       .then(function(r){return r.json();})
-      .then(function(d){if(d&&d.features)paintFeatures(d.features);else loadFeatures();})
+      .then(function(d){if(d&&d.features){paintFeatures(d.features);totals(d.features);coach(d.features);}else loadFeatures();})
       .catch(loadFeatures);
   }
   function paintFeatures(list){
@@ -258,10 +254,26 @@ h1{letter-spacing:-.03em}
       var card=document.getElementById(ids[0]),pill=document.getElementById(ids[1]),open=document.getElementById(ids[2]);
       if(!card||!pill)return;
       pill.className="pill "+(f.on?"live":"soon");
-      pill.textContent=f.on?"● On":"Off";
+      pill.textContent=!f.on?"Off":f.on_credit?"● On · free credit":"● On";
       // A card that isn't running shouldn't invite you in and show you nothing.
       if(open)open.innerHTML=f.on?'Open <i class="ti ti-arrow-right"></i>':'Not running';
       if(open)open.style.color=f.on?"":"var(--ink3)";
+      // ── the meter: this feature's activity + tokens as they accumulate ──
+      // Fortnight-scoped because that's the billing period — the number here
+      // and the number on the invoice are the same number.
+      var st=card.querySelector(".fstat");
+      if(!st){st=document.createElement("div");st.className="fstat";
+        st.style.cssText="font-size:12px;color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums";
+        var dd=card.querySelector(".d");if(dd&&dd.parentNode)dd.parentNode.appendChild(st);}
+      // Every switched-on feature shows its own meter — tasks AND tokens —
+      // so the burn is visible per feature, not just in the total bar.
+      if(!f.on){st.innerHTML=f.free?'<b style="color:var(--grn)">Free</b> — switch on and it just runs.':"";}
+      else{
+        st.innerHTML=(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+fmtT(f.tokens||0)+' tokens this fortnight · '
+          +(f.free?'<b style="color:var(--grn)">Free</b>'
+            :f.on_credit?'<b style="color:var(--grn)">Free</b> — running on your starter credit'
+            :'<b>'+fmtC(f.charge_usd||0)+'</b>');
+      }
       var row=card.querySelector(".row");if(!row)return;
       var sw=row.querySelector(".fsw");
       if(!sw){sw=document.createElement("span");sw.className="fsw";
@@ -277,9 +289,55 @@ h1{letter-spacing:-.03em}
       };
     });
   }
+  // ── the total: every feature's meter rolled up, plus the credit pool ────
+  // Each card carries its own meter; this is the one line that adds them up.
+  // The $100 starter credit is account-level (shared by the paid features),
+  // so it belongs here, not on any single card.
+  function totals(list){
+    var el=document.getElementById("fttl");
+    if(!el){el=document.createElement("div");el.id="fttl";
+      el.style.cssText="display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 18px;margin:0 0 14px;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums";
+      var grid=document.querySelector(".grid");
+      if(grid&&grid.parentNode)grid.parentNode.insertBefore(el,grid);}
+    var tasks=0,tokens=0,charge=0,creditLeft=null;
+    list.forEach(function(f){
+      tasks+=Number(f.tasks)||0;tokens+=Number(f.tokens)||0;charge+=Number(f.charge_usd)||0;
+      if(f.on_credit&&f.free_credit_left!=null)creditLeft=f.free_credit_left;
+    });
+    var h='<span><b style="color:var(--ink)">Everything this fortnight</b></span>'
+      +'<span>'+tasks.toLocaleString("en-NZ")+' tasks</span>'
+      +'<span>'+fmtT(tokens)+' tokens</span>'
+      +'<span><b style="color:var(--ink)">'+fmtC(charge)+'</b></span>';
+    if(creditLeft!=null)
+      h+='<span style="color:var(--grn);font-weight:600">'+fmtC(creditLeft)+' of your $100 free credit left</span>';
+    el.innerHTML=h;
+  }
+  // First time in with nothing on: the dashboard's job is to coach — connect
+  // the accounts Ava runs off, then switch on a first feature. Gone the moment
+  // something is running.
+  function coach(list){
+    var anyOn=list.some(function(f){return f.on;});
+    var el=document.getElementById("coach");
+    if(anyOn){if(el)el.remove();return;}
+    if(el)return;
+    el=document.createElement("div");el.id="coach";
+    el.style.cssText="background:var(--card);border:1px solid #C9C4F2;border-radius:6px;padding:16px 18px;margin:0 0 18px;font-size:13.5px;line-height:1.65;color:var(--ink2)";
+    el.innerHTML='<b style="color:var(--ink);font-size:14.5px">Here’s how it works</b><br>'
+      +'Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>'
+      +'<b style="color:var(--ink)">1.</b> <a href="connections.html" style="color:var(--ind);font-weight:600">Connect Xero</a> — your books, invoices and bank feed live there.<br>'
+      +'<b style="color:var(--ink)">2.</b> <a href="connections.html" style="color:var(--ind);font-weight:600">Connect the inboxes</a> where receipts, bills and invoices land.<br>'
+      +'<b style="color:var(--ink)">3.</b> Switch on your first feature below — your first <b style="color:var(--ink)">$100</b> of Ava’s work is on us, and each feature shows its own activity and tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.';
+    var grid=document.querySelector(".grid");
+    if(grid&&grid.parentNode)grid.parentNode.insertBefore(el,grid);
+  }
   function loadFeatures(){
     fetch(API+"/features?company="+comp.id).then(function(r){return r.json();})
-      .then(function(d){if(d&&d.features)paintFeatures(d.features);}).catch(function(){});
+      .then(function(d){
+        if(!(d&&d.features))return;
+        paintFeatures(d.features);
+        totals(d.features);
+        coach(d.features);
+      }).catch(function(){});
   }
   loadFeatures();
 

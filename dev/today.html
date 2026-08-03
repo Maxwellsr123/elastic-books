@@ -82,10 +82,24 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .u .t{font-size:12px;color:var(--ink2);margin-top:2px;font-variant-numeric:tabular-nums}
 .feats{margin-top:10px;font-size:12.5px;color:var(--ink3);line-height:1.7}
 .feats b{color:var(--ink2);font-weight:600}
-/* ── Today IS the dashboard: the feature switches + meters live here ── */
-.coach{background:#fff;border:1px solid #C9C4F2;border-radius:6px;padding:15px 17px;margin-top:14px;font-size:13.5px;line-height:1.65;color:var(--ink2)}
+/* ── V3: one next action, always ──
+   A stepper with exactly one button at any moment: Gmail → Xero → Start.
+   The features stay a quiet promise underneath until Ava's running. */
+.coach{background:#fff;border:1px solid #C9C4F2;border-radius:6px;padding:19px 21px;margin-top:14px;font-size:13.5px;line-height:1.6;color:var(--ink2)}
 .coach b{color:var(--ink)}
-.coach a{color:var(--ind);font-weight:600;text-decoration:none}
+.coach a{text-decoration:none}
+.s3top{display:flex;align-items:center;gap:5px;margin-bottom:10px}
+.s3n{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-right:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#E5E5DE;display:inline-block}
+.dot.done{background:var(--grn)}
+.dot.cur{background:var(--ind);box-shadow:0 0 0 3px rgba(83,74,183,.18)}
+.s3t{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.s3tick{color:var(--grn)}
+.s3d{margin-top:5px;font-size:13px;line-height:1.55}
+.s3b{display:inline-block;margin-top:13px;background:var(--ind);color:#fff;font:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:3px;border:0;cursor:pointer;text-decoration:none}
+.s3b:hover{background:#463DA4}
+.s3f{margin-top:16px;border-top:1px solid #efefef;padding-top:11px;font-size:12.5px;color:var(--ink3);line-height:1.9}
+.s3f b{color:var(--ink2)}
 .fttl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:#fff;border:1px solid var(--line);border-radius:6px;padding:11px 16px;margin-top:12px;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .fttl b{color:var(--ink)}
 .fttl .cr{color:var(--grn);font-weight:600}
@@ -187,7 +201,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     <div class="use" id="use"></div>
     <div class="feats" id="feats"></div>
 
-    <div class="sec">Features <span class="c">switch on · watch the burn</span></div>
+    <div class="sec" id="fsec" style="display:none">Features <span class="c">running · watch the burn</span></div>
     <div class="fttl" id="fttl" style="display:none"></div>
     <div class="fgrid" id="fgrid"></div>
   </div></main>
@@ -299,20 +313,49 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   // inputs says "waiting on…" instead of an empty meter that reads as broken.
   var FNEEDS={bookkeeping:{gmail:true,xero:true},invoice_chaser:{xero:true,gmail:true},gst_putaway:{xero:true}};
   var CONNS={gmail_inboxes:[],xero:false};
-  // The coaching card, built against what's ACTUALLY connected. Gmail leads:
-  // the receipts are the raw material, and one business often has several
-  // inboxes worth of them (Max: "connect every inbox that might hold one").
+  // V3: the stepper. One next action at a time — Gmail, then Xero, then one
+  // Start button that switches everything on. The three features sit
+  // underneath as a quiet promise, not a decision to make yet.
   function coachHtml(){
     var g=CONNS.gmail_inboxes.length,x=CONNS.xero;
-    var tick='<span style="color:var(--grn);font-weight:700">✓</span> ';
-    return '<b style="font-size:14.5px">Here’s how it works</b><br>'
-      +'Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>'
-      +'<b>1.</b> '+(g?tick:'')+'<a href="connections.html?c='+CO+'">Connect your Gmail inboxes</a> — every inbox that might have receipts, bills or supplier invoices landing in it. Connect as many as you like; Ava reads them all.'
-      +(g?' <span style="color:var(--grn);font-weight:600">'+g+' connected.</span>':'')+'<br>'
-      +'<b>2.</b> '+(x?tick:'')+'<a href="connections.html?c='+CO+'">Connect Xero</a> — your books, invoices and bank feed live there.'
-      +(x?' <span style="color:var(--grn);font-weight:600">Connected.</span>':'')+'<br>'
-      +'<b>3.</b> Switch on your first feature below — your first <b>$100</b> of Ava’s work is on us, and every feature shows its own tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.';
+    var gmailUrl=API+"/gmail-auth?company_id="+CO;
+    var xeroUrl=CONNS.xero_url||("connections.html?c="+CO);
+    var step=!g?1:!x?2:3;
+    var dots="";
+    for(var i=1;i<=3;i++)dots+='<span class="dot'+(i<step?" done":i===step?" cur":"")+'"></span>';
+    var body=step===1
+      ?'<div class="s3t">Connect your inbox</div>'
+        +'<div class="s3d">Every inbox where receipts, bills and supplier invoices land — Ava reads them all. You can add more inboxes after.</div>'
+        +'<a class="s3b" href="'+gmailUrl+'">Connect Gmail</a>'
+      :step===2
+      ?'<div class="s3t"><span class="s3tick">✓ Inbox in.</span> Now Xero</div>'
+        +'<div class="s3d">Your books, invoices and bank feed. This is the last connection.</div>'
+        +'<a class="s3b" href="'+xeroUrl+'">Connect Xero</a>'
+      :'<div class="s3t"><span class="s3tick">✓ All connected.</span> Start Ava</div>'
+        +'<div class="s3d">One tap switches on all three. Your first <b>$100</b> of her work is free, every feature meters itself as it runs, and you can switch any of them off whenever you like.</div>'
+        +'<button class="s3b bstart">Start Ava — first $100 free</button>';
+    return '<div class="s3top"><span class="s3n">Step '+step+' of 3</span>'+dots+'</div>'+body
+      +'<div class="s3f">'
+      +'<div><b>Auto Bookkeeping</b> — receipts read out of email, matched to the right spend in Xero</div>'
+      +'<div><b>Auto Collect</b> — overdue invoices chased politely, from your own address</div>'
+      +'<div><b>GST put-away</b> — what to set aside each week so GST day never stings · free forever</div>'
+      +'</div>';
   }
+  document.addEventListener("click",function(e){
+    if(!(e.target.closest&&e.target.closest(".bstart")))return;
+    var b=document.querySelector(".bstart");
+    b.disabled=true;b.textContent="Starting…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    var by=(sess&&sess.email)||"owner";
+    var chain=Promise.resolve();
+    ["bookkeeping","invoice_chaser","gst_putaway"].forEach(function(k){
+      chain=chain.then(function(){return fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,key:k,on:true,by:by})});});
+    });
+    chain.then(function(){return fetch(API+"/ava-triage?company="+CO);})
+      .then(function(r){return r.json();}).then(render)
+      .catch(function(){b.disabled=false;b.textContent="Start Ava — first $100 free";});
+  });
   function waitingOn(f){
     if(!f.on)return null;
     var need=FNEEDS[f.key]||{};
@@ -329,12 +372,14 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     fs=fs.filter(function(f){return f.key!=="invoicing";});
     if(!fs.length)return;
     var allOff=fs.every(function(f){return !f.on;});
-    // The coaching stays up until the accounts are actually connected — a
-    // feature switched on against nothing isn't set up, it's just a toggle.
+    // The stepper stays up until the accounts are connected AND Ava's on;
+    // the features section only exists once she's actually running.
     var setupDone=CONNS.gmail_inboxes.length&&CONNS.xero&&!allOff;
     var coach=document.getElementById("coach");
     coach.style.display=setupDone?"none":"";
     if(!setupDone)coach.innerHTML=coachHtml();
+    document.getElementById("fsec").style.display=allOff?"none":"";
+    if(allOff){document.getElementById("fttl").style.display="none";document.getElementById("fgrid").innerHTML="";return;}
     // The charge-up bar (Max, 2026-08-03: no fortnight roll-up — each card
     // already carries its own meter). While the starter credit lasts, count
     // it down; once it's spent, show what this fortnight is costing and the
