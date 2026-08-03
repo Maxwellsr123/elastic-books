@@ -382,7 +382,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     if(allOff){document.getElementById("fttl").style.display="none";document.getElementById("fgrid").innerHTML="";return;}
     // The charge-up bar (Max, 2026-08-03: no fortnight roll-up — each card
     // already carries its own meter). While the starter credit lasts, count
-    // it down; once it's spent, show what this fortnight is costing and the
+    // it down; once it's spent, show what this month is costing and the
     // way to pay. Usage & billing stays the detailed view.
     var charge=0,creditLeft=null;
     fs.forEach(function(f){
@@ -394,7 +394,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     tt.innerHTML=creditLeft!=null
       ?'<span class="cr" style="font-size:13.5px">⚡ '+fmtC(creditLeft)+' of your $100 free credit left</span>'
         +'<span style="margin-left:auto;color:var(--ink3)">then it’s pay-as-you-go — <a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">top up any time</a></span>'
-      :'<span><b>'+fmtC(charge)+'</b> this fortnight</span>'
+      :'<span><b>'+fmtC(charge)+'</b> this month</span>'
         +'<span style="margin-left:auto"><a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">Top up / pay →</a></span>';
     // cards
     document.getElementById("fgrid").innerHTML=fs.map(function(f){
@@ -410,7 +410,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         ?'<div class="fb">'+esc(f.blurb)+offHint+'</div>'
         :waiting
         ?'<div class="fm" style="color:var(--amb)">Waiting on '+esc(waiting)+' — <a href="connections.html?c='+CO+'" style="color:var(--amb);font-weight:700">connect it</a> and Ava gets to work.</div>'
-        :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this fortnight · '
+        :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this month · '
           +(f.free?'<span class="fr">Free</span>'
             :f.on_credit?'<span class="fr">Free — on your starter credit</span>'
             :'<b>'+fmtC(f.charge_usd||0)+'</b>')+'</div>';
