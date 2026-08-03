@@ -984,10 +984,19 @@ h1{letter-spacing:-.03em}
     fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
       .then(function(r){return r.json();}).then(function(d){
         if(d&&d.ok)setS({email:d.email,name:d.name,looper:d.looper,partner:d.partner||null,companies:d.companies,token:d.token||t});
-        // a fresh sign-in lands on the features hub, not straight into the
-        // bookkeeping board — EVERYONE, loopers included (Max, 2026-07-30);
-        // the hub links loopers on to The Desk
-        if(d&&d.ok&&!hasC){location.replace("index.html");return;}
+        // A fresh sign-in used to always bounce here to index.html, which
+        // then immediately bounced non-loopers on again to today.html — two
+        // hops to land where they were always going (Max, 3 Aug: "it needs
+        // to go to today", found while tracing why join.html's brand-new-
+        // client link still landed on the bookkeeping board along the way).
+        // Loopers still go to the hub — they hop between clients and The
+        // Desk, same reasoning as index.html's own redirect.
+        if(d&&d.ok&&!hasC){
+          if(d.looper){location.replace("index.html");return;}
+          var firstCo=(d.companies&&d.companies[0]&&d.companies[0].id)||"";
+          location.replace(firstCo?("today.html?c="+encodeURIComponent(firstCo)):"index.html");
+          return;
+        }
         history.replaceState({},"",hasC?location.pathname+"?c="+hasC:location.pathname);
         route();
       }).catch(function(){route();});
