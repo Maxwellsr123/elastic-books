@@ -348,8 +348,12 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         :f.on_credit?'<span class="pill p-ind">On · free credit</span>'
         :'<span class="pill p-grn">On</span>';
       var waiting=waitingOn(f);
+      // An OFF paid card says the starter credit covers it BEFORE they commit
+      // — "is this going to cost me?" is the exact hesitation at this button.
+      var offHint=f.free?' <span style="color:var(--grn);font-weight:600">Free.</span>'
+        :f.on_credit?' <span style="color:var(--grn);font-weight:600">Covered by your free $100 starter credit.</span>':'';
       var meter=!f.on
-        ?'<div class="fb">'+esc(f.blurb)+(f.free?' <span class="fr" style="color:var(--grn);font-weight:600">Free.</span>':'')+'</div>'
+        ?'<div class="fb">'+esc(f.blurb)+offHint+'</div>'
         :waiting
         ?'<div class="fm" style="color:var(--amb)">Waiting on '+esc(waiting)+' — <a href="connections.html?c='+CO+'" style="color:var(--amb);font-weight:700">connect it</a> and Ava gets to work.</div>'
         :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this fortnight · '
