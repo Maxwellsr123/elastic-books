@@ -96,6 +96,11 @@
       "#avash .out{color:#B42318;border-top:1px solid #ECECE4;border-radius:0;margin-top:6px}" +
       "#avash .out i{color:#B42318}" +
       "body.avanav-pad{padding-left:212px}" +
+      // Plain pages (usage, connections, hub) get the nav APPENDED to body —
+      // sticky there means "in flow, after the content", which on a long page
+      // dropped the rail below the fold (Max's usage-page screenshot,
+      // 2026-08-03). Floating rails pin instead.
+      "#avanav.nvfloat{position:fixed;left:0;top:0}" +
       // ── phone first: bottom bar, thumb targets, safe area ──
       "@media(max-width:820px){" +
       "html,body{overflow-x:hidden;max-width:100vw}" +
@@ -191,7 +196,7 @@
     var app = document.querySelector(".app");
     if (old && old.parentNode) old.parentNode.removeChild(old);
     if (app) app.insertBefore(nav, app.firstChild);
-    else { document.body.appendChild(nav); document.body.classList.add("avanav-pad"); }
+    else { nav.classList.add("nvfloat"); document.body.appendChild(nav); document.body.classList.add("avanav-pad"); }
   }
 
   global.avaNav = {
