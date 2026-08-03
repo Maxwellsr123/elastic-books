@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elastic — The Desk</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+--ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
+--grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.top{display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-bottom:1px solid var(--line);background:#131218;color:#fff;position:sticky;top:0;z-index:10}
+.top .brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:15px}
+.top .logo{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.top .sub{font-size:11px;font-weight:700;letter-spacing:1.4px;color:#6F66DB;text-transform:uppercase}
+.wrap{max-width:880px;margin:0 auto;padding:24px 20px 80px}
+.sec{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.sec .cnt{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;color:var(--ink3)}
+.co{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:10px;overflow:hidden}
+.cohead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.cohead:hover{background:#FCFCF9}
+.coname{font-weight:600;font-size:14.5px;flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.b-grn{background:var(--grnbg);color:var(--grn)}.b-amb{background:var(--ambbg);color:var(--amb)}.b-ind{background:var(--indbg);color:var(--indtx)}.b-red{background:var(--redbg);color:var(--red)}.b-mut{background:#EFEFE8;color:var(--ink3)}
+.panel{border-top:1px solid var(--line);padding:16px;display:none;background:#FBFBF8}
+.drop{border:2px dashed #C9C4F2;border-radius:6px;background:#fff;padding:16px;text-align:center;margin-bottom:16px}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:3px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--bg)}
+.btn-p{background:#FF6A1A;color:#fff;border-color:#FF6A1A}.btn-p:hover{background:#D2530F;border-color:#D2530F}
+.btn-g{border-color:var(--grn);color:var(--grn)}
+.list{background:#fff;border:1px solid var(--line);border-radius:4px}
+.row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-top:1px solid #ECECE4;flex-wrap:wrap}
+.row:first-child{border-top:0}
+.rmain{flex:1;min-width:180px}
+.rt{font-weight:600;font-size:13.5px}
+.rs{font-size:12px;color:var(--ink2);margin-top:1px}
+.muted{color:var(--ink3);font-size:12.5px}
+a{color:var(--indtx)}
+input.fi{border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-family:inherit;font-size:13px}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:640px){.formrow{flex-direction:column;align-items:stretch}.formrow .fi{width:100%!important;flex:unset!important}}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+@media(max-width:640px){.top{padding:12px 14px}.top .sub{display:none}.wrap{padding:16px 10px 60px}.cohead{padding:12px 34px 12px 12px;flex-wrap:wrap;position:relative;row-gap:8px}.coname{flex-basis:100%}.cohead>i{position:absolute;right:12px;top:12px}.row{padding:10px 11px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><div class="logo">E</div><div><div>The Desk <span id="envbadge" style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#fde68a;color:#92400e;padding:2px 7px;border-radius:3px;vertical-align:middle">BETA</span></div><div class="sub">Elastic · every client, one screen</div></div></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="whoami" style="font-size:12px;color:#8B8B98"></span>
+    <a id="signout" style="font-size:12px;color:#A7A2F4;cursor:pointer;font-weight:600">Sign out</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="sec">Invite a client <span class="cnt">they sign themselves up — email or Slack not required</span></div>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px;margin-bottom:8px">
+    <div class="formrow">
+      <input class="fi" id="iv-name" placeholder="Client business name" style="flex:1;min-width:160px">
+      <input class="fi" id="iv-email" placeholder="Their email (optional — blank makes a copy link)" style="flex:1;min-width:220px">
+      <button class="btn btn-p" id="iv-go"><i class="ti ti-mail-forward"></i> Invite</button>
+    </div>
+    <div class="muted" id="iv-msg" style="margin-top:8px;min-height:15px">They confirm their business details, connect Gmail &amp; Xero, and land on their own board — no Slack anywhere.</div>
+  </div>
+  <div id="invlist"></div>
+
+  <div class="sec" style="margin-top:28px">Elastic team hours <span class="cnt">drop Jewel's Clockify PDF — it bills at each client's agreed rate</span></div>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px;margin-bottom:8px">
+    <div id="ck-drop" style="border:1.5px dashed var(--line);border-radius:5px;padding:18px;text-align:center;cursor:pointer;font-size:13.5px;color:var(--ink2)">
+      <i class="ti ti-file-time" style="font-size:20px;display:block;margin-bottom:5px"></i>
+      Drop the Clockify PDF here, or tap to choose
+      <input type="file" id="ck-file" accept="application/pdf,image/*" style="display:none">
+    </div>
+    <div class="muted" id="ck-msg" style="margin-top:8px;min-height:15px">Ava reads the hours per client, matches them to a company, and prices them at that client's rate. Nothing bills until you confirm.</div>
+    <div id="ck-preview"></div>
+  </div>
+
+  <div class="sec" style="margin-top:28px">Invoice run <span class="cnt" id="ir-hint">last closed fortnight — raise these, then record the payment with Top-up +</span></div>
+  <div id="ir-list" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 14px;margin-bottom:8px"><span class="muted">Loading…</span></div>
+
+  <div class="sec">Needs Elastic <span class="cnt" id="workhint">loading clients…</span></div>
+  <div id="worklist"></div>
+  <div class="sec" style="margin-top:28px">Quiet <span class="cnt">nothing owed right now</span></div>
+  <div id="quietlist"></div>
+</div>
+
+<div id="gate">
+  <div style="width:100%;max-width:380px;text-align:center">
+    <div style="width:52px;height:52px;border-radius:6px;background:linear-gradient(135deg,var(--ind),var(--ind2));margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px">E</div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:5px">Elastic team sign-in</div>
+    <div style="font-size:13px;color:var(--ink2);margin-bottom:18px">Enter your @elasticadmin email and we'll send a link.</div>
+    <input id="gemail" type="email" placeholder="you@elasticadmin.com" style="width:100%;border:1px solid var(--line);border-radius:3px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:10px">
+    <button id="gbtn" class="btn btn-p" style="width:100%;justify-content:center;padding:12px">Email me a link</button>
+    <div id="gmsg" style="font-size:12.5px;margin-top:10px;min-height:16px;color:var(--ink2)"></div>
+  </div>
+</div>
+
+<script>
+var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+var APP="app.html";
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
+var SKEY="ava_session";
+function getS(){try{return JSON.parse(localStorage.getItem(SKEY)||"null");}catch(e){return null;}}
+var SESSION=getS();
+var CACHE={};   // chase-list per company (Auto Bookkeeping)
+var ACOL={};    // auto-collect per company (Auto Collect)
+var APCACHE={}; // ava-aged-payables FULL view per company — loaded lazily, on panel open
+var APCOUNT={}; // {flagged,flagged_total} per company — the cheap upfront badge check
+// folded feature sections, per client — survives re-renders and reloads
+var FOLDS={};try{FOLDS=JSON.parse(localStorage.getItem("desk_folds")||"{}")||{};}catch(e){}
+
+// ── auth: loopers only; dev is open ──
+function boot(){
+  var t=new URLSearchParams(location.search).get("t");
+  if(t){fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",token:t})})
+    .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){localStorage.setItem(SKEY,JSON.stringify({email:d.email,name:d.name,looper:d.looper,companies:d.companies,token:d.token}));}history.replaceState({},"",location.pathname);SESSION=getS();boot();})
+    .catch(function(){history.replaceState({},"",location.pathname);boot();});return;}
+  if(window.IS_DEV&&!SESSION){SESSION={email:"max@elasticadmin.com",name:"Dev looper",looper:true};start();return;}
+  if(!SESSION){document.getElementById("gate").style.display="flex";return;}
+  if(!SESSION.looper){location.replace(APP);return;}
+  start();
+}
+document.getElementById("gbtn").addEventListener("click",function(){
+  var v=(document.getElementById("gemail").value||"").trim().toLowerCase(),m=document.getElementById("gmsg");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.textContent="Enter a valid email.";return;}
+  this.disabled=true;this.textContent="Sending…";var b=this;
+  fetch(API+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"request",email:v,redirect:location.origin+location.pathname.replace(/admin\.html$/,"app.html")})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.textContent="Email me a link";m.textContent=d&&d.error?d.error:"Check your email — link sent.";})
+    .catch(function(){b.disabled=false;b.textContent="Email me a link";m.textContent="Couldn't send — try again.";});
+});
+document.getElementById("signout").addEventListener("click",function(){localStorage.removeItem(SKEY);location.reload();});
+
+// ── the desk ──
+function track(co,act){
+  if(window.IS_DEV||!SESSION||!SESSION.email)return;
+  try{fetch(API+"/desk-track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co,email:SESSION.email,action:act})});}catch(e){}
+}
+function toast(msg,undoFn){
+  var t=document.getElementById("dtoast");if(t)t.remove();
+  t=document.createElement("div");t.id="dtoast";
+  t.style.cssText="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#101311;color:#F4F2EA;padding:11px 16px;font-size:13.5px;display:flex;gap:14px;align-items:center;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25)";
+  t.innerHTML="<span>"+msg+"</span>";
+  if(undoFn){var u=document.createElement("a");u.textContent="Undo";u.style.cssText="color:#7FD1A8;font-weight:700;cursor:pointer";u.addEventListener("click",function(){t.remove();undoFn();});t.appendChild(u);}
+  document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},8000);
+}
+// ── invites: The Desk onboards new house clients the same way partner firms do ──
+function copyText(txt,btn){
+  var done=function(){var old=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> Copied';setTimeout(function(){btn.innerHTML=old;},1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){window.prompt("Copy this link:",txt);});}
+  else window.prompt("Copy this link:",txt);
+}
+function loadInvites(){
+  if(!SESSION.token){document.getElementById("iv-msg").textContent="Sign out and back in once to enable inviting (your session predates it).";document.getElementById("iv-go").disabled=true;return;}
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)).then(function(r){return r.json();}).then(function(d){
+    var house=((d&&d.firms)||[]).filter(function(f){return f.id===null;})[0];
+    var inv=(house&&house.pending_invites)||[];
+    if(!inv.length){document.getElementById("invlist").innerHTML="";return;}
+    document.getElementById("invlist").innerHTML='<div class="list" style="margin-bottom:8px">'+inv.map(function(i){
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.client_name)+'</div><div class="rs">'+(i.email?"invited — emailed "+esc(i.email):"invited — copy link, not emailed")+' · expires '+new Date(i.expires_at).toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</div></div>'
+        +'<button class="btn bicopy" data-link="'+esc(i.link)+'" style="padding:6px 11px;font-size:12px"><i class="ti ti-copy"></i> Copy link</button>'
+        +'<button class="btn birevoke" data-id="'+i.id+'" style="padding:6px 11px;font-size:12px;color:var(--red)">Revoke</button></div>';
+    }).join("")+'</div>';
+  }).catch(function(){});
+}
+document.getElementById("iv-go").addEventListener("click",function(){
+  var nm=document.getElementById("iv-name").value.trim(),em=document.getElementById("iv-email").value.trim().toLowerCase(),m=document.getElementById("iv-msg");
+  if(!nm){m.textContent="Client business name first.";return;}
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){m.textContent="That email doesn't look right (or leave it blank for a copy link).";return;}
+  var b=this;b.disabled=true;b.textContent="…";
+  fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"invite",client_name:nm,email:em||undefined})})
+    .then(function(r){return r.json();}).then(function(d){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';
+      if(d&&d.error){m.textContent=d.error;return;}
+      document.getElementById("iv-name").value="";document.getElementById("iv-email").value="";
+      if(d.emailed)m.textContent="Invite emailed — it's in the waiting list below until they sign up.";
+      else m.innerHTML='Link created — <a class="bicopy" data-link="'+esc(d.link)+'" style="cursor:pointer;font-weight:600">copy it</a> and send it to them.';
+      loadInvites();})
+    .catch(function(){b.disabled=false;b.innerHTML='<i class="ti ti-mail-forward"></i> Invite';m.textContent="Couldn't create the invite — try again.";});
+});
+// ---- Clockify drop: PDF in, priced hours out, confirm before anything bills
+var RATES={},CKROWS=null,CKDATE=null;
+function loadRates(){
+  return fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&rates=1")
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){RATES={};d.rates.forEach(function(x){RATES[x.id]=x;});
+        // headers may have rendered before rates landed — correct them in place
+        document.querySelectorAll(".setrate").forEach(function(a){
+          var c=RATES[a.getAttribute("data-co")];if(c)a.textContent="$"+c.rate+"/hr";});}
+      return RATES;});
+}
+function coOptions(sel){
+  var list=Object.keys(RATES).map(function(k){return RATES[k];}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  return '<option value="">— skip —</option>'+list.map(function(c){
+    return '<option value="'+c.id+'"'+(c.id===sel?" selected":"")+'>'+esc(c.name)+'</option>';}).join("");
+}
+function renderCkPreview(){
+  var el=document.getElementById("ck-preview");
+  if(!CKROWS||!CKROWS.length){el.innerHTML="";return;}
+  var total=CKROWS.reduce(function(n,r){return n+(r.company_id?r.hours*r.rate:0);},0);
+  el.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'
+    +CKROWS.map(function(r,i){
+      return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid #f1f1e9;font-size:13px">'
+        +'<span style="flex:1;min-width:120px">'+esc(r.client)+' <span class="muted">'+r.hours+'h</span></span>'
+        +'<select class="ck-co fi" data-i="'+i+'" style="flex:1;min-width:150px;padding:5px">'+coOptions(r.company_id)+'</select>'
+        +'<span style="white-space:nowrap">$<input class="ck-rate fi" data-i="'+i+'" value="'+r.rate+'" style="width:56px;padding:5px;text-align:right">/hr</span>'
+        +'<span style="font-weight:700;min-width:64px;text-align:right;font-variant-numeric:tabular-nums">'+(r.company_id?"$"+(r.hours*r.rate).toFixed(2):"—")+'</span>'
+        +'</div>';}).join("")
+    +'<div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">'
+    +'<span class="muted" style="flex:1;min-width:140px">Bills in the fortnight containing <b>'+esc(CKDATE)+'</b></span>'
+    +'<button class="btn btn-p" id="ck-commit">Log $'+total.toFixed(2)+' of hours</button></div></div>';
+}
+function ckUpload(file){
+  var msg=document.getElementById("ck-msg");
+  if(!file){return;}
+  msg.textContent="Reading "+file.name+"…";
+  var fr=new FileReader();
+  fr.onload=function(){
+    var b64=String(fr.result).split(",")[1];
+    loadRates().then(function(){
+      return fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({t:SESSION.token,action:"clockify",file_b64:b64,mime:file.type||"application/pdf"})});
+    }).then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){msg.textContent="Couldn't read it: "+(d&&d.error||"unknown");return;}
+      CKROWS=d.rows;CKDATE=d.worked_on;
+      msg.innerHTML=d.rows.length?("Found <b>"+d.rows.length+"</b> client"+(d.rows.length===1?"":"s")+" · "+d.matched+" matched"+(d.unmatched?", <b>"+d.unmatched+" need picking</b>":"")+" — check and confirm."):"No hours found in that file.";
+      renderCkPreview();
+    }).catch(function(){msg.textContent="Couldn't read it — network error.";});
+  };
+  fr.readAsDataURL(file);
+}
+function loadInvoiceRun(){
+  fetch(API+"/partner-desk?t="+encodeURIComponent(SESSION.token)+"&invoice_run=1")
+    .then(function(r){return r.json();}).then(function(d){
+      var el=document.getElementById("ir-list");
+      if(!d||!d.ok){el.innerHTML='<span class="muted">Couldn\'t load the run.</span>';return;}
+      if(!d.period||!(d.rows||[]).length){el.innerHTML='<span class="muted">Nothing to invoice for the last closed fortnight.</span>';return;}
+      function fd(ymd){var t=new Date(ymd+"T12:00:00");return t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}
+      document.getElementById("ir-hint").textContent=fd(d.period.start)+" – "+fd(d.period.end)+" · $"+Number(d.total).toFixed(2)+" USD across "+d.rows.length+" client"+(d.rows.length===1?"":"s");
+      el.innerHTML=d.rows.map(function(r){
+        var span=fd(d.period.start)+"–"+fd(d.period.end);
+        var line=r.name+" — Elastic Admin "+span+" — Ava usage $"+r.ava.toFixed(2)
+          +(r.hours?" + Elastic team "+r.hours+"h $"+r.human.toFixed(2):"")+" — USD $"+r.charge.toFixed(2);
+        var detail=r.tasks+' tasks'+(r.hours?' · '+r.hours+'h human':'');
+        return '<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #f1f1e9;font-size:13.5px">'
+          +'<span style="flex:1;min-width:0">'+esc(r.name)+(r.firm?' <span class="muted" style="font-size:11.5px">via '+esc(r.firm)+'</span>':'')+'</span>'
+          +'<span class="muted" style="font-size:12px;white-space:nowrap">'+detail+'</span>'
+          +'<span style="font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums">$'+r.charge.toFixed(2)+'</span>'
+          +'<a class="bicopy" data-link="'+esc(line)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" title="Copy an invoice line for Xero">copy</a>'
+          +'</div>';
+      }).join("");
+    }).catch(function(){document.getElementById("ir-list").innerHTML='<span class="muted">Couldn\'t load the run.</span>';});
+}
+function start(){
+  document.getElementById("whoami").textContent=(SESSION.name||SESSION.email||"").split("@")[0];
+  loadInvites();
+  loadInvoiceRun();
+  loadRates();
+  // Clockify drop: click, tap, or drag a PDF onto the zone
+  var dz=document.getElementById("ck-drop"),fi=document.getElementById("ck-file");
+  dz.addEventListener("click",function(){fi.click();});
+  fi.addEventListener("change",function(){ckUpload(fi.files[0]);fi.value="";});
+  ["dragenter","dragover"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.style.borderColor="var(--ind)";});});
+  ["dragleave","drop"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.style.borderColor="var(--line)";});});
+  dz.addEventListener("drop",function(e){if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0])ckUpload(e.dataTransfer.files[0]);});
+  // preview edits: company pick + rate override
+  document.addEventListener("change",function(e){
+    var sc=e.target.closest?e.target.closest(".ck-co"):null;
+    if(sc&&CKROWS){var i=Number(sc.getAttribute("data-i"));CKROWS[i].company_id=sc.value||null;
+      if(sc.value&&RATES[sc.value])CKROWS[i].rate=RATES[sc.value].rate;renderCkPreview();return;}
+    var rr=e.target.closest?e.target.closest(".ck-rate"):null;
+    if(rr&&CKROWS){var j=Number(rr.getAttribute("data-i"));var v=Number(rr.value);
+      if(Number.isFinite(v)&&v>=0){CKROWS[j].rate=v;renderCkPreview();}return;}
+  });
+  fetch(API+"/admin-clients").then(function(r){return r.json();}).then(function(d){
+    var cs=(d.clients||[]).filter(function(c){return !/^(test|sandbox)/i.test(c.name||"");});
+    if(!window.IS_DEV)cs=cs.filter(function(c){return c.id!=="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";});
+    // Both features per client, in one pass. Auto Collect runs owner-side, but
+    // when Ava hands a chase back it's a human's job — and that human can be us
+    // (Max, 31 Jul). So the Desk reads it too and surfaces the handovers.
+    // Third leg: Aged Payables' "flagged for Elastic" queue. A flag with
+    // nobody looking at it isn't a control, it's a checkbox — this is the
+    // side that closes the loop (Max, 2 Aug: draft the bill, never send it
+    // without a human, and that human is us).
+    // Aged Payables' badge uses ?count=1 — a plain ap_pile count, no Xero call.
+    // The full Xero-matched view (apBlock) only loads when a panel opens.
+    Promise.all(cs.map(function(c){
+      return Promise.all([
+        fetch(API+"/chase-list?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch(API+"/auto-collect?company="+c.id).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch(API+"/ava-aged-payables?company="+c.id+"&count=1").then(function(r){return r.json();}).catch(function(){return null;})
+      ]).then(function(all){CACHE[c.id]=all[0];ACOL[c.id]=all[1];APCOUNT[c.id]=all[2];return {c:c,cl:all[0],ac:all[1],apc:all[2]};});
+    })).then(renderClients);
+  }).catch(function(){document.getElementById("workhint").textContent="couldn't load clients";});
+}
+function laneCounts(cl){
+  var it=(cl&&cl.items)||[];
+  var n=function(f){return it.filter(f).length;};
+  return {
+    ready:n(function(i){return i.lane==="ready";}),
+    review:n(function(i){return i.lane==="review"||i.lane==="looper";}),
+    owner:n(function(i){return i.lane==="guess"||(i.needs_receipt&&!i.receipt_incoming&&!i.reconciled&&!i.bill&&i.lane!=="review"&&i.lane!=="looper");}),
+    hunting:n(function(i){return i.receipt_incoming;}),
+    pile:n(function(i){return i.lane==="pile";})
+  };
+}
+// Auto Collect, boiled down to the two numbers that decide whether this client
+// belongs in "Needs Elastic": how many chases Ava's handed back, and what's out.
+function acCounts(ac){
+  if(!ac||ac.error||!ac.enabled)return {on:false,needs:0,active:0,owing:0,paused:false,ready:false};
+  var c=ac.counts||{};
+  return {on:true,needs:c.needs_you||0,active:c.active||0,owing:c.owing_total||0,paused:!!ac.paused,ready:!!ac.ready};
+}
+// Aged Payables, boiled down the same way: how many bills someone flagged
+// for us to actually enter in Xero. Anything still 'new' (unreviewed) isn't
+// Elastic's job yet — only a flag is a request for our time. Reads the cheap
+// ?count=1 result (no Xero call) — see apBlock for the full, lazy-loaded view.
+function apCounts(apc){
+  if(!apc||apc.error)return {flagged:0,flaggedTotal:0};
+  return {flagged:apc.flagged||0,flaggedTotal:apc.flagged_total||0};
+}
+function renderClients(rows){
+  // handovers outrank bookkeeping: an invoice nobody's chasing costs the client
+  // more than a receipt nobody's filed.
+  rows.sort(function(a,b){var ca=laneCounts(a.cl),cb=laneCounts(b.cl),aa=acCounts(a.ac),ab=acCounts(b.ac),pa=apCounts(a.apc),pb=apCounts(b.apc);
+    return ((ab.needs+pb.flagged)-(aa.needs+pa.flagged))||(cb.ready+cb.review)-(ca.ready+ca.review)||(cb.owner-ca.owner);});
+  var work="",quiet="",working=0;
+  rows.forEach(function(r){
+    var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac),ap=apCounts(r.apc);
+    var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
+    var badges="";
+    if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
+    if(c.review)badges+='<span class="badge b-amb">'+c.review+' check</span> ';
+    if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
+    if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
+    if(ac.needs)badges+='<span class="badge b-red" title="Auto Collect: Ava has handed these back — email sent, no reply, or a dispute">'+ac.needs+' collect</span> ';
+    if(ap.flagged)badges+='<span class="badge b-red" title="Aged Payables: bills someone flagged for us to enter in Xero">'+ap.flagged+' to enter</span> ';
+    if(!badges)badges='<span class="badge b-mut">all quiet</span>';
+    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="setrate" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--ink3)" title="Their agreed labour sell rate — click to change">$'+(RATES[r.c.id]?RATES[r.c.id].rate:20)+'/hr</a><a href="#" class="loghours" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Log Elastic team hours against this client">Hours +</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
+    if(c.ready||c.review||c.owner||c.pile||ac.needs||ap.flagged){work+=html;working++;}else quiet+=html;
+  });
+  document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
+  document.getElementById("quietlist").innerHTML=quiet;
+  document.getElementById("workhint").textContent=working+" client"+(working===1?"":"s")+" with work";
+}
+document.addEventListener("click",function(e){
+  var fh=e.target.closest(".fhead");
+  if(fh){var fb=fh.nextElementSibling;if(fb&&fb.classList.contains("fbody")){var open=fb.style.display!=="none";fb.style.display=open?"none":"";var ch=fh.querySelector("i");if(ch){ch.classList.toggle("ti-chevron-up",!open);ch.classList.toggle("ti-chevron-down",open);}
+    // remember the choice so re-renders (tick-offs, uploads, reloads) don't pop it back open
+    var fk=fh.getAttribute("data-fold");if(fk){FOLDS[fk]=open;try{localStorage.setItem("desk_folds",JSON.stringify(FOLDS));}catch(_e){}}}return;}
+  var ic=e.target.closest(".bicopy");
+  if(ic){copyText(ic.getAttribute("data-link"),ic);return;}
+  var at=e.target.closest(".acthread");
+  if(at){var tid=at.getAttribute("data-id"),tco=at.getAttribute("data-co"),td=document.getElementById("th-"+tid);
+    if(!td)return;
+    if(td.style.display!=="none"){td.style.display="none";THREAD[tid]=null;at.textContent="Read the full thread";return;}
+    td.style.display="";at.textContent="Hide the full thread";
+    if(!THREAD[tid]){
+      td.innerHTML='<div class="muted" style="padding:8px 0">Loading the thread…</div>';
+      track(tco,"collect_thread");
+      fetch(API+"/auto-collect?company="+tco+"&thread="+tid).then(function(r){return r.json();})
+        .then(function(d){THREAD[tid]=acThreadHtml(d);td.innerHTML=THREAD[tid];})
+        .catch(function(){td.innerHTML='<div class="muted" style="padding:8px 0;color:var(--amb)">Couldn\'t reach the thread — try again.</div>';});
+    }
+    return;}
+  var ape=e.target.closest(".bapenter");
+  if(ape){var eco=ape.getAttribute("data-co"),eid=ape.getAttribute("data-id");ape.disabled=true;ape.textContent="…";
+    fetch(API+"/ava-aged-payables",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:eco,id:eid,action:"enter"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){toast("Marked as entered in Xero");fetch(API+"/ava-aged-payables?company="+eco).then(function(r){return r.json();}).then(function(fresh){APCACHE[eco]=fresh;var p=document.getElementById("p-"+eco);if(p&&p.style.display==="block")renderPanel(eco);});}
+        else{ape.disabled=false;ape.textContent="Entered ✓";alert((d&&d.error)||"Couldn't save.");}
+      }).catch(function(){ape.disabled=false;ape.textContent="Entered ✓";});
+    return;}
+  var api=e.target.closest(".bapignore");
+  if(api){var ico=api.getAttribute("data-co"),iid=api.getAttribute("data-id");
+    if(!confirm("Not actually a bill to pay? This removes it from Aged Payables."))return;
+    api.disabled=true;api.textContent="…";
+    fetch(API+"/ava-aged-payables",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:ico,id:iid,action:"ignore"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){toast("Removed from Aged Payables");fetch(API+"/ava-aged-payables?company="+ico).then(function(r){return r.json();}).then(function(fresh){APCACHE[ico]=fresh;var p=document.getElementById("p-"+ico);if(p&&p.style.display==="block")renderPanel(ico);});}
+        else{api.disabled=false;api.textContent="Not real";alert((d&&d.error)||"Couldn't save.");}
+      }).catch(function(){api.disabled=false;api.textContent="Not real";});
+    return;}
+  var bf=e.target.closest(".bfeat");
+  if(bf){var fco=bf.getAttribute("data-co"),fkey=bf.getAttribute("data-key"),turningOff=bf.getAttribute("data-on")==="1";
+    var fname=bf.closest(".row").querySelector(".rt").textContent;
+    // Switching a client's feature off from our side stops Ava working for them.
+    // That's their call more than ours, so make it a deliberate one.
+    if(turningOff&&!confirm("Switch "+fname+" OFF for this client?\n\nAva stops doing it — the hourly jobs will skip them until it's switched back on."))return;
+    bf.disabled=true;bf.textContent="…";
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:fco,key:fkey,on:!turningOff,by:(SESSION&&SESSION.email)||"desk"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){FEATS[fco]=d;renderPanel(fco);toast(fname+(turningOff?" switched off":" switched on"));}
+        else{bf.disabled=false;bf.textContent=turningOff?"Switch off":"Switch on";alert("Couldn't change it: "+((d&&d.error)||"unknown"));}})
+      .catch(function(){bf.disabled=false;bf.textContent=turningOff?"Switch off":"Switch on";});
+    return;}
+  var as=e.target.closest(".acstory");
+  if(as){var aid=as.getAttribute("data-id"),sd=document.getElementById("st-"+aid);
+    if(sd){var shut=sd.style.display==="none";sd.style.display=shut?"":"none";STORY[aid]=shut;
+      as.innerHTML=(shut?"Hide trail":"Trail")+as.innerHTML.slice(as.innerHTML.indexOf(" <span"));}
+    return;}
+  var ir=e.target.closest(".birevoke");
+  if(ir){ir.disabled=true;ir.textContent="…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"revoke",id:ir.getAttribute("data-id")})})
+      .then(function(){loadInvites();}).catch(function(){ir.disabled=false;ir.textContent="Revoke";});
+    return;}
+  if(e.target&&e.target.id==="ck-commit"){
+    var btn=e.target;btn.disabled=true;btn.textContent="Logging…";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({t:SESSION.token,action:"clockify_commit",worked_on:CKDATE,note:"Clockify report",rows:CKROWS.filter(function(r){return r.company_id;})})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){
+          document.getElementById("ck-msg").innerHTML="Logged <b>"+d.logged+"</b> client"+(d.logged===1?"":"s")+" — $"+d.charge.toFixed(2)+" added to the "+d.period.start+" fortnight.";
+          CKROWS=null;renderCkPreview();loadInvoiceRun();
+        }else{btn.disabled=false;btn.textContent="Try again";alert("Couldn't log: "+(d&&d.error||"unknown"));}})
+      .catch(function(){btn.disabled=false;btn.textContent="Try again";});
+    return;}
+  var lh=e.target.closest(".loghours");
+  if(lh){e.preventDefault();
+    var co=lh.getAttribute("data-co");
+    var known=RATES[co]?RATES[co].rate:20;
+    var hrs=prompt("Elastic team hours for "+lh.getAttribute("data-name")+" (bills at their agreed $"+known+"/hr):");
+    if(hrs===null)return;
+    var hn=Number(String(hrs).replace(/[^0-9.]/g,""));
+    if(!hn){alert("Enter hours, e.g. 1.5");return;}
+    var day=prompt("Date the work was done (YYYY-MM-DD) — sets which fortnight it bills in:",new Date().toISOString().slice(0,10));
+    if(day===null)return;
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"add_hours",id:co,hours:hn,worked_on:day,note:"logged on the Desk"})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){alert("Logged "+hn+"h at $"+d.rate+"/hr = $"+d.charge.toFixed(2)+" — bills in the "+d.period.start+" fortnight.");loadInvoiceRun();}
+        else alert("Couldn't log hours: "+(d&&d.error||"unknown"));})
+      .catch(function(){alert("Couldn't log hours — network error.");});
+    return;}
+  var rt=e.target.closest(".setrate");
+  if(rt){e.preventDefault();
+    var rco=rt.getAttribute("data-co");
+    var cur=RATES[rco]?RATES[rco].rate:20;
+    var nr=prompt("Agreed labour sell rate for "+rt.getAttribute("data-name")+" (USD per hour) — OG clients keep their old price:",String(cur));
+    if(nr===null)return;
+    var nrn=Number(String(nr).replace(/[^0-9.]/g,""));
+    if(!Number.isFinite(nrn)){alert("Enter a rate, e.g. 20");return;}
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"set_rate",id:rco,rate_usd:nrn})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){if(RATES[rco])RATES[rco].rate=d.rate;rt.textContent="$"+d.rate+"/hr";}
+        else alert("Couldn't save: "+(d&&d.error||"unknown"));})
+      .catch(function(){alert("Couldn't save — network error.");});
+    return;}
+  var tu=e.target.closest(".topup");
+  if(tu){e.preventDefault();
+    var amt=prompt("Record a top-up for "+tu.getAttribute("data-name")+" — amount in USD (what they paid):");
+    if(amt===null)return;
+    var n=Number(String(amt).replace(/[^0-9.\-]/g,""));
+    if(!n){alert("Enter a dollar amount, e.g. 50");return;}
+    var note=prompt("Note (optional — e.g. bank transfer 30 Jul):")||"";
+    fetch(API+"/partner-desk",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({t:SESSION.token,action:"add_credit",id:tu.getAttribute("data-co"),amount_usd:n,note:note})})
+      .then(function(r){return r.json();}).then(function(d){alert(d&&d.ok?"Recorded — their balance updates straight away.":"Couldn't record: "+(d&&d.error||"unknown"));})
+      .catch(function(){alert("Couldn't record — network error.");});
+    return;}
+  var h=e.target.closest(".cohead");
+  if(h&&e.target.closest("a"))return; // the Board link navigates; don't also toggle the panel
+  if(h){var co=h.parentNode,id=co.getAttribute("data-id"),p=document.getElementById("p-"+id);
+    var open=p.style.display==="block";
+    document.querySelectorAll(".panel").forEach(function(x){x.style.display="none";});
+    if(!open){p.style.display="block";renderPanel(id);track(id,"panel_open");
+      if(!FEATS[id])loadFeats(id,function(){if(p.style.display==="block")renderPanel(id);});
+      // The Desk stays open for hours; Auto Collect moves every hour at :25.
+      // Re-read it on open and repaint if it changed under us.
+      fetch(API+"/auto-collect?company="+id).then(function(r){return r.json();}).then(function(ac){
+        if(!ac||ac.error)return;
+        if(JSON.stringify(ac)===JSON.stringify(ACOL[id]))return;
+        ACOL[id]=ac;if(p.style.display==="block")renderPanel(id);
+      }).catch(function(){});
+      // Aged Payables' full Xero-matched view is the expensive one (a live
+      // Xero read) — load it only now, on open, never upfront for every
+      // client (Max, 2 Aug: The Desk was doing 24 of these on every load).
+      if(!APCACHE[id])fetch(API+"/ava-aged-payables?company="+id).then(function(r){return r.json();}).then(function(ap){
+        APCACHE[id]=ap;if(p.style.display==="block")renderPanel(id);
+      }).catch(function(){});}
+    return;}
+  var b=e.target.closest(".bdrop");
+  if(b){var f=document.querySelector('.bfile[data-id="'+b.getAttribute("data-id")+'"]');if(f)f.click();return;}
+  var r=e.target.closest(".brec");
+  if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");track(rco,"reconcile");r.disabled=true;r.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
+      .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else{refresh(rco);
+        toast("Ticked off as reconciled",function(){fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"unreconcile"})}).then(function(){refresh(rco);});});}}).catch(function(){r.disabled=false;});
+    return;}
+  var sm=e.target.closest(".showmore");
+  if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
+  var sp=e.target.closest(".showpile");
+  if(sp){var pm=document.getElementById("pm-"+sp.getAttribute("data-id"));if(pm){pm.style.display="block";sp.parentNode.style.display="none";}return;}
+  var pv=e.target.closest(".bvac");
+  if(pv){var vid=pv.getAttribute("data-id"),vco=pv.getAttribute("data-co"),vact=pv.getAttribute("data-act");track(vco,vact);pv.disabled=true;
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:vco,id:vid,action:vact})})
+      .then(function(){refresh(vco);}).catch(function(){pv.disabled=false;});
+    return;}
+  var pg=e.target.closest(".bpig");
+  if(pg){var gid=pg.getAttribute("data-id"),gco=pg.getAttribute("data-co");track(gco,"pile_ignore");pg.disabled=true;pg.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:gco,id:gid,action:"ignore"})})
+      .then(function(){refresh(gco);toast("Dropped from the pile");}).catch(function(){pg.disabled=false;pg.textContent="Ignore";});
+    return;}
+  var bb=e.target.closest(".bback");
+  if(bb){var bid=bb.getAttribute("data-id"),bco=bb.getAttribute("data-co");track(bco,"send_back");bb.disabled=true;bb.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:bco,id:bid,action:"reopen"})})
+      .then(function(){refresh(bco);toast("Sent back to the working queue — the owner gets asked again");}).catch(function(){bb.disabled=false;bb.textContent="Send back";});
+    return;}
+  var bc=e.target.closest(".bconf");
+  if(bc){var cid=bc.getAttribute("data-id"),cco=bc.getAttribute("data-co");track(cco,"owner_confirmed");bc.disabled=true;bc.textContent="…";
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:cco,id:cid,action:"owner_confirmed"})})
+      .then(function(){refresh(cco);toast("Owner-confirmed — moved to Ready to reconcile");}).catch(function(){bc.disabled=false;bc.textContent="Owner confirmed";});
+    return;}
+});
+function itemRow(i,actions){
+  var rc=i.receipt_url?'<a href="'+i.receipt_url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>'
+    :(i.receipt==="have"?'<span class="muted" style="white-space:nowrap"><i class="ti ti-paperclip" style="vertical-align:-2px"></i> on the Xero txn ✓</span>':'');
+  var extra=(i.extra_receipts||[]).map(function(x){return '<a href="'+x.url+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">'+esc(x.filename)+'</a>';}).join(" ");
+  // Jewel needs to see which costs belong to jobs: bold job # when the owner set one,
+  // "job cost" when ticked without a #, and Ava's materials hunch when unanswered.
+  var job=i.job_ref?' · <b>'+esc(i.job_ref)+'</b>'
+    :(i.is_job===true?' · <b>job cost</b> <span class="muted">(no job #)</span>'
+    :(i.is_job==null&&i.ava_job?' · <span style="color:#9a6700">job? looks like materials — ask the owner</span>':''));
+  // GST only when the owner actually answered — silence means unasked, not "no"
+  var gst=i.gst===true?' · <b>GST</b>':(i.gst===false?' · <b>no GST</b>':'');
+  // why is this line reconcilable? A receipt link alone doesn't say whether a human
+  // signed off — name the proof and who gave it on every row (Jewel, 18 Jul)
+  var why=i.personal?'owner coded it personal'
+    :i.receipt==="have"?(i.dropped?'receipt uploaded by the owner/team':(String(i.source||"").indexOf("gmail")===0?'Ava found the receipt in email':'receipt attached in Xero'))
+    :i.receipt==="cant_find"?'owner says the receipt is lost'
+    :i.receipt==="not_needed"?(i.receipt_required===false?'owner said no receipt needed':((i.feedback==="up"||i.kind_confirmed)?'owner confirmed — no receipt owed':'no receipt owed'))
+    :i.receipt==="needed"?(i.receipt_incoming?'receipt on its way by email':'receipt still owed')
+    :'';
+  if(why)why=' · <span style="color:var(--indtx)">'+why+(i.feedback==="up"&&i.receipt==="have"?' · owner 👍':'')+'</span>';
+  // Ava's read on WHAT the payment is (with her reasoning on hover) — the same summary
+  // the owner confirmed, so Jewel codes with context, not just a supplier name (Max, 19 Jul)
+  var ins=i.insight?'<div class="rs" style="color:var(--indtx);margin-top:2px" title="'+esc(i.reasoning||"")+'">💡 '+esc(i.insight)+(i.confidence!=null?' <span style="color:var(--ink3)">'+Math.round(i.confidence*100)+'% sure</span>':'')+'</div>':'';
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"")+(i.account?" · "+esc(i.account):"")+gst+job+why+(i.note?' · '+esc(String(i.note).slice(0,80)):"")+'</div>'+ins+'</div>'+rc+extra+actions+'</div>';
+}
+// ── Auto Collect, Desk-side ────────────────────────────────────────────────
+// The owner's board shows the chase running. The Desk shows the SAME rows plus
+// the reason Ava stopped, because a handover is the moment a human is owed the
+// job — and Elastic can be that human before the owner even opens their board.
+// Read-only: nobody emails a client's customer from here.
+var AC_STATE={"new":["queued","b-ind"],needs_contact:["needs contact details","b-red"],emailed:["emailed — awaiting reply","b-ind"],
+  followup:["followed up","b-ind"],calling:["calling","b-ind"],called:["called","b-ind"],needs_human:["needs a human","b-red"],
+  promised:["promised","b-grn"],paid:["paid ✓","b-grn"],stopped:["closed","b-mut"]};
+function acDate(s){if(!s)return "";try{return new Date(String(s).slice(0,10)+"T12:00:00").toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}catch(e){return s;}}
+function acPill(ch){
+  if(ch.state==="promised"&&ch.promised_date)return '<span class="badge b-grn">promised '+esc(acDate(ch.promised_date))+'</span>';
+  var m=AC_STATE[ch.state]||[ch.state,"b-ind"];
+  return '<span class="badge '+m[1]+'">'+esc(m[0])+'</span>';
+}
+// ── the paper trail ────────────────────────────────────────────────────────
+// "How's Ava going with the chasing?" is a question about work, not states, and
+// the answer is the history: what she sent, what came back, what she did next.
+// The owner reads it in their Slack thread; the Desk has no Slack, so it reads
+// the same events here.
+var STORY={};   // chase id -> open, survives the panel re-render
+function acWhen(at){
+  if(!at)return "";
+  var d=new Date(at),days=Math.floor((Date.now()-d.getTime())/864e5);
+  return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" <span style=\"color:var(--ink3)\">"+(days<=0?"today":days===1?"yesterday":days+"d ago")+"</span>";
+}
+var AC_INTENT={promise:"they promised to pay",paid_claim:"they say it's already paid",dispute:"they're disputing it",question:"they asked a question",other:"no clear answer"};
+function acEvent(e){
+  var k=e.kind,ic="ti-point",col="var(--ink2)",txt="";
+  switch(k){
+    case "emailed": ic="ti-mail";txt="Emailed "+esc(e.to||"them")+(e.subject?' — <span style="color:var(--ink3)">“'+esc(e.subject)+'”</span>':"");break;
+    case "followup_emailed": ic="ti-mail-forward";txt="Followed up by email"+(e.reason?' <span style="color:var(--ink3)">('+esc(e.reason)+')</span>':"");break;
+    case "reply": ic="ti-message-2";col="var(--indtx)";
+      txt="<b>They replied</b> — "+esc(AC_INTENT[e.intent]||e.intent||"replied")+(e.promised_date?" by <b>"+esc(acDate(e.promised_date))+"</b>":"")+(e.summary?'<div style="color:var(--ink2);margin-top:2px">'+esc(e.summary)+'</div>':"");break;
+    case "calling": ic="ti-phone-outgoing";txt="Rang them"+(e.phone?" on "+esc(e.phone):"");break;
+    case "call_voicemail": ic="ti-phone-off";txt="Went to voicemail";break;
+    case "call_done": ic="ti-phone-check";col="var(--indtx)";
+      txt="<b>Spoke to them</b> — "+esc(AC_INTENT[e.intent]||e.intent||"call finished")+(e.promised_date?" by <b>"+esc(acDate(e.promised_date))+"</b>":"")+(e.summary?'<div style="color:var(--ink2);margin-top:2px">'+esc(e.summary)+'</div>':"");break;
+    case "promise_broken": ic="ti-clock-x";col="var(--amb)";txt="Promised date came and went"+(e.n?" ("+e.n+" times now)":"");break;
+    case "promises_broken": ic="ti-clock-x";col="var(--red)";txt="Too many broken promises — stopped chasing";break;
+    case "paid_claim_unresolved": ic="ti-alert-circle";col="var(--amb)";txt="They said it was paid, but Xero still shows it owing";break;
+    case "paid": ic="ti-circle-check";col="var(--grn)";txt="<b>Paid ✓</b>";break;
+    case "stopped": ic="ti-circle-minus";txt="Closed in Xero"+(e.reason?" ("+esc(e.reason)+")":"");break;
+    case "owner_handover": ic="ti-hand-stop";col="var(--red)";txt="<b>Handed back to the owner</b>"+(e.silent_days?" — "+e.silent_days+" days of silence":"");break;
+    case "owner_reminder": ic="ti-bell";col="var(--amb)";txt="Nudged the owner again — still unpaid";break;
+    case "needs_contact": ic="ti-address-book";col="var(--red)";txt="No email or phone on their Xero contact";break;
+    case "out_of_moves": ic="ti-hand-stop";col="var(--red)";txt="Out of moves — email and phone both exhausted";break;
+    case "too_many_touches": ic="ti-hand-stop";col="var(--red)";txt="Touch limit reached — Ava stopped here";break;
+    case "email_blocked": ic="ti-mail-x";col="var(--amb)";txt="Couldn't send"+(e.reason?" — "+esc(e.reason):"");break;
+    case "email_error": ic="ti-mail-x";col="var(--amb)";txt="Email failed"+(e.reason?" — "+esc(e.reason):"")+", retrying";break;
+    case "call_error": ic="ti-phone-x";col="var(--amb)";txt="Call failed"+(e.reason?" — "+esc(e.reason):"");break;
+    case "call_lost": ic="ti-phone-x";txt="Call didn't connect";break;
+    default: txt=esc(String(k||"step").replace(/_/g," "));
+  }
+  return '<div style="display:flex;gap:9px;padding:6px 0;font-size:12.5px;line-height:1.5;border-top:1px solid #F1F1E9">'
+    +'<i class="ti '+ic+'" style="color:'+col+';font-size:15px;margin-top:1px"></i>'
+    +'<div style="flex:1;min-width:0;color:'+col+'">'+txt+'</div>'
+    +'<div style="white-space:nowrap;color:var(--ink2);font-size:11.5px">'+acWhen(e.at)+'</div></div>';
+}
+// ── Slack mrkdwn -> HTML ────────────────────────────────────────────────────
+// The thread is written for Slack, but it's read here. Links arrive as
+// <url|label>, user text arrives HTML-escaped, quoted email bodies arrive as
+// "> " lines carrying [cid:…] inline-image rubbish. Order matters: pull the
+// link tokens out (they use REAL angle brackets) before unescaping the rest.
+var EMOJI={moneybag:"💰",email:"✉️",raised_hand:"✋",speech_balloon:"💬",telephone_receiver:"📞",tada:"🎉",
+  warning:"⚠️",mag:"🔍",date:"📅",mailbox_with_mail:"📬",no_entry_sign:"🚫",rotating_light:"🚨",bell:"🔔",
+  "hand-stop":"✋",eyes:"👀",memo:"📝",white_check_mark:"✅"};
+function slackToHtml(raw){
+  var links=[],t=String(raw||"");
+  t=t.replace(/<(https?:\/\/[^>|]+)(?:\|([^>]*))?>/g,function(m,u,l){
+    links.push('<a href="'+u.replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(l||u)+'</a>');return "@@LNK"+(links.length-1)+"@@";});
+  t=t.replace(/<mailto:([^>|]+)(?:\|([^>]*))?>/g,function(m,a,l){links.push(esc(l||a));return "@@LNK"+(links.length-1)+"@@";});
+  t=t.replace(/&gt;/g,">").replace(/&lt;/g,"<").replace(/&amp;/g,"&");   // Slack's escaping of plain text
+  t=t.replace(/\[cid:[^\]]+\]/g,"");                                      // inline-image placeholders from quoted mail
+  t=esc(t);
+  t=t.replace(/@@LNK(\d+)@@/g,function(m,i){return links[Number(i)];});
+  t=t.replace(/:([a-z0-9_+-]+):/g,function(m,n){return EMOJI[n]||"";});
+  t=t.replace(/\*([^*\n]+)\*/g,"<b>$1</b>").replace(/`([^`\n]+)`/g,'<code style="background:#F1F1E9;padding:1px 4px;border-radius:2px">$1</code>');
+  // "> " runs are the quoted email — the actual words that were sent and sent back
+  var out="",quote=[];
+  function flush(){if(!quote.length)return;
+    out+='<div style="border-left:3px solid var(--line);background:#FBFBF8;padding:8px 11px;margin:6px 0;max-height:280px;overflow:auto;'
+      +'font-size:12.5px;color:var(--ink2);white-space:pre-wrap;word-break:break-word">'+quote.join("\n").trim()+'</div>';quote=[];}
+  t.split("\n").forEach(function(l){
+    if(/^&gt;\s?/.test(l)||/^>\s?/.test(l)){quote.push(l.replace(/^(&gt;|>)\s?/,""));return;}
+    flush();if(l.trim())out+='<div style="margin:3px 0">'+l+'</div>';
+  });
+  flush();
+  return out;
+}
+function acStory(ch,co){
+  var h=(ch.history||[]);
+  var body=h.length?h.map(acEvent).join("")
+    :'<div class="muted" style="padding:6px 0">No trail on this one yet — she picked it up but hasn\'t sent anything.</div>';
+  // The summaries above are Ava's read. The thread below is the actual words —
+  // the email she sent and what came back. Read it here; don't send anyone to
+  // Slack for it (Max, 31 Jul). Loaded on click: it's 200 messages a client.
+  var foot='<div style="display:flex;gap:12px;padding:8px 0 2px;font-size:12px;color:var(--ink3);flex-wrap:wrap;align-items:baseline">'
+    +'<span>'+(ch.emails_sent||0)+' email'+((ch.emails_sent||0)===1?'':'s')+(ch.calls?' · '+ch.calls+' call'+(ch.calls===1?'':'s'):'')+' since '+esc(acDate(ch.started_at))+'</span>'
+    +'<a class="acthread" data-id="'+ch.id+'" data-co="'+co+'" style="cursor:pointer;font-weight:600;margin-left:auto;color:var(--indtx)">'
+    +(THREAD[ch.id]?'Hide the full thread':'Read the full thread')+'</a>'
+    +(ch.slack_url?'<a href="'+esc(ch.slack_url)+'" target="_blank" style="font-weight:500;text-decoration:none;color:var(--ink3)">in Slack ↗</a>':'')+'</div>'
+    +'<div class="acth" id="th-'+ch.id+'"'+(THREAD[ch.id]?'':' style="display:none"')+'>'+(THREAD[ch.id]||'')+'</div>';
+  return '<div class="acst" id="st-'+ch.id+'"'+(STORY[ch.id]?'':' style="display:none"')+'>'+body+foot+'</div>';
+}
+// Rendered threads, kept so a panel re-render doesn't drop what you were reading
+var THREAD={};
+function acThreadHtml(d){
+  if(!d||!d.ok)return '<div class="muted" style="padding:8px 0;color:var(--amb)">'+esc((d&&d.error)||"Couldn't load the thread.")+'</div>';
+  if(!(d.messages||[]).length)return '<div class="muted" style="padding:8px 0">The thread is empty.</div>';
+  return '<div style="border:1px solid var(--line);border-radius:4px;background:#fff;padding:4px 12px;margin:6px 0 2px">'
+    +d.messages.map(function(m){
+      var who=m.from==="ava"?'<span style="color:var(--indtx)">Ava</span>'
+        :m.from==="customer"?'<span style="color:var(--grn)">'+esc(d.customer||"The customer")+'</span>'
+        :'<span style="color:var(--ink2)">Someone in Slack</span>';
+      return '<div style="padding:10px 0;border-top:1px solid #F1F1E9">'
+        +'<div style="display:flex;gap:8px;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px">'+who
+        +'<span style="margin-left:auto;font-weight:500">'+acWhen(m.at)+'</span></div>'
+        +'<div style="font-size:13px;line-height:1.55">'+slackToHtml(m.text)+'</div></div>';
+    }).join("")+'</div>';
+}
+function acRow(ch,withWhy,co){
+  var overdue=0,paid=ch.state==="paid";
+  if(ch.due_date){var d=new Date(String(ch.due_date).slice(0,10)+"T12:00:00");overdue=Math.floor((Date.now()-d.getTime())/864e5);}
+  // Xero zeroes amount_due the moment it's paid, so a settled row must not read
+  // "$0.00 owing · 2d overdue" — say what happened instead.
+  var sub=(paid?'settled · was due '+esc(acDate(ch.due_date)):money(ch.owing)+' owing · due '+esc(acDate(ch.due_date))+(overdue>0?' · <b>'+overdue+'d overdue</b>':''))
+    +(ch.emails_sent?' · '+ch.emails_sent+' email'+(ch.emails_sent===1?'':'s'):'')
+    +(ch.calls?' · '+ch.calls+' call'+(ch.calls===1?'':'s'):'');
+  // Contact details, one click from a phone call — the whole point of handing it
+  // to a human is that the human can now do the thing Ava can't.
+  var contact='';
+  if(withWhy){
+    if(ch.contact_phone)contact+='<a class="bicopy" data-link="'+esc(ch.contact_phone)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" title="Copy their phone number"><i class="ti ti-phone"></i> '+esc(ch.contact_phone)+'</a>';
+    if(ch.contact_email)contact+='<a class="bicopy" data-link="'+esc(ch.contact_email)+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;margin-left:8px" title="Copy their email"><i class="ti ti-mail"></i> copy email</a>';
+    if(!ch.contact_phone&&!ch.contact_email)contact='<span class="muted" style="white-space:nowrap">no contact details</span>';
+  }
+  var why=(withWhy&&ch.why)?'<div class="rs" style="color:var(--red);margin-top:2px">'+esc(ch.why)+'</div>':'';
+  // Every row opens into what Ava actually did. The last thing that happened is
+  // the label, so the trail is worth opening before you've opened it.
+  var hist=ch.history||[];
+  var lastTxt=hist.length?({emailed:"emailed",followup_emailed:"followed up",reply:"they replied",
+    calling:"rang them",call_done:"spoke to them",call_voicemail:"voicemail",paid:"paid",owner_handover:"handed back",
+    needs_contact:"no contact details",promise_broken:"promise broken"}[hist[hist.length-1].kind]||"last step"):"nothing sent yet";
+  var toggle='<a class="acstory" data-id="'+ch.id+'" style="cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">'
+    +(STORY[ch.id]?'Hide trail':'Trail')+' <span class="muted" style="font-weight:400">('+hist.length+' · '+esc(lastTxt)+')</span></a>';
+  return '<div class="row" style="flex-direction:column;align-items:stretch;gap:0">'
+    +'<div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">'
+    +'<div class="rmain"><div class="rt">'+esc(ch.customer||"—")+(paid?'':' — '+money(ch.owing))
+    +' <span class="muted" style="font-weight:400">'+esc(ch.invoice||"")+'</span></div><div class="rs">'+sub+'</div>'+why+'</div>'
+    +contact+toggle+acPill(ch)+'</div>'+acStory(ch,co)+'</div>';
+}
+function acBlock(id){
+  var ac=ACOL[id];
+  var needs=[],rest=[],hint="",body="";
+  if(!ac||ac.error){
+    hint="couldn't load";
+    body='<div class="muted">Couldn\'t read Auto Collect for this client — refresh to retry.</div>';
+  }else if(!ac.enabled){
+    hint="not switched on";
+    body='<div class="muted">The owner hasn\'t switched Auto Collect on. Nothing is being chased — if their debtors are getting old, that\'s a conversation to have.</div>';
+  }else{
+    var c=ac.counts||{};
+    var chases=(ac.chases||[]).filter(function(x){return x.state!=="stopped"&&x.state!=="paid";});
+    var won=(ac.chases||[]).filter(function(x){return x.state==="paid";});
+    needs=chases.filter(function(x){return x.state==="needs_human"||x.state==="needs_contact";});
+    rest=chases.filter(function(x){return x.state!=="needs_human"&&x.state!=="needs_contact";});
+    // A handover is the one you have to read, so open its trail unasked.
+    needs.forEach(function(x){if(STORY[x.id]===undefined)STORY[x.id]=true;});
+    var st=ac.paused?'<span class="badge b-amb">paused</span>'
+      :(ac.ready?'<span class="badge b-grn">on</span>':'<span class="badge b-amb">setup needed</span>');
+    hint=money(c.owing_total||0)+' overdue · '+(c.active||0)+' chase'+((c.active||0)===1?'':'s')
+      +(c.promised?' · '+c.promised+' promised':'')+(c.needs_you?' · '+c.needs_you+' need a human':'');
+    body='<div class="row" style="background:#fff;border:1px solid var(--line);border-radius:4px;margin-bottom:10px">'
+      +'<div class="rmain"><div class="rt">'+money(c.owing_total||0)+' overdue across '+(c.active||0)+' invoice'+((c.active||0)===1?'':'s')+'</div>'
+      +'<div class="rs">'+(c.waiting_reply||0)+' awaiting a reply · '+(c.promised||0)+' promised a date · '+(c.on_the_phone||0)+' on the phone</div>'
+      // How she's GOING, off the paper trail rather than the status column
+      +'<div class="rs" style="color:var(--indtx);margin-top:3px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Last 30 days: '
+      +(c.emails_30d||0)+' email'+((c.emails_30d||0)===1?'':'s')+' sent · '+(c.replies_30d||0)+' repl'+((c.replies_30d||0)===1?'y':'ies')+' read'
+      +((c.calls_30d||0)?' · '+c.calls_30d+' call'+(c.calls_30d===1?'':'s'):'')
+      +' · <b>'+(c.collected_30d||0)+' paid up</b></div></div>'+st+'</div>';
+    if(!ac.ready&&!ac.paused){
+      var miss=[];var s=ac.setup||{};
+      if(!s.xero)miss.push("Xero isn't connected");
+      if(!s.gmail_send)miss.push("no mailbox with send permission");
+      if(miss.length)body+='<div class="muted" style="color:var(--amb);margin-bottom:10px"><i class="ti ti-alert-triangle" style="vertical-align:-2px"></i> Switched on but not chasing: '+esc(miss.join(" · "))+'.</div>';
+    }
+    if(needs.length){
+      body+='<div class="sec" style="margin-top:4px;color:var(--red)">Ava\'s handed these back <span class="cnt">she\'s out of moves — the owner has been told, and so have we</span></div>'
+        +'<div class="list">'+needs.map(function(x){return acRow(x,true,id);}).join("")+'</div>';
+    }
+    if(rest.length){
+      body+='<div class="sec" style="color:var(--ink2)">Ava\'s still on these <span class="cnt">no action needed — here so you can see it moving</span></div>'
+        +'<div class="list">'+rest.map(function(x){return acRow(x,false,id);}).join("")+'</div>';
+    }
+    if(won.length){
+      body+='<div class="sec" style="color:var(--grn)">Ava got these paid <span class="cnt">chased, replied to, and settled — open the trail to see how</span></div>'
+        +'<div class="list">'+won.map(function(x){return acRow(x,false,id);}).join("")+'</div>';
+    }
+    if(!chases.length&&!won.length)body+='<div class="muted">Nothing overdue right now — or her next Xero sweep (25 past the hour) hasn\'t run yet.</div>';
+  }
+  body+='<div style="margin-top:12px"><a href="collect.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Auto Collect board ↗</a></div>';
+  // Defaults open only when a human is owed something; an explicit fold wins.
+  var stored=FOLDS[id+"|ac"];
+  var open=stored===undefined?(needs.length>0):(stored===false);
+  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Collect <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
+// ── Aged Payables: the flag queue ──────────────────────────────────────────
+// Ava never creates a Xero bill herself — same rule as attach-never-reconcile.
+// A flag is a human (owner or Ava) asking us to enter it; this is where that
+// request actually lands. "Entered" and "Not real" both clear it — the first
+// because the job's done, the second because it never was a bill.
+function apRow(x,id){
+  return '<div class="row"><div class="rmain"><div class="rt">'+esc(x.supplier||"—")+(x.invoice_number?' <span class="muted" style="font-weight:400">· '+esc(x.invoice_number)+'</span>':'')+'</div>'
+    +'<div class="rs">'+(x.due_date?"due "+esc(x.due_date):"no due date found")+' · found '+esc((x.found_at||"").slice(0,10))
+    +(x.flagged_by?' · flagged by '+esc(x.flagged_by.split("@")[0]):'')+'</div></div>'
+    +(x.doc_url?'<a href="'+esc(x.doc_url)+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>':'')
+    +'<button class="btn bapenter" data-id="'+esc(x.id)+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px" title="You\'ve created this bill in Xero">Entered ✓</button>'
+    +'<button class="btn bapignore" data-id="'+esc(x.id)+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px;color:var(--ink3)" title="Not actually a bill — credit note, duplicate, already paid">Not real</button>'
+    +'<div class="rt" style="min-width:76px;text-align:right">'+money(x.amount)+'</div></div>';
+}
+function apBlock(id){
+  var ap=APCACHE[id];
+  var flagged=[],hint="",body="";
+  if(ap===undefined){
+    hint="loading…";
+    body='<div class="muted">Reading their Aged Payables…</div>';
+  }else if(!ap||ap.error){
+    hint="couldn't load";
+    body='<div class="muted">Couldn\'t read Aged Payables for this client — refresh to retry.</div>';
+  }else{
+    var u=(ap.email_found&&ap.email_found.unmatched)||[];
+    flagged=u.filter(function(x){return x.status==="flagged";});
+    var pending=u.filter(function(x){return x.status==="new";});
+    hint=flagged.length?flagged.length+' to enter':(pending.length?pending.length+' unreviewed, not flagged yet':'nothing outstanding');
+    if(flagged.length){
+      body+='<div class="sec" style="margin-top:4px;color:var(--red)">Flagged for us <span class="cnt">the owner (or Ava) asked us to enter these in Xero</span></div>'
+        +'<div class="list">'+flagged.map(function(x){return apRow(x,id);}).join("")+'</div>';
+    }else{
+      body+='<div class="muted">Nothing flagged right now. '+(pending.length?pending.length+' invoice'+(pending.length===1?'':'s')+' found in email '+(pending.length===1?'is':'are')+" sitting unreviewed on their Aged Payables page — the owner hasn't asked us to touch "+(pending.length===1?'it':'them')+' yet.':'')+'</div>';
+    }
+  }
+  body+='<div style="margin-top:12px"><a href="payables.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Aged Payables ↗</a></div>';
+  var stored=FOLDS[id+"|ap"];
+  var open=stored===undefined?(flagged.length>0):(stored===false);
+  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Aged Payables <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
+// ── feature switches ───────────────────────────────────────────────────────
+// Every feature arrives switched on; a client who doesn't want one switches it
+// off and the ENGINE stops — the cron skips them, not just the page (Max, 31
+// Jul). Same row the owner's own board flips, so the two can't disagree.
+var FEATS={};
+function featBlock(id){
+  var f=FEATS[id];
+  var open=FOLDS[id+"|feat"]===false;   // defaults closed; it's a settings drawer
+  var body;
+  if(!f){body='<div class="muted">Loading their switches…</div>';}
+  else if(f.error){body='<div class="muted">Couldn\'t read their switches.</div>';}
+  else{
+    body='<div class="list">'+f.features.map(function(x){
+      var on=x.on;
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(x.name)+'</div>'
+        +'<div class="rs">'+esc(x.blurb)+'</div></div>'
+        +'<span class="badge '+(on?'b-grn':'b-mut')+'">'+(on?'on':'off')+'</span>'
+        +'<button class="btn bfeat" data-co="'+id+'" data-key="'+esc(x.key)+'" data-on="'+(on?'1':'0')+'" style="padding:6px 11px;font-size:12px'+(on?'':';color:var(--grn)')+'">'
+        +(on?'Switch off':'Switch on')+'</button></div>';
+    }).join("")+'</div>'
+    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. New clients arrive with everything off, so switching them on is part of onboarding. Auto Scheduling isn\'t here: it\'s parked and gated separately.</div>';
+  }
+  // "never switched on" is not the same as "they turned it off", and the
+  // difference is the whole conversation when a new client's board is quiet.
+  var offCount=f&&f.features?f.features.filter(function(x){return !x.on;}).length:0;
+  var untouched=f&&f.features&&f.features.every(function(x){return !x.on&&!x.set_by_owner;});
+  var hint=!f||!f.features?'…':(untouched?'not switched on yet':(offCount?offCount+' switched off':'all on'));
+  return '<div class="sec fhead" data-fold="'+id+'|feat" style="cursor:pointer'+(untouched?';color:var(--amb)':'')+'">Feature switches <span class="cnt">'
+    +esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
+}
+function loadFeats(id,then){
+  fetch(API+"/features?company="+id).then(function(r){return r.json();})
+    .then(function(d){FEATS[id]=d;if(then)then();})
+    .catch(function(){FEATS[id]={error:true};if(then)then();});
+}
+function renderPanel(id){
+  var p=document.getElementById("p-"+id),cl=CACHE[id];
+  if(!cl){p.innerHTML='<div class="muted">Couldn\'t load this client.</div>';return;}
+  var it=cl.items||[];
+  var ready=it.filter(function(i){return i.lane==="ready";});
+  var review=it.filter(function(i){return i.lane==="review"||i.lane==="looper";});
+  var owner=it.filter(function(i){return i.lane==="guess"||(i.needs_receipt&&!i.receipt_incoming&&!i.reconciled&&!i.bill&&i.lane!=="review"&&i.lane!=="looper");});
+  var hunting=it.filter(function(i){return i.receipt_incoming;}).length;
+  var pileItems=it.filter(function(i){return i.lane==="pile";});
+
+  // "when did we last feed this client a report?" — the answer Max kept having to guess
+  var lastRep='';
+  if(cl.last_report_drop){
+    var d=new Date(cl.last_report_drop),days=Math.floor((Date.now()-d.getTime())/864e5);
+    var agoTxt=days<=0?"today":(days===1?"yesterday":days+" days ago");
+    lastRep=' &nbsp;·&nbsp; Last report: <b>'+d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+'</b> ('+agoTxt+')'+(days>=14?' <span style="color:var(--amb)">⚠ getting stale</span>':'');
+  } else { lastRep=' &nbsp;·&nbsp; <b>No report dropped yet</b>'; }
+  // features are separated on the admin side: bookkeeping is the one with
+  // Elastic touches (upload the report, reconcile & tick off) — the rest run
+  // themselves. Each feature block collapses on its header.
+  var bkFold=!!FOLDS[id+"|bk"]; // bookkeeping defaults open
+  var html='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Auto Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
+  html+='<div class="fbody"'+(bkFold?' style="display:none"':'')+'>';
+  html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
+    +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
+    +'<button class="btn btn-p bdrop" data-id="'+id+'"><i class="ti ti-upload"></i> Upload report</button>'
+    +'<input type="file" class="bfile" data-id="'+id+'" accept="image/*,.pdf,.csv,.xlsx,.xls" multiple style="display:none">'
+    +'<div class="bproc muted" style="margin-top:9px;min-height:15px"></div></div>';
+
+  if(ready.length){html+='<div class="sec" style="margin-top:4px;color:var(--grn)">Ready to reconcile <span class="cnt">do these in Xero, tick off here</span></div><div class="list">'
+    +ready.map(function(i){return itemRow(i,'<a href="https://go.xero.com/Bank/BankAccounts.aspx" target="_blank" style="font-size:12px;text-decoration:none">Xero ↗</a><button class="btn btn-g brec" data-id="'+i.id+'" data-co="'+id+'" title="Reconcile it in Xero first, then click here to tick it off — Ava never touches Xero" style="padding:6px 11px;font-size:12px"><i class="ti ti-checks"></i> Reconciled in Xero</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" title="Wrong receipt or not actually ready? Send it back to the working queue — the owner gets asked again" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
+  if(review.length){html+='<div class="sec" style="color:var(--amb)">Check these <span class="cnt">Ava\'s flagged something off — your call</span></div><div class="list">'
+    +review.map(function(i){return itemRow(i,'<button class="btn brec" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Looks right — reconciled</button><button class="btn bback" data-id="'+i.id+'" data-co="'+id+'" style="padding:6px 11px;font-size:12px">Send back</button>');}).join("")+'</div>';}
+  if(owner.length){
+    var oRow=function(i){var j={};for(var k in i)j[k]=i[k];if(/low confidence|no candidate|no confident/i.test(String(j.note||"")))j.note="";
+      return itemRow(j,'<button class="btn bconf" data-id="'+i.id+'" data-co="'+id+'" title="The owner confirmed this outside the app (Slack/phone) and no receipt is coming — moves it to Ready to reconcile" style="padding:6px 11px;font-size:12px"><i class="ti ti-user-check"></i> Owner confirmed</button>');};
+    html+='<div class="sec" style="color:var(--indtx)">With the owner <span class="cnt">Ava\'s asking them — board + daily email. Owner said yes elsewhere? Use the button.</span></div><div class="list">'
+      +owner.slice(0,8).map(oRow).join("")
+      +(owner.length>8?'<div class="ownermore" id="om-'+id+'" style="display:none">'+owner.slice(8).map(oRow).join("")+'</div><div class="row"><a class="showmore" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+owner.length+' →</a></div>':"")+'</div>';}
+  // The pile itself, not just a count — Jewel works the pile (uploads receipts into
+  // Xero, ticks them off) and couldn't see it from the Desk (Max, 20 Jul). Unticked
+  // receipts sort first; ticking calls chase-feedback va_check (state only).
+  if(pileItems.length){
+    var pRow=function(i){
+      var doc=i.receipt_url||((i.extra_receipts||[])[0]||{}).url;
+      var rc=doc?'<a href="'+doc+'" target="_blank" style="font-size:12px;text-decoration:none;white-space:nowrap">View ↗</a>':'';
+      var vc=i.va_checked
+        ?'<button class="btn bvac" data-id="'+i.id+'" data-co="'+id+'" data-act="va_uncheck" title="Marked as already uploaded into Xero — click to untick" style="padding:6px 11px;font-size:12px;color:#0e7a50"><i class="ti ti-checkbox"></i> In Xero ✓</button>'
+        :'<button class="btn bvac" data-id="'+i.id+'" data-co="'+id+'" data-act="va_check" title="Tick once you’ve uploaded this receipt into Xero" style="padding:6px 11px;font-size:12px"><i class="ti ti-square"></i> Uploaded to Xero?</button>';
+      var ig='<button class="btn bpig" data-id="'+i.id+'" data-co="'+id+'" title="Not a business expense — drop it from the pile" style="padding:6px 11px;font-size:12px">Ignore</button>';
+      return '<div class="row"><div class="rmain"><div class="rt">'+esc(i.supplier)+' — '+money(i.amount)+'</div><div class="rs">'+(i.date||"no date")+' · receipt in hand, waiting for its bank line'+(i.note?' · '+esc(String(i.note).slice(0,80)):'')+'</div></div>'+rc+vc+ig+'</div>';
+    };
+    var pi=pileItems.slice().sort(function(a,b){return (a.va_checked?1:0)-(b.va_checked?1:0);});
+    html+='<div class="sec" style="color:var(--indtx)">Receipt pile <span class="cnt">receipts in hand, no bank line yet — tick what you’ve uploaded into Xero</span></div><div class="list">'
+      +pi.slice(0,8).map(pRow).join("")
+      +(pi.length>8?'<div class="pilemore" id="pm-'+id+'" style="display:none">'+pi.slice(8).map(pRow).join("")+'</div><div class="row"><a class="showpile" data-id="'+id+'" style="cursor:pointer;font-size:12.5px;font-weight:600">Show all '+pi.length+' →</a></div>':"")+'</div>';
+  }
+  if(hunting){html+='<div class="muted" style="margin-top:12px"><i class="ti ti-sparkles" style="vertical-align:-2px"></i> Ava\'s on it: '+hunting+' receipt'+(hunting===1?"":"s")+' arriving by email</div>';}
+  html+='</div>';
+  html+=acBlock(id);
+  html+=apBlock(id);
+  html+=featBlock(id);
+  var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
+  html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">GST put-away works owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
+  var ints=cl.integrations||{},ib=ints.inboxes||[];
+  html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
+    +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';
+  html+='<div style="margin-top:14px"><a href="'+APP+'?c='+id+'" style="font-size:12.5px;font-weight:600;text-decoration:none">Open the owner\'s board →</a></div>';
+  p.innerHTML=html;
+}
+function uploadReport(co,proc,files){
+  track(co,"report_drop");
+  // a failed read must SAY so — this used to count any HTTP response as "read",
+  // so two 502s still showed "Done — 2 files read" (Max, 17 Jul)
+  var done=0,lines=0,matched=0,cleared=0,fails=[];
+  (function next(idx){
+    if(idx>=files.length){
+      if(fails.length){proc.innerHTML='<span style="color:#b42318"><b>'+fails.length+' file'+(fails.length===1?"":"s")+' NOT read:</b><br>'+fails.map(esc).join("<br>")+'</span>';refresh(co);return;}
+      proc.textContent="Ava is hunting Gmail for receipts…";
+      fetch(API+"/chase-hunt",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co})})
+        .then(function(){proc.textContent="Done — "+done+" file"+(done===1?"":"s")+" read: "+lines+" line"+(lines===1?"":"s")+(matched?", "+matched+" matched a receipt":"")+(cleared?", "+cleared+" ticked off as reconciled in Xero":"")+".";refresh(co);})
+        .catch(function(){refresh(co);});
+      return;}
+    var file=files[idx];proc.textContent="Ava is reading "+file.name+" ("+(idx+1)+"/"+files.length+")…";
+    var rd=new FileReader();
+    rd.onload=function(){var b64=String(rd.result).split(",")[1];
+      fetch(API+"/chase-drop",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:co,kind:"bankline",file_base64:b64,mime:file.type||"application/octet-stream",filename:file.name})})
+        .then(function(r){return r.json().catch(function(){return {error:"server error "+r.status};});})
+        .then(function(m){if(m&&m.ok){done++;lines+=(m.count||0);matched+=(m.matched||0);cleared+=(m.cleared||0);}else{fails.push(file.name+" — "+((m&&m.error)||"couldn't be read"));}next(idx+1);})
+        .catch(function(){fails.push(file.name+" — network error");next(idx+1);});};
+    rd.readAsDataURL(file);
+  })(0);
+}
+document.addEventListener("change",function(e){
+  var f=e.target.closest(".bfile");if(!f||!f.files.length)return;
+  var co=f.getAttribute("data-id"),proc=f.closest(".drop").querySelector(".bproc");
+  var files=Array.prototype.slice.call(f.files);f.value="";
+  uploadReport(co,proc,files);
+});
+// the box says "Drop the reconciliation report" — so let an actual drag-and-drop work
+document.addEventListener("dragover",function(e){var d=e.target.closest&&e.target.closest(".drop");if(d){e.preventDefault();d.style.outline="2px dashed var(--indtx)";d.style.outlineOffset="-2px";}});
+document.addEventListener("dragleave",function(e){var d=e.target.closest&&e.target.closest(".drop");if(d&&!d.contains(e.relatedTarget)){d.style.outline="";}});
+document.addEventListener("drop",function(e){
+  var d=e.target.closest&&e.target.closest(".drop");if(!d)return;
+  e.preventDefault();d.style.outline="";
+  var files=Array.prototype.slice.call((e.dataTransfer&&e.dataTransfer.files)||[]);
+  if(!files.length)return;
+  uploadReport(d.getAttribute("data-co"),d.querySelector(".bproc"),files);
+});
+function refresh(co){
+  fetch(API+"/chase-list?company="+co).then(function(r){return r.json();}).then(function(cl){CACHE[co]=cl;renderPanel(co);});
+}
+boot();
+</script>
+</body>
+</html>

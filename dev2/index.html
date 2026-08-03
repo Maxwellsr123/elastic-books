@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elastic Admin — your admin, handled</title>
+<meta name="description" content="Elastic Admin handles bookkeeping for trade businesses. Connect the Gmail inboxes where your receipts and bills land and Ava — our assistant — reads them, matches each document to the right bank transaction, chases suppliers for anything missing, and preps your books. The Elastic team reconciles.">
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var l=document.querySelector(".brand");if(l)l.insertAdjacentHTML("beforeend",' <span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px;vertical-align:middle">DEV</span>');document.title="DEV · "+document.title;});</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff;
+        --grn:#0e7a50;--grnbg:#e7f6ee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+  .wrap{max-width:760px;margin:0 auto;padding:26px 20px 60px}
+  .top{display:flex;align-items:center;gap:11px;margin-bottom:34px}
+  .logo{width:38px;height:38px;border-radius:4px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;box-shadow:0 6px 16px rgba(83,74,183,.3)}
+  .brand{font-weight:600;font-size:16px;letter-spacing:-.02em}
+  .brand span{color:var(--ink3);font-weight:500}
+  .top .admin{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:4px}
+  .top .admin:hover{background:#fff;border-color:#d9d9d0}
+  h1{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+  .lede{color:var(--ink2);font-size:15px;line-height:1.55;margin:0 0 28px;max-width:520px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;display:flex;flex-direction:column;gap:13px;box-shadow:0 1px 2px rgba(20,20,24,.025),0 16px 34px rgba(20,20,24,.035);text-decoration:none;color:inherit}
+  a.card{transition:transform .12s,box-shadow .12s}
+  a.card:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(20,20,24,.03),0 22px 44px rgba(20,20,24,.08)}
+  .card.soon{box-shadow:none;background:#fbfbf9}
+  .card.soon .ic,.card.soon .h,.card.soon .d{opacity:.55}
+  .ico{width:46px;height:46px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:24px}
+  .ico.book{background:#eef0ff;color:var(--ind)}
+  .ico.cal{background:#fff2e3;color:#b5630f}
+  .ico.inv{background:#e7f6ee;color:#0e7a50}
+  .ico.call{background:#fdeef0;color:#c0364b}
+  .ico.rep{background:#eef6ff;color:#175cd3}
+.ico.mkt{background:#e6f7f4;color:#0d9488}
+  .ico.gst{background:#e7f6ee;color:#0e7a50}
+  .row{display:flex;align-items:flex-start;gap:13px}
+  .h{font-weight:600;font-size:16px;letter-spacing:-.01em}
+  .d{font-size:13px;color:var(--ink2);line-height:1.5;margin-top:3px}
+  .pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:2px;white-space:nowrap;align-self:flex-start}
+  .pill.live{background:var(--grnbg);color:var(--grn)}
+  .pill.soon{background:#efefe8;color:var(--ink3)}
+  .open{margin-top:auto;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#D2530F}
+  .foot{margin-top:34px;font-size:12px;color:var(--ink3)}
+  /* signed-in hero — the product face of the dashboard */
+  .hero{display:none;color:#fff;padding:26px 28px 22px;margin:0 0 28px}
+  .hero .hi{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .hero .co{color:#A7A2F4}
+  .hero .sub{color:#9a97ab;font-size:13.5px;margin-top:4px}
+  .hero .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .hero .stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:11px 16px 12px;min-width:128px;border-radius:6px}
+  .hero .stat .k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B8B98}
+  .hero .stat .n{font-size:20px;font-weight:700;margin-top:3px}
+  .hero .featline{margin-top:14px;font-size:12.5px;color:#b7b4c7;line-height:1.75}
+  .hero .featline b{color:#dedbee;font-weight:600}
+  .hero .fine{margin-top:12px;font-size:11px;color:#77748a}
+  .hero .banner{display:none;margin-top:14px;padding:11px 14px;border-radius:4px;font-size:13px;line-height:1.5;font-weight:500}
+  .hero .banner.warn{display:block;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.45);color:#fcd34d}
+  .hero .banner.overdue{display:block;background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.5);color:#fca5a5}
+  .hero .banner a{color:inherit;font-weight:700}
+  .hero .seg{display:inline-flex;gap:0;margin-top:16px;border:1px solid rgba(255,255,255,.14);border-radius:4px;overflow:hidden}
+  .hero .seg button{background:transparent;border:0;color:#8B8B98;font:inherit;font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer}
+  .hero .seg button.on{background:rgba(255,255,255,.1);color:#fff}
+  .top .out{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:4px;cursor:pointer;display:none}
+  /* Phone first: this is how most owners open it — thumb-sized targets, no
+     horizontal squeeze. Desktop then gets the room it deserves. */
+  @media (max-width:560px){
+    .wrap{padding:18px 14px 44px}
+    .top{gap:8px;flex-wrap:wrap;margin-bottom:22px}
+    .top .admin,.top .out{padding:9px 12px;font-size:12.5px}
+    .hero{padding:20px 18px 18px}
+    .hero .hi{font-size:19px;line-height:1.25}
+    /* two stats side by side, the period toggle full-width beneath them */
+    .hero .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .hero .stats>div:nth-child(3){grid-column:1/-1}
+    .hero .stat{min-width:0;padding:10px 13px 11px}
+    .hero .stat .n{font-size:19px}
+    .hero .seg{width:100%;margin-top:4px}
+    .hero .seg button{flex:1;padding:10px 8px;font-size:12.5px}
+    .grid{gap:11px}
+    .card{padding:16px}
+  }
+  /* Desktop: fill the screen instead of hiding in a 760px column */
+  @media (min-width:1000px){
+    .wrap{max-width:1080px}
+    .hero{padding:30px 34px 26px}
+    .hero .hi{font-size:26px}
+    .hero .stat{min-width:150px}
+    .hero .stat .n{font-size:23px}
+    .grid{grid-template-columns:repeat(3,1fr)}
+  }
+</style>
+
+<style id="sharpskin">
+/* ── sharp skin: less rounding, more edge ── */
+.card{border-radius:6px!important;box-shadow:none!important;border:1px solid #D9D9CC!important}
+a.card{transition:border-color .12s,box-shadow .12s,transform .12s}
+a.card:hover{transform:none!important;border-color:#534AB7!important;box-shadow:0 0 0 1px #534AB7,0 10px 28px rgba(83,74,183,.14)!important}
+.card.soon{border-style:dashed!important}
+.pill{border-radius:2px!important;text-transform:uppercase!important;font-size:10px!important;letter-spacing:.06em!important;font-weight:700!important;padding:3px 8px!important}
+.chip{border-radius:2px!important;text-transform:uppercase;font-size:10px!important;letter-spacing:.06em;font-weight:700!important}
+.btn,.tbtn,.seg,.seg button,input[type=text],select{border-radius:3px!important}
+.btn-p{border-radius:3px!important;box-shadow:none!important;font-weight:600!important}
+.ic,.ico,.logo,.dz,.side .foot,.think,.day{border-radius:4px!important}
+.nav a{border-radius:3px!important}
+.nav a.on{box-shadow:inset 2px 0 0 #6F66DB}
+.job{border-radius:2px!important}
+.sec{text-transform:uppercase;font-size:11px!important;letter-spacing:.1em;font-weight:700!important}
+.sec .cnt{text-transform:none;letter-spacing:0;font-weight:500!important}
+.stat{position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#534AB7,#6F66DB)}
+.stat .n{font-variant-numeric:tabular-nums}
+.hero{border-radius:6px!important;border:1px solid #262433;background:
+ radial-gradient(720px 260px at 88% -30%,rgba(103,96,244,.4),transparent 62%),
+ repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 26px),
+ repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 26px),
+ linear-gradient(120deg,#131218,#1c1a27)!important}
+.hero h2{letter-spacing:-.02em}
+.drop{border-radius:6px!important}
+h1{letter-spacing:-.03em}
+.open{text-transform:uppercase;font-size:12px!important;letter-spacing:.07em;font-weight:700!important}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo">E</div>
+      <div class="brand">Elastic Admin <span>· your admin, handled</span></div>
+      <a href="connections.html" style="margin-left:auto;font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:6px"><i class="ti ti-plug-connected"></i> Connections</a>
+      <a class="out" id="signout">Sign out</a>
+    </div>
+
+    <div class="hero" id="hero">
+      <div class="hi"><span id="hero-greet">Welcome back</span><span id="hero-name"></span> <span class="co" id="hero-co"></span></div>
+      <div class="sub">Here's what Ava's been doing for you.</div>
+      <div class="stats" id="hero-stats"></div>
+      <div class="featline" id="hero-feats"></div>
+      <div class="fine"><a href="usage.html" style="color:#b7b4c7;font-weight:600;text-decoration:none">Usage &amp; billing <i class="ti ti-arrow-right"></i></a></div>
+    </div>
+
+    <h1 id="landing-h1">Elastic Admin — your admin, handled</h1>
+    <p class="lede" id="landing-lede"><b>Elastic Admin</b> runs the books for trade businesses. Connect the Gmail inboxes where your receipts and bills land, and <b>Ava</b> — the Elastic Admin assistant — reads them to find the paperwork, matches each document to the right bank transaction in Xero, and preps your books. With your permission she can also send from your inbox — only to chase a supplier for a missing receipt or reply where you've asked her to; she never deletes or modifies mail. The Elastic team checks and reconciles everything. You can disconnect an inbox at any time.</p>
+
+    <div class="grid">
+      <a class="card" href="app.html" id="bk-card">
+        <div class="row"><div class="ico book"><i class="ti ti-book-2"></i></div><span class="pill live" id="bk-pill">● Live · Beta</span></div>
+        <div><div class="h">Auto Bookkeeping</div><div class="d">Ava does 80% — reads every receipt, matches it to the right spend, preps your books audit-ready. The last 20% is human: the Elastic team reconciles and signs off.</div></div>
+        <span class="open" id="bk-open">Open <i class="ti ti-arrow-right"></i></span>
+      </a>
+
+      <a class="card" href="collect.html" id="collect-card">
+        <div class="row"><div class="ico inv"><i class="ti ti-cash"></i></div><span class="pill live" id="collect-pill">● Live · Beta</span></div>
+        <div><div class="h">Auto Collect</div><div class="d">Ava chases overdue invoices for you — a polite email from your address, a call if they go quiet — and holds them to the promised date until it&rsquo;s paid.</div></div>
+        <span class="open" id="collect-open">Open <i class="ti ti-arrow-right"></i></span>
+      </a>
+
+      <a class="card" href="gst.html" id="gst-card">
+        <div class="row"><div class="ico gst"><i class="ti ti-pig-money"></i></div><span class="pill live" id="gst-pill">● Live · Beta</span></div>
+        <div><div class="h">GST put-away</div><div class="d">How much to set aside each week so GST day never stings — worked out from your own Xero year, not a rule of thumb.</div></div>
+        <span class="open" id="gst-open">Open <i class="ti ti-arrow-right"></i></span>
+      </a>
+
+      <div class="card soon">
+        <div class="row"><div class="ico inv"><i class="ti ti-file-invoice"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Auto Invoicing</div><div class="d">Quote → invoice → chased automatically, straight off the job. Cash in faster.</div></div>
+      </div>
+
+      <div class="card soon">
+        <div class="row"><div class="ico book"><i class="ti ti-file-dollar"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Auto AP</div><div class="d">Supplier bills in, checked against the job and the quote, queued for payment on the day they&rsquo;re due — nothing paid twice, nothing paid early.</div></div>
+      </div>
+
+      <div class="card soon">
+        <div class="row"><div class="ico inv"><i class="ti ti-receipt-2"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Auto AR</div><div class="d">The whole receivables side: invoice the moment the job&rsquo;s done, watch what lands, and hand anything overdue to Auto Collect.</div></div>
+      </div>
+
+      <div class="card soon">
+        <div class="row"><div class="ico rep"><i class="ti ti-chart-arcs"></i></div><span class="pill soon">Coming soon</span></div>
+        <div><div class="h">Profit pulse</div><div class="d">How&rsquo;s the business actually doing? What came in, what went out, what you&rsquo;re really making — in plain English, no spreadsheets.</div></div>
+      </div>
+
+      </div>
+
+    <div class="foot">Powered by Ava · Elastic Admin · Aotearoa NZ &nbsp;·&nbsp; <a href="https://elasticadmin.com/privacy" style="color:inherit;font-weight:600">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://elasticadmin.com" style="color:inherit;font-weight:600">elasticadmin.com</a><br>
+    Our use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.</div>
+  </div>
+<script>
+// Signed out: marketing lede + Auto Bookkeeping locked (needs a human in the
+// loop, so it comes with the Elastic team).
+// Signed in: product hero — greeting, company, and THEIR billable Ava usage
+// for the current + previous fortnight, straight off the billing view.
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function fmtC(n){return n>0&&n<0.01?"<$0.01":"$"+Number(n).toFixed(2);}
+  function fmtT(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);}
+  function fmtD(ymd){if(!ymd)return"";var d=new Date(ymd+"T12:00:00");return d.toLocaleDateString("en-NZ",{weekday:"short",day:"numeric",month:"short"});}
+  var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
+  var member=!!(s&&((s.companies&&s.companies.length)||s.looper||s.partner));
+  if(!member){
+    var pill=document.getElementById("bk-pill");
+    pill.textContent="🔒 Live · comes with the Elastic team";pill.className="pill soon";
+    document.getElementById("bk-open").innerHTML='Unlocked when the Elastic team runs your books <i class="ti ti-arrow-right"></i>';
+    document.getElementById("bk-card").setAttribute("href","https://elasticadmin.com");
+    return;
+  }
+  // signed in: sign-out affordance (+ Desk/portal shortcuts for the Elastic team)
+  var out=document.getElementById("signout");
+  out.style.display="inline-flex";
+  out.addEventListener("click",function(){localStorage.removeItem("ava_session");location.reload();});
+  if(s.looper){out.insertAdjacentHTML("beforebegin",'<a href="admin.html" class="out" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-shield-check"></i> The Desk</a><a href="partners.html" class="out" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-building-store"></i> Partners</a>');}
+  if(!(s.companies&&s.companies.length)||!s.token)return;
+  var qc=new URLSearchParams(location.search).get("c");
+  var comp=null;for(var i=0;i<s.companies.length;i++){if(s.companies[i].id===qc){comp=s.companies[i];break;}}
+  if(!comp&&s.looper){
+    // loopers see every company — default their hero to Max's own business
+    var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+    for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
+  }
+  comp=comp||s.companies[0];
+  // ── Today IS the home ───────────────────────────────────────────────────
+  // Triage, the feature switches, the token meters and the first-time setup
+  // coaching all live on today.html now (Max, 2026-08-03: "today is the
+  // dashboard"). A signed-in owner never lands here; this page survives as
+  // the signed-out marketing face, the loopers' hub, and behind ?hub=1.
+  if(!s.looper && !new URLSearchParams(location.search).get("hub")){
+    location.replace("today.html?c="+encodeURIComponent(comp.id));
+    return;
+  }
+
+  // ── which of their features are actually running ──────────────────────
+  // Features are opt-in (2026-07-31): a new client arrives with everything
+  // off. So the dashboard has to say which are on, and let them switch one
+  // on themselves — otherwise every card reads "Live · Beta" while nothing
+  // happens, and switching on is a support request. Same row The Desk flips.
+  var FCARDS={bookkeeping:["bk-card","bk-pill","bk-open"],
+              invoice_chaser:["collect-card","collect-pill","collect-open"],
+              gst_putaway:["gst-card","gst-pill","gst-open"]};
+  function setFeature(key,on,el){
+    el.textContent="…";
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:comp.id,key:key,on:on,by:s.email||"owner"})})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.features){paintFeatures(d.features);totals(d.features);coach(d.features);}else loadFeatures();})
+      .catch(loadFeatures);
+  }
+  function paintFeatures(list){
+    list.forEach(function(f){
+      var ids=FCARDS[f.key];if(!ids)return;
+      var card=document.getElementById(ids[0]),pill=document.getElementById(ids[1]),open=document.getElementById(ids[2]);
+      if(!card||!pill)return;
+      pill.className="pill "+(f.on?"live":"soon");
+      pill.textContent=!f.on?"Off":f.on_credit?"● On · free credit":"● On";
+      // A card that isn't running shouldn't invite you in and show you nothing.
+      if(open)open.innerHTML=f.on?'Open <i class="ti ti-arrow-right"></i>':'Not running';
+      if(open)open.style.color=f.on?"":"var(--ink3)";
+      // ── the meter: this feature's activity + tokens as they accumulate ──
+      // Fortnight-scoped because that's the billing period — the number here
+      // and the number on the invoice are the same number.
+      var st=card.querySelector(".fstat");
+      if(!st){st=document.createElement("div");st.className="fstat";
+        st.style.cssText="font-size:12px;color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums";
+        var dd=card.querySelector(".d");if(dd&&dd.parentNode)dd.parentNode.appendChild(st);}
+      // Every switched-on feature shows its own meter — tasks AND tokens —
+      // so the burn is visible per feature, not just in the total bar.
+      if(!f.on){st.innerHTML=f.free?'<b style="color:var(--grn)">Free</b> — switch on and it just runs.':"";}
+      else{
+        st.innerHTML=(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+fmtT(f.tokens||0)+' tokens this fortnight · '
+          +(f.free?'<b style="color:var(--grn)">Free</b>'
+            :f.on_credit?'<b style="color:var(--grn)">Free</b> — running on your starter credit'
+            :'<b>'+fmtC(f.charge_usd||0)+'</b>');
+      }
+      var row=card.querySelector(".row");if(!row)return;
+      var sw=row.querySelector(".fsw");
+      if(!sw){sw=document.createElement("span");sw.className="fsw";
+        sw.style.cssText="font-size:11.5px;font-weight:700;cursor:pointer;margin-left:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em";
+        row.appendChild(sw);}
+      sw.textContent=f.on?"Switch off":"Switch on";
+      sw.style.color=f.on?"var(--ink3)":"var(--ind)";
+      sw.onclick=function(e){
+        // the whole card is a link — the switch must not navigate
+        e.preventDefault();e.stopPropagation();
+        if(f.on&&!confirm("Switch "+f.key.replace(/_/g," ")+" off?\n\nAva stops doing it until you switch it back on."))return;
+        setFeature(f.key,!f.on,sw);
+      };
+    });
+  }
+  // ── the total: every feature's meter rolled up, plus the credit pool ────
+  // Each card carries its own meter; this is the one line that adds them up.
+  // The $100 starter credit is account-level (shared by the paid features),
+  // so it belongs here, not on any single card.
+  function totals(list){
+    var el=document.getElementById("fttl");
+    if(!el){el=document.createElement("div");el.id="fttl";
+      el.style.cssText="display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 18px;margin:0 0 14px;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums";
+      var grid=document.querySelector(".grid");
+      if(grid&&grid.parentNode)grid.parentNode.insertBefore(el,grid);}
+    var tasks=0,tokens=0,charge=0,creditLeft=null;
+    list.forEach(function(f){
+      tasks+=Number(f.tasks)||0;tokens+=Number(f.tokens)||0;charge+=Number(f.charge_usd)||0;
+      if(f.on_credit&&f.free_credit_left!=null)creditLeft=f.free_credit_left;
+    });
+    var h='<span><b style="color:var(--ink)">Everything this fortnight</b></span>'
+      +'<span>'+tasks.toLocaleString("en-NZ")+' tasks</span>'
+      +'<span>'+fmtT(tokens)+' tokens</span>'
+      +'<span><b style="color:var(--ink)">'+fmtC(charge)+'</b></span>';
+    if(creditLeft!=null)
+      h+='<span style="color:var(--grn);font-weight:600">'+fmtC(creditLeft)+' of your $100 free credit left</span>';
+    el.innerHTML=h;
+  }
+  // First time in with nothing on: the dashboard's job is to coach — connect
+  // the accounts Ava runs off, then switch on a first feature. Gone the moment
+  // something is running.
+  function coach(list){
+    var anyOn=list.some(function(f){return f.on;});
+    var el=document.getElementById("coach");
+    if(anyOn){if(el)el.remove();return;}
+    if(el)return;
+    el=document.createElement("div");el.id="coach";
+    el.style.cssText="background:var(--card);border:1px solid #C9C4F2;border-radius:6px;padding:16px 18px;margin:0 0 18px;font-size:13.5px;line-height:1.65;color:var(--ink2)";
+    el.innerHTML='<b style="color:var(--ink);font-size:14.5px">Here’s how it works</b><br>'
+      +'Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>'
+      +'<b style="color:var(--ink)">1.</b> <a href="connections.html" style="color:var(--ind);font-weight:600">Connect Xero</a> — your books, invoices and bank feed live there.<br>'
+      +'<b style="color:var(--ink)">2.</b> <a href="connections.html" style="color:var(--ind);font-weight:600">Connect the inboxes</a> where receipts, bills and invoices land.<br>'
+      +'<b style="color:var(--ink)">3.</b> Switch on your first feature below — your first <b style="color:var(--ink)">$100</b> of Ava’s work is on us, and each feature shows its own activity and tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.';
+    var grid=document.querySelector(".grid");
+    if(grid&&grid.parentNode)grid.parentNode.insertBefore(el,grid);
+  }
+  function loadFeatures(){
+    fetch(API+"/features?company="+comp.id).then(function(r){return r.json();})
+      .then(function(d){
+        if(!(d&&d.features))return;
+        paintFeatures(d.features);
+        totals(d.features);
+        coach(d.features);
+      }).catch(function(){});
+  }
+  loadFeatures();
+
+  // swap the marketing intro for the product hero
+  document.getElementById("landing-h1").style.display="none";
+  document.getElementById("landing-lede").style.display="none";
+  var hero=document.getElementById("hero");hero.style.display="block";
+  var hr=new Date().getHours();
+  document.getElementById("hero-greet").textContent=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
+  document.getElementById("hero-name").textContent=s.name?", "+String(s.name).split(" ")[0]:"";
+  document.getElementById("hero-co").textContent="· "+comp.name;
+  fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
+      // tasks only on the hero — the money lives in Usage & billing
+      var tasks=d.tasks||{week:0,month:0,year:0};
+      var toks=d.tokens||{week:0,month:0,year:0};
+      var CAP={week:"Resets every Monday",month:"This calendar month",year:"This year"};
+      document.getElementById("hero-stats").innerHTML=
+        '<div class="stat" style="min-width:170px"><div class="k">Tasks Ava ran</div><div class="n" id="task-n"></div></div>'
+        +'<div class="stat" style="min-width:150px"><div class="k">Tokens</div><div class="n" id="token-n"></div></div>'
+        +'<div style="display:flex;flex-direction:column;justify-content:flex-end"><div class="seg" id="task-seg">'
+        +'<button data-k="week" class="on">Week</button><button data-k="month">Month</button><button data-k="year">Year</button>'
+        +'</div></div>';
+      function pick(k){
+        document.getElementById("task-n").textContent=(tasks[k]||0).toLocaleString();
+        document.getElementById("token-n").textContent=fmtT(toks[k]||0);
+        document.getElementById("hero-feats").textContent=CAP[k]+(tasks[k]?"":" — connect Xero and Gmail and Ava gets to work.");
+        var bs=document.querySelectorAll("#task-seg button");
+        for(var i=0;i<bs.length;i++)bs[i].className=bs[i].getAttribute("data-k")===k?"on":"";
+      }
+      document.getElementById("task-seg").addEventListener("click",function(e){
+        var k=e.target&&e.target.getAttribute&&e.target.getAttribute("data-k");
+        if(k)pick(k);
+      });
+      pick("week");
+    }).catch(function(){
+      document.getElementById("hero-stats").innerHTML='<div class="stat"><div class="k">Tasks Ava ran</div><div class="n">—</div></div>';
+    });
+})();
+</script>
+<script src="ava-chat.js"></script>
+<script src="ava-nav.js"></script>
+</body>
+</html>

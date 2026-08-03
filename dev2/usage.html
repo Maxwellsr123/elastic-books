@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage &amp; billing — Elastic Admin</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var l=document.querySelector(".brand");if(l)l.insertAdjacentHTML("beforeend",' <span style="font-size:10px;font-weight:700;letter-spacing:.5px;background:#bbf7d0;color:#166534;padding:2px 7px;border-radius:5px;vertical-align:middle">DEV</span>');document.title="DEV · "+document.title;});</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+  .wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
+  .top{display:flex;align-items:center;gap:11px;margin-bottom:30px}
+  .logo{width:38px;height:38px;border-radius:4px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
+  .brand{font-weight:600;font-size:16px;letter-spacing:-.02em}
+  .top a.back{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:3px}
+  h1{font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
+  .sub{color:var(--ink2);font-size:13.5px;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:14px}
+  .card .kt{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+  .balrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .bal{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+  .bal.neg{color:#b91c1c}
+  .bal.pos{color:#0e7a50}
+  .standing{font-size:13px;line-height:1.55;color:var(--ink2);margin-top:8px}
+  .standing.warn{color:#92400e}
+  .standing.overdue{color:#b91c1c;font-weight:600}
+  .prow{display:flex;gap:10px;align-items:baseline;font-size:13.5px;padding:7px 0;border-bottom:1px solid #eeeee6}
+  .prow:last-child{border-bottom:0}
+  .prow .pw{color:var(--ink3);white-space:nowrap;font-size:12px;min-width:120px}
+  .prow .pf{flex:1;min-width:0}
+  .prow .pc{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .frow{font-size:12.5px;color:var(--ink2);padding:3px 0 3px 120px}
+  .frow b{color:var(--ink);font-weight:600}
+  .lrow{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink2);padding:5px 0;border-bottom:1px solid #f1f1e9}
+  .lrow .lw{color:var(--ink3);white-space:nowrap;font-variant-numeric:tabular-nums;min-width:96px;font-size:11.5px}
+  .lrow .lf{flex:1;min-width:0}
+  .lrow .lc{color:var(--ink);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .rows{max-height:340px;overflow-y:auto}
+  .fine{margin-top:20px;font-size:12px;color:var(--ink3);line-height:1.6}
+  .empty{color:var(--ink3);font-size:13px}
+  .paybtn{margin-top:12px;display:inline-flex;align-items:center;gap:7px;background:var(--ind);color:#fff;border:0;border-radius:3px;font:inherit;font-size:14px;font-weight:600;padding:11px 18px;cursor:pointer}
+  .paybtn:hover{background:#463DA4}
+  .paybtn[disabled]{opacity:.6;cursor:default}
+  .paid{margin-top:12px;background:#e7f6ee;border:1px solid #b7e4cd;color:#0e7a50;border-radius:4px;padding:10px 13px;font-size:13px;font-weight:600}
+  /* phone first — the fortnight rows stack instead of squeezing */
+  @media (max-width:560px){
+    .wrap{padding:18px 14px 44px}
+    .prow{flex-wrap:wrap}
+    .prow .pw{min-width:100%;order:-1}
+    .prow .pf{flex:1 1 auto}
+    .frow{padding-left:0}
+    .lrow{flex-wrap:wrap}
+    .lrow .lw{min-width:100%}
+    .bal{font-size:23px}
+  }
+  @media (min-width:1000px){ .wrap{max-width:900px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo">E</div>
+      <div class="brand">Elastic Admin</div>
+      <a class="back" href="index.html"><i class="ti ti-arrow-left"></i> Home</a>
+    </div>
+
+    <h1>Usage &amp; billing</h1>
+    <p class="sub" id="co-sub">Everything Ava and the Elastic team have done, and what it costs — itemised.</p>
+
+    <div class="card">
+      <div class="kt">Account</div>
+      <div class="balrow"><span class="bal" id="bal">—</span><span id="bal-word" style="font-size:13px;color:var(--ink2)"></span></div>
+      <div class="standing" id="standing"></div>
+      <div id="paid-note"></div>
+      <button class="paybtn" id="pay" style="display:none"><i class="ti ti-credit-card"></i> <span id="pay-label">Pay now</span></button>
+    </div>
+
+    <div class="card">
+      <div class="kt">Fortnights</div>
+      <div id="periods" class="empty">Loading…</div>
+    </div>
+
+    <div class="card">
+      <div class="kt">Where it went — recent activity</div>
+      <div class="rows" id="ledger"><span class="empty">Loading…</span></div>
+    </div>
+
+    <div class="fine">Ava's usage plus any Elastic team hours, billed together · invoiced on the 1st &amp; 16th · USD ex-GST.<br>
+    Questions about a line? Reply to your invoice email or ask the Elastic team.</div>
+  </div>
+
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function fmtC(n){return n>0&&n<0.01?"<$0.01":"$"+Number(n).toFixed(2);}
+  function fmtT(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);}
+  function fmtD(ymd){if(!ymd)return"";var d=new Date(ymd+"T12:00:00");return d.toLocaleDateString("en-NZ",{weekday:"short",day:"numeric",month:"short"});}
+  var s=null;try{s=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
+  if(!s||!s.token||!(s.companies&&s.companies.length)){location.replace("app.html");return;}
+  var qc=new URLSearchParams(location.search).get("c");
+  var comp=null;for(var i=0;i<s.companies.length;i++){if(s.companies[i].id===qc){comp=s.companies[i];break;}}
+  if(!comp&&s.looper){
+    var KPA="5c829c7f-0b63-4bbc-87b9-c24b822a564d";
+    for(var j=0;j<s.companies.length;j++){if(s.companies[j].id===KPA){comp=s.companies[j];break;}}
+  }
+  comp=comp||s.companies[0];
+  document.getElementById("co-sub").textContent=comp.name+" — everything Ava and the Elastic team have done, and what it costs, itemised.";
+  // back from Stripe: the webhook credits within a second or two
+  if(new URLSearchParams(location.search).get("paid")==="1"){
+    document.getElementById("paid-note").innerHTML='<div class="paid">Payment received — thank you. Your balance updates within a few seconds.</div>';
+    history.replaceState({},"",location.pathname+"?c="+comp.id);
+    setTimeout(function(){location.reload();},6000);
+  }
+  fetch(API+"/partner-desk?t="+encodeURIComponent(s.token)+"&usage_company="+comp.id)
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok)throw new Error(d&&d.error||"usage fetch failed");
+      // account standing
+      var acc=d.account||{state:"ok",balance:0,owing:0};
+      var bal=document.getElementById("bal");
+      bal.textContent=fmtC(Math.abs(acc.balance||0));
+      bal.className="bal "+((acc.balance||0)<-0.005?"neg":"pos");
+      document.getElementById("bal-word").textContent=(acc.balance||0)<-0.005?"owing":"in credit";
+      var st=document.getElementById("standing");
+      st.className="standing";
+      var owes=(acc.balance||0)<-0.005;
+      st.textContent=owes?"Invoiced fortnightly on the 1st & 16th. Pay by card here, or wait for your invoice email — whichever suits.":"All square. Ava's on the job.";
+      // card payment — Stripe hosts the form, we never see the card
+      if(owes&&acc.owing>=1){
+        var pay=document.getElementById("pay");
+        pay.style.display="inline-flex";
+        document.getElementById("pay-label").textContent="Pay "+fmtC(acc.owing)+" by card";
+        pay.addEventListener("click",function(){
+          pay.disabled=true;document.getElementById("pay-label").textContent="Opening secure checkout…";
+          fetch(API+"/stripe-pay",{method:"POST",headers:{"content-type":"application/json"},
+            body:JSON.stringify({t:s.token,company_id:comp.id,return_url:location.href.split("?")[0]})})
+            .then(function(r){return r.json();}).then(function(p){
+              if(p&&p.ok&&p.url){location.href=p.url;return;}
+              pay.disabled=false;
+              document.getElementById("pay-label").textContent="Pay "+fmtC(acc.owing)+" by card";
+              st.textContent=(p&&p.error)||"Couldn't open checkout — try again, or reply to your invoice email.";
+            }).catch(function(){
+              pay.disabled=false;
+              document.getElementById("pay-label").textContent="Pay "+fmtC(acc.owing)+" by card";
+              st.textContent="Couldn't reach checkout — try again in a moment.";
+            });
+        });
+      }
+      // fortnight periods, current first, with per-feature breakdown
+      var ps=(d.periods||[]);
+      var ph=ps.map(function(p,ix){
+        var label=fmtD(p.start)+" – "+fmtD(p.end)+(ix===0?" · current":"");
+        var feats=(p.features||[]).filter(function(f){return f.charge>=0.005||f.tasks>0;})
+          .map(function(f){return '<div class="frow"><b>'+esc(f.feature)+'</b> '+fmtC(f.charge)+' · '+f.tasks+' tasks · '+fmtT((f.tin||0)+(f.tout||0))+' tok</div>';}).join("");
+        // human work sits alongside Ava's usage — same fortnight, same invoice
+        if(p.human&&p.human.hours)
+          feats+='<div class="frow"><b>Human work — the Elastic team</b> '+fmtC(p.human.charge)+' · '+p.human.hours+' hours</div>';
+        var summary=(p.tasks||0)+' tasks · '+fmtT((p.tin||0)+(p.tout||0))+' tokens'
+          +(p.human&&p.human.hours?' · '+p.human.hours+'h human':'');
+        return '<div class="prow"><span class="pw">'+label+'</span><span class="pf">'+summary+'</span><span class="pc">'+fmtC(p.charge)+'</span></div>'+feats;
+      }).join("");
+      document.getElementById("periods").innerHTML=ph||'<span class="empty">No billable activity yet — connect Xero and Gmail and Ava gets to work.</span>';
+      document.getElementById("periods").className="";
+      // itemised ledger
+      var ev=(d.events||[]);
+      document.getElementById("ledger").innerHTML=ev.length?ev.map(function(e){
+        var t=new Date(e.at);
+        var when=t.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" "+t.toLocaleTimeString("en-NZ",{hour:"2-digit",minute:"2-digit"});
+        return '<div class="lrow"><span class="lw">'+when+'</span><span class="lf">'+esc(e.feature)+' <span style="color:var(--ink3)">· '+e.tasks+' task'+(e.tasks===1?"":"s")+' · '+fmtT(e.tokens)+' tok</span></span><span class="lc">'+fmtC(e.charge)+'</span></div>';
+      }).join(""):'<span class="empty">Nothing metered yet.</span>';
+    }).catch(function(e){
+      document.getElementById("standing").textContent="Couldn't load usage — try refreshing.";
+      document.getElementById("periods").textContent="—";
+      document.getElementById("ledger").textContent="—";
+    });
+})();
+</script>
+<script src="ava-nav.js"></script>
+</body>
+</html>
