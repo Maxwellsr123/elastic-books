@@ -370,11 +370,16 @@ h1{letter-spacing:-.03em}
     else if(f==="looper"){list=U_ITEMS.filter(function(i){return i.lane==="looper";});htxt="With Elastic — our team is looking into these";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing with Elastic right now.';}
     else if(f==="send"){list=U_ITEMS.filter(function(i){return i.lane!=="guess"&&i.lane!=="ready"&&i.lane!=="done"&&i.lane!=="looper"&&i.lane!=="to_pay"&&i.lane!=="pile";});htxt="Needs work — a receipt or an action is owed";row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing unfinished — nice.';}
     else{
-      // THE owner list: only what only-the-owner can do. Everything else is Elastic's.
+      // THE owner list: only what only-the-owner can do. Everything else is
+      // Elastic's — EXCEPT a missing receipt, which no amount of Elastic
+      // review can produce: the owner has the paper. Excluding review/looper
+      // lanes here made the board say "nothing needs you" while the daily
+      // email begged for six receipts (Max, 2026-08-03). Only the pile stays
+      // out — those ARE receipts, already in hand.
       list=U_ITEMS.filter(function(i){
         if(i.bill||i.reconciled)return false;
         if(i.lane==="guess")return true;
-        return i.needs_receipt&&!i.receipt_incoming&&i.lane!=="review"&&i.lane!=="looper"&&i.lane!=="pile";
+        return i.needs_receipt&&!i.receipt_incoming&&i.lane!=="pile";
       });
       htxt='Needs your attention <span style="font-weight:400;font-size:12px;color:var(--ink3)">· '+list.length+' item'+(list.length===1?'':'s')+' — after this, Ava and Elastic take it</span>';
       row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing needs you — Ava and Elastic have it all.';
