@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
 --ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
 --grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
@@ -809,7 +809,7 @@ function featBlock(id){
         +'<button class="btn bfeat" data-co="'+id+'" data-key="'+esc(x.key)+'" data-on="'+(on?'1':'0')+'" style="padding:6px 11px;font-size:12px'+(on?'':';color:var(--grn)')+'">'
         +(on?'Switch off':'Switch on')+'</button></div>';
     }).join("")+'</div>'
-    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. New clients arrive with everything off, so switching them on is part of onboarding. Auto Scheduling isn\'t here: it\'s under construction and gated separately.</div>';
+    +'<div class="muted" style="margin-top:9px">Switching one off stops Ava doing it — the hourly jobs skip this client entirely. New clients arrive with everything off, so switching them on is part of onboarding. Auto Scheduling isn\'t here: it\'s parked and gated separately.</div>';
   }
   // "never switched on" is not the same as "they turned it off", and the
   // difference is the whole conversation when a new client's board is quiet.
@@ -889,7 +889,7 @@ function renderPanel(id){
   html+=featBlock(id);
   var otherOpen=FOLDS[id+"|other"]===false; // other features default closed
   html+='<div class="sec fhead" data-fold="'+id+'|other" style="cursor:pointer">Other features <span class="cnt">run themselves — no Elastic touch</span><i class="ti ti-chevron-'+(otherOpen?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
-    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">GST put-away and Auto Scheduling work owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
+    +'<div class="fbody"'+(otherOpen?'':' style="display:none"')+'><div class="muted">GST put-away works owner-side. Nothing lands here unless a feature grows a human step.</div></div>';
   var ints=cl.integrations||{},ib=ints.inboxes||[];
   html+='<div class="muted" style="margin-top:12px"><i class="ti ti-mail" style="vertical-align:-2px"></i> Mailboxes Ava reads: '+(ib.length?ib.map(esc).join(", "):"<b>none yet</b>")
     +(ints.gmail_url?' &nbsp;·&nbsp; <a href="'+ints.gmail_url+'" target="_blank" style="font-weight:600;text-decoration:none">＋ Link a mailbox</a>':'')+'</div>';

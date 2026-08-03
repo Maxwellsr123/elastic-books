@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
 --ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
 --grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;--red:#B42318;--redbg:#FEF3F2;--org:#FF6A1A;--ink0:#100F15}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
@@ -82,6 +82,29 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
 .u .t{font-size:12px;color:var(--ink2);margin-top:2px;font-variant-numeric:tabular-nums}
 .feats{margin-top:10px;font-size:12.5px;color:var(--ink3);line-height:1.7}
 .feats b{color:var(--ink2);font-weight:600}
+/* ── Today IS the dashboard: the feature switches + meters live here ── */
+.coach{background:#fff;border:1px solid #C9C4F2;border-radius:6px;padding:15px 17px;margin-top:14px;font-size:13.5px;line-height:1.65;color:var(--ink2)}
+.coach b{color:var(--ink)}
+.coach a{color:var(--ind);font-weight:600;text-decoration:none}
+.fttl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:#fff;border:1px solid var(--line);border-radius:6px;padding:11px 16px;margin-top:12px;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.fttl b{color:var(--ink)}
+.fttl .cr{color:var(--grn);font-weight:600}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.fcard{background:#fff;border:1px solid var(--line);border-radius:6px;padding:13px 15px}
+.fcard.foff{opacity:.75}
+.fcard .fh{display:flex;align-items:center;gap:8px}
+.fcard .fn{font-size:13.5px;font-weight:700}
+.fcard .fp{margin-left:auto}
+.fcard .fb{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.5}
+.fcard .fm{font-size:12px;color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+.fcard .fm b{color:var(--ink)}
+.fcard .fm .fr{color:var(--grn);font-weight:600}
+.fcard .fa{display:flex;gap:12px;margin-top:9px;align-items:center}
+.fcard .fa a,.fcard .fa span.fsw2{font-size:11.5px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;text-decoration:none}
+.fcard .fa a{color:#D2530F}
+.fcard .fsw2{color:var(--ind)}
+.fcard .fsw2.soff{color:var(--ink3)}
+@media(max-width:820px){.fgrid{grid-template-columns:1fr}}
 .wip{display:flex;gap:11px;align-items:flex-start;background:var(--ambbg);border:1px solid #EBD7B4;color:#7A4A10;border-radius:6px;padding:11px 14px;font-size:13px;line-height:1.55;margin-bottom:12px}
 .wip i{font-size:17px;position:relative;top:1px}
 .wip b{color:#5E3808}
@@ -144,6 +167,14 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       <div class="mic" id="micbtn" title="Tap to record a voice note"><i class="ti ti-microphone"></i></div>
     </div>
 
+    <div class="coach" id="coach" style="display:none">
+      <b style="font-size:14.5px">Here’s how it works</b><br>
+      Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>
+      <b>1.</b> <a href="connections.html">Connect Xero</a> — your books, invoices and bank feed live there.<br>
+      <b>2.</b> <a href="connections.html">Connect the inboxes</a> where receipts, bills and invoices land.<br>
+      <b>3.</b> Switch on your first feature below — your first <b>$100</b> of Ava’s work is on us, and every feature shows its own tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.
+    </div>
+
     <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
     <div class="note" id="tnote" style="display:none"><i class="ti ti-arrow-badge-down" style="font-size:17px;position:relative;top:1px"></i><div id="tnotet"></div></div>
     <div id="needs"></div>
@@ -155,6 +186,10 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     <div class="sec">What Ava's done <span class="c">tasks and tokens</span></div>
     <div class="use" id="use"></div>
     <div class="feats" id="feats"></div>
+
+    <div class="sec">Features <span class="c">switch on · watch the burn</span></div>
+    <div class="fttl" id="fttl" style="display:none"></div>
+    <div class="fgrid" id="fgrid"></div>
   </div></main>
 </div>
 
@@ -249,7 +284,64 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     document.getElementById("feats").innerHTML=tf.length
       ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
       :"";
+
+    renderFeatures(d.features||[]);
   }
+
+  // ── the feature switches + meters: Today IS the dashboard ───────────────
+  // Each card: on/off pill, its own tasks·tokens meter, the $ (or Free), a
+  // switch, and an Open link into its board. The total bar rolls it all up
+  // and carries the $100 starter-credit countdown (account-level pool).
+  function fmtC(n){n=Number(n)||0;return n>0&&n<0.01?"<$0.01":"$"+n.toFixed(2);}
+  var FBOARD={bookkeeping:"app.html",invoice_chaser:"collect.html",gst_putaway:"gst.html"};
+  function renderFeatures(fs){
+    if(!fs.length)return;
+    var allOff=fs.every(function(f){return !f.on;});
+    document.getElementById("coach").style.display=allOff?"":"none";
+    // total bar
+    var tasks=0,tokens=0,charge=0,creditLeft=null;
+    fs.forEach(function(f){
+      tasks+=Number(f.tasks)||0;tokens+=Number(f.tokens)||0;charge+=Number(f.charge_usd)||0;
+      if(f.on_credit&&f.free_credit_left!=null)creditLeft=f.free_credit_left;
+    });
+    var tt=document.getElementById("fttl");
+    tt.style.display="";
+    tt.innerHTML='<span><b>Everything this fortnight</b></span>'
+      +'<span>'+tasks.toLocaleString("en-NZ")+' tasks</span>'
+      +'<span>'+tok(tokens)+' tokens</span>'
+      +'<span><b>'+fmtC(charge)+'</b></span>'
+      +(creditLeft!=null?'<span class="cr">'+fmtC(creditLeft)+' of your $100 free credit left</span>':'');
+    // cards
+    document.getElementById("fgrid").innerHTML=fs.map(function(f){
+      var pill=!f.on?'<span class="pill p-mut">Off</span>'
+        :f.on_credit?'<span class="pill p-ind">On · free credit</span>'
+        :'<span class="pill p-grn">On</span>';
+      var meter=!f.on
+        ?'<div class="fb">'+esc(f.blurb)+(f.free?' <span class="fr" style="color:var(--grn);font-weight:600">Free.</span>':'')+'</div>'
+        :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this fortnight · '
+          +(f.free?'<span class="fr">Free</span>'
+            :f.on_credit?'<span class="fr">Free — on your starter credit</span>'
+            :'<b>'+fmtC(f.charge_usd||0)+'</b>')+'</div>';
+      var acts='<div class="fa">'
+        +(f.on&&FBOARD[f.key]?'<a href="'+FBOARD[f.key]+'?c='+CO+'">Open</a>':'')
+        +'<span class="fsw2'+(f.on?" soff":"")+'" data-key="'+esc(f.key)+'" data-on="'+(f.on?"1":"")+'">'+(f.on?"Switch off":"Switch on")+'</span>'
+        +'</div>';
+      return '<div class="fcard'+(f.on?"":" foff")+'"><div class="fh"><span class="fn">'+esc(f.name)+'</span><span class="fp">'+pill+'</span></div>'+meter+acts+'</div>';
+    }).join("");
+  }
+  document.addEventListener("click",function(e){
+    var sw=e.target.closest&&e.target.closest(".fsw2");
+    if(!sw)return;
+    var key=sw.getAttribute("data-key"),on=!!sw.getAttribute("data-on");
+    if(on&&!confirm("Switch "+key.replace(/_/g," ")+" off?\n\nAva stops doing it until you switch it back on."))return;
+    sw.textContent="…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,key:key,on:!on,by:(sess&&sess.email)||"owner"})})
+      .then(function(){return fetch(API+"/ava-triage?company="+CO);})
+      .then(function(r){return r.json();}).then(render)
+      .catch(function(){sw.textContent="Didn't save";});
+  });
 
   // ── the owner's own say on the order ────────────────────────────────────
   // Ava ranks it; you get the last word. "Later" drops one to the bottom,

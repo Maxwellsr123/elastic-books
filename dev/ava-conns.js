@@ -3,9 +3,9 @@
 // One rule: a feature page shows ONLY the accounts that actually feed that
 // feature. GST put-away is Xero alone. Auto Collect is Xero (what's overdue,
 // what's been paid) + Gmail (the reminder goes from the owner's own address).
-// Auto Scheduling is Gmail (the job requests) + Fergus (where it books).
 // Auto Bookkeeping is Gmail + Xero — Fergus has nothing to do with it, and
 // showing it there reads like Ava needs it.
+// (Auto Scheduling was Gmail + Fergus. Parked 2026-08-03, page removed.)
 //
 // The central Connections page (connections.html) stays the one place that
 // lists everything and does the connecting/disconnecting; these strips are

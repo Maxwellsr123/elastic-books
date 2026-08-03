@@ -11,7 +11,7 @@
 <script src="ava-conns.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;--ind:#534AB7;--indbg:#EEEDFE;--indtx:#3F3795;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;--ind:#534AB7;--indbg:#EEEDFE;--indtx:#3F3795;--grn:#0E7A50;--grnbg:#E7F6EE;--border-stronger:#c9c9c2}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:26px}
@@ -42,7 +42,7 @@ h1{font-size:24px;letter-spacing:-.02em;margin-bottom:5px}
 <div class="wrap">
   <div class="top"><div class="logo">E</div><div class="brand">Elastic AI <span>· back office</span></div><a class="back" href="index.html"><i class="ti ti-arrow-left"></i> Home</a></div>
   <h1>Connections</h1>
-  <p class="lede">Connect the tools Ava works with. You set these up once here — they power every feature: Auto Bookkeeping, Auto Scheduling and more.</p>
+  <p class="lede">Connect the tools Ava works with. You set these up once here — they power every feature: Auto Bookkeeping, Auto Collect, GST put-away and more.</p>
   <div id="conn"><div class="card"><div class="sub" style="margin-left:0">Loading your connections…</div></div></div>
 </div>
 
@@ -95,7 +95,7 @@ function render(g){
     ? '<span class="pill p-ok">CONNECTED</span>'+(g.fergus_url?'<a class="lnk rec" href="'+esc(g.fergus_url)+'">Reconnect</a>':'')+'<button type="button" class="lnk disc" onclick="askDisc(this,\'fergus\',\'\')">Disconnect</button>'
     : (g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
   var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusAct+'</div>'
-    +'<div class="sub">Jobs and quotes. (Auto Scheduling is under construction &mdash; we&rsquo;re on the money features first.)</div></div>';
+    +'<div class="sub">Jobs and quotes &mdash; what Ava reads when you ask her about work on the books.</div></div>';
   box.innerHTML=gmailCard+xeroCard+fergusCard;
 }
 // Inline confirm → disconnect (no jarring native dialog). Cancel re-renders.

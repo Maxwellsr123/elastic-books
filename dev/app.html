@@ -12,7 +12,7 @@
 <script src="ava-feature-switch.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#FAF8F4;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
+:root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
 --ind:#534AB7;--ind2:#6F66DB;--indbg:#EEEDFE;--indtx:#3F3795;
 --grn:#0E7A50;--grnbg:#E7F6EE;--amb:#9A5B12;--ambbg:#FBF1E2;--blu:#175CD3;--blubg:#EFF6FF;}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
@@ -440,8 +440,8 @@ h1{letter-spacing:-.03em}
     // only the compact "connected" strip is left. Step 3 (bringing Elastic in)
     // counts: a board that's connected but has never met a human isn't set up.
     if(!g.gmail || !g.xero || !g.elastic_setup_requested_at){box.innerHTML=setupPanel(g);return;}
-    // Only what feeds the books. Fergus powers Auto Scheduling, not this — it
-    // lives on that page and in Settings, not here. (avaConns → ava-conns.js)
+    // Only what feeds the books. Fergus isn't part of this — it lives on the
+    // Connections page and in Settings, not here. (avaConns → ava-conns.js)
     avaConns(box,g,[
       {key:"gmail",note:"The inboxes Ava reads for receipts and bills."},
       {key:"xero",note:"The bank lines she files them against."}
