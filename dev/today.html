@@ -332,19 +332,22 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     var coach=document.getElementById("coach");
     coach.style.display=setupDone?"none":"";
     if(!setupDone)coach.innerHTML=coachHtml();
-    // total bar
-    var tasks=0,tokens=0,charge=0,creditLeft=null;
+    // The charge-up bar (Max, 2026-08-03: no fortnight roll-up — each card
+    // already carries its own meter). While the starter credit lasts, count
+    // it down; once it's spent, show what this fortnight is costing and the
+    // way to pay. Usage & billing stays the detailed view.
+    var charge=0,creditLeft=null;
     fs.forEach(function(f){
-      tasks+=Number(f.tasks)||0;tokens+=Number(f.tokens)||0;charge+=Number(f.charge_usd)||0;
+      charge+=Number(f.charge_usd)||0;
       if(f.on_credit&&f.free_credit_left!=null)creditLeft=f.free_credit_left;
     });
     var tt=document.getElementById("fttl");
     tt.style.display="";
-    tt.innerHTML='<span><b>Everything this fortnight</b></span>'
-      +'<span>'+tasks.toLocaleString("en-NZ")+' tasks</span>'
-      +'<span>'+tok(tokens)+' tokens</span>'
-      +'<span><b>'+fmtC(charge)+'</b></span>'
-      +(creditLeft!=null?'<span class="cr">'+fmtC(creditLeft)+' of your $100 free credit left</span>':'');
+    tt.innerHTML=creditLeft!=null
+      ?'<span class="cr" style="font-size:13.5px">⚡ '+fmtC(creditLeft)+' of your $100 free credit left</span>'
+        +'<span style="margin-left:auto;color:var(--ink3)">then it’s pay-as-you-go — <a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">top up any time</a></span>'
+      :'<span><b>'+fmtC(charge)+'</b> this fortnight</span>'
+        +'<span style="margin-left:auto"><a href="usage.html?c='+CO+'" style="color:var(--ind);font-weight:600;text-decoration:none">Top up / pay →</a></span>';
     // cards
     document.getElementById("fgrid").innerHTML=fs.map(function(f){
       var pill=!f.on?'<span class="pill p-mut">Off</span>'
