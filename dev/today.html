@@ -167,13 +167,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       <div class="mic" id="micbtn" title="Tap to record a voice note"><i class="ti ti-microphone"></i></div>
     </div>
 
-    <div class="coach" id="coach" style="display:none">
-      <b style="font-size:14.5px">Here’s how it works</b><br>
-      Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>
-      <b>1.</b> <a href="connections.html">Connect Xero</a> — your books, invoices and bank feed live there.<br>
-      <b>2.</b> <a href="connections.html">Connect the inboxes</a> where receipts, bills and invoices land.<br>
-      <b>3.</b> Switch on your first feature below — your first <b>$100</b> of Ava’s work is on us, and every feature shows its own tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.
-    </div>
+    <div class="coach" id="coach" style="display:none"></div>
 
     <div class="hdr"><h1 id="hd">Loading…</h1><div class="s" id="hs"></div><div class="when" id="hw"></div></div>
     <div class="note" id="tnote" style="display:none"><i class="ti ti-arrow-badge-down" style="font-size:17px;position:relative;top:1px"></i><div id="tnotet"></div></div>
@@ -285,6 +279,7 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
       :"";
 
+    if(d.conns)CONNS=d.conns;
     renderFeatures(d.features||[]);
   }
 
@@ -294,6 +289,32 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
   // and carries the $100 starter-credit countdown (account-level pool).
   function fmtC(n){n=Number(n)||0;return n>0&&n<0.01?"<$0.01":"$"+n.toFixed(2);}
   var FBOARD={bookkeeping:"app.html",invoice_chaser:"collect.html",gst_putaway:"gst.html"};
+  // What each feature actually runs off — a card that's ON but missing its
+  // inputs says "waiting on…" instead of an empty meter that reads as broken.
+  var FNEEDS={bookkeeping:{gmail:true,xero:true},invoice_chaser:{xero:true,gmail:true},gst_putaway:{xero:true}};
+  var CONNS={gmail_inboxes:[],xero:false};
+  // The coaching card, built against what's ACTUALLY connected. Gmail leads:
+  // the receipts are the raw material, and one business often has several
+  // inboxes worth of them (Max: "connect every inbox that might hold one").
+  function coachHtml(){
+    var g=CONNS.gmail_inboxes.length,x=CONNS.xero;
+    var tick='<span style="color:var(--grn);font-weight:700">✓</span> ';
+    return '<b style="font-size:14.5px">Here’s how it works</b><br>'
+      +'Ava runs off your own accounts — nothing happens until you connect them and switch a feature on.<br>'
+      +'<b>1.</b> '+(g?tick:'')+'<a href="connections.html?c='+CO+'">Connect your Gmail inboxes</a> — every inbox that might have receipts, bills or supplier invoices landing in it. Connect as many as you like; Ava reads them all.'
+      +(g?' <span style="color:var(--grn);font-weight:600">'+g+' connected.</span>':'')+'<br>'
+      +'<b>2.</b> '+(x?tick:'')+'<a href="connections.html?c='+CO+'">Connect Xero</a> — your books, invoices and bank feed live there.'
+      +(x?' <span style="color:var(--grn);font-weight:600">Connected.</span>':'')+'<br>'
+      +'<b>3.</b> Switch on your first feature below — your first <b>$100</b> of Ava’s work is on us, and every feature shows its own tokens as it runs, so you’ll always know exactly what it costs before you pay a cent.';
+  }
+  function waitingOn(f){
+    if(!f.on)return null;
+    var need=FNEEDS[f.key]||{};
+    var missing=[];
+    if(need.gmail&&!CONNS.gmail_inboxes.length)missing.push("your Gmail inboxes");
+    if(need.xero&&!CONNS.xero)missing.push("Xero");
+    return missing.length?missing.join(" and "):null;
+  }
   function renderFeatures(fs){
     // Invoice nudges is hidden from owners for now (Max, 2026-08-03): it's
     // Slack-only with no board to open and its cost can't be isolated, so the
@@ -302,7 +323,12 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     fs=fs.filter(function(f){return f.key!=="invoicing";});
     if(!fs.length)return;
     var allOff=fs.every(function(f){return !f.on;});
-    document.getElementById("coach").style.display=allOff?"":"none";
+    // The coaching stays up until the accounts are actually connected — a
+    // feature switched on against nothing isn't set up, it's just a toggle.
+    var setupDone=CONNS.gmail_inboxes.length&&CONNS.xero&&!allOff;
+    var coach=document.getElementById("coach");
+    coach.style.display=setupDone?"none":"";
+    if(!setupDone)coach.innerHTML=coachHtml();
     // total bar
     var tasks=0,tokens=0,charge=0,creditLeft=null;
     fs.forEach(function(f){
@@ -321,8 +347,11 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
       var pill=!f.on?'<span class="pill p-mut">Off</span>'
         :f.on_credit?'<span class="pill p-ind">On · free credit</span>'
         :'<span class="pill p-grn">On</span>';
+      var waiting=waitingOn(f);
       var meter=!f.on
         ?'<div class="fb">'+esc(f.blurb)+(f.free?' <span class="fr" style="color:var(--grn);font-weight:600">Free.</span>':'')+'</div>'
+        :waiting
+        ?'<div class="fm" style="color:var(--amb)">Waiting on '+esc(waiting)+' — <a href="connections.html?c='+CO+'" style="color:var(--amb);font-weight:700">connect it</a> and Ava gets to work.</div>'
         :'<div class="fm">'+(Number(f.tasks)||0).toLocaleString("en-NZ")+' tasks · '+tok(f.tokens||0)+' tokens this fortnight · '
           +(f.free?'<span class="fr">Free</span>'
             :f.on_credit?'<span class="fr">Free — on your starter credit</span>'
