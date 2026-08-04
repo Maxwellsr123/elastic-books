@@ -41,9 +41,9 @@
   var ITEMS = [
     { key: "today",   href: "today.html",       icon: "ti-inbox",        label: "Today",   phone: true, wip: true },
     // The four AGENT BOARDS (Max, 2026-08-04): one per money direction.
-    // Auto Rec = the books; Auto AR = what you're owed (Auto Collect lives
+    // Auto Reconcile = the books; Auto AR = what you're owed (Auto Collect lives
     // INSIDE it now, not as its own board); Auto AP = what you owe; GST free.
-    { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Auto Rec", group: "Agent boards" },
+    { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Auto Reconcile", group: "Agent boards" },
     { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Auto Receivables" },
     { key: "ap",      href: "payables.html",    icon: "ti-arrow-up-circle",   label: "Auto Payables" },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "Auto GST" },
