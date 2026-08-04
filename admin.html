@@ -22,9 +22,9 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .sec{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:24px 0 10px;display:flex;align-items:center;gap:8px}
 .sec .cnt{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;color:var(--ink3)}
 .co{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:10px;overflow:hidden}
-.cohead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.cohead{display:flex;align-items:center;gap:8px 12px;padding:14px 16px;cursor:pointer;flex-wrap:wrap}
 .cohead:hover{background:#FCFCF9}
-.coname{font-weight:600;font-size:14.5px;flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.coname{font-weight:600;font-size:14.5px;flex:1;min-width:180px;display:flex;align-items:center;gap:9px}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
 .b-grn{background:var(--grnbg);color:var(--grn)}.b-amb{background:var(--ambbg);color:var(--amb)}.b-ind{background:var(--indbg);color:var(--indtx)}.b-red{background:var(--redbg);color:var(--red)}.b-mut{background:#EFEFE8;color:var(--ink3)}
@@ -334,14 +334,15 @@ function renderClients(rows){
     var c=laneCounts(r.cl),name=r.c.name,ac=acCounts(r.ac),ap=apCounts(r.apc);
     var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
     var badges="";
-    if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
+    // Jewel-first order: HER work in hot colours, passive counts muted last.
+    if(ap.flagged)badges+='<span class="badge b-red" title="Auto AP: supplier invoices found in email with no Xero bill — enter in Xero, then tick">'+ap.flagged+' to enter</span> ';
+    if(ac.needs)badges+='<span class="badge b-red" title="Auto AR: Ava has handed these chases back — no reply, or a dispute">'+ac.needs+' collect</span> ';
     if(c.review)badges+='<span class="badge b-amb">'+c.review+' check</span> ';
+    if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
     if(c.pile)badges+='<span class="badge b-mut">'+c.pile+' in pile</span> ';
-    if(ac.needs)badges+='<span class="badge b-red" title="Auto Collect: Ava has handed these back — email sent, no reply, or a dispute">'+ac.needs+' collect</span> ';
-    if(ap.flagged)badges+='<span class="badge b-red" title="Aged Payables: bills someone flagged for us to enter in Xero">'+ap.flagged+' to enter</span> ';
     if(!badges)badges='<span class="badge b-mut">all quiet</span>';
-    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><a href="#" class="setrate" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--ink3)" title="Their agreed labour sell rate — click to change">$'+(RATES[r.c.id]?RATES[r.c.id].rate:20)+'/hr</a><a href="#" class="loghours" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Log Elastic team hours against this client">Hours +</a><a href="#" class="topup" data-co="'+r.c.id+'" data-name="'+esc(name)+'" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="Record a payment against this client\'s account">Top-up +</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
+    var html='<div class="co" data-id="'+r.c.id+'"><div class="cohead"><div class="coname">'+conn+' '+esc(name)+'</div>'+badges+'<a href="app.html?c='+r.c.id+'" target="_blank" style="font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap" title="See this client\'s dashboard exactly as they do">Board ↗</a><i class="ti ti-chevron-down" style="color:var(--ink3)"></i></div><div class="panel" id="p-'+r.c.id+'"></div></div>';
     if(c.ready||c.review||c.owner||c.pile||ac.needs||ap.flagged){work+=html;working++;}else quiet+=html;
   });
   document.getElementById("worklist").innerHTML=work||'<div class="muted" style="padding:8px 2px">Nothing owed anywhere — nice.</div>';
@@ -850,7 +851,12 @@ function renderPanel(id){
   // Elastic touches (upload the report, reconcile & tick off) — the rest run
   // themselves. Each feature block collapses on its header.
   var bkFold=!!FOLDS[id+"|bk"]; // bookkeeping defaults open
-  var html='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Auto Bookkeeping <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
+  var pname=(typeof cl.company==="string"?cl.company:(cl.company&&cl.company.name))||"";
+  var html='<div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--ink3);padding:2px 0 10px;flex-wrap:wrap"><span style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:10.5px">Account</span>'
+    +'<a href="#" class="setrate" data-co="'+id+'" data-name="'+esc(pname)+'" style="font-weight:600;text-decoration:none;color:var(--ink2)" title="Their agreed labour sell rate — click to change">$'+(RATES[id]?RATES[id].rate:20)+'/hr</a>'
+    +'<a href="#" class="loghours" data-co="'+id+'" data-name="'+esc(pname)+'" style="font-weight:600;text-decoration:none" title="Log Elastic team hours against this client">Log hours</a>'
+    +'<a href="#" class="topup" data-co="'+id+'" data-name="'+esc(pname)+'" style="font-weight:600;text-decoration:none" title="Record a payment against this client\'s account">Record top-up</a></div>';
+  html+='<div class="sec fhead" data-fold="'+id+'|bk" style="margin-top:0;color:var(--indtx);cursor:pointer">Auto Rec <span class="cnt">Elastic\'s two touches: upload the report · reconcile &amp; tick off</span><i class="ti ti-chevron-'+(bkFold?'down':'up')+'" style="margin-left:auto;color:var(--ink3)"></i></div>';
   html+='<div class="fbody"'+(bkFold?' style="display:none"':'')+'>';
   html+='<div class="drop" data-co="'+id+'"><div style="font-weight:600;font-size:14px;margin-bottom:3px"><i class="ti ti-file-spreadsheet" style="color:var(--indtx);vertical-align:-2px"></i> Drop the reconciliation report</div>'
     +'<div class="muted" style="margin-bottom:11px">Xero unreconciled export — screenshot, PDF, CSV or Excel. Drag it here or click upload. Ava reads every line, matches receipts, and asks the owner the rest.'+lastRep+'</div>'
