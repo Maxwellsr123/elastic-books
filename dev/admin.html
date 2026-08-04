@@ -335,8 +335,8 @@ function renderClients(rows){
     var conn='<span class="dot" title="Gmail" style="background:'+(r.c.gmail?"#0E7A50":"#D9D9CC")+'"></span><span class="dot" title="Xero" style="background:'+(r.c.xero?"#13B5EA":"#D9D9CC")+'"></span>';
     var badges="";
     // Jewel-first order: HER work in hot colours, passive counts muted last.
-    if(ap.flagged)badges+='<span class="badge b-red" title="Auto AP: supplier invoices found in email with no Xero bill — enter in Xero, then tick">'+ap.flagged+' to enter</span> ';
-    if(ac.needs)badges+='<span class="badge b-red" title="Auto AR: Ava has handed these chases back — no reply, or a dispute">'+ac.needs+' collect</span> ';
+    if(ap.flagged)badges+='<span class="badge b-red" title="Auto Payables: supplier invoices found in email with no Xero bill — enter in Xero, then tick">'+ap.flagged+' to enter</span> ';
+    if(ac.needs)badges+='<span class="badge b-red" title="Auto Receivables: Ava has handed these chases back — no reply, or a dispute">'+ac.needs+' collect</span> ';
     if(c.review)badges+='<span class="badge b-amb">'+c.review+' check</span> ';
     if(c.ready)badges+='<span class="badge b-grn">'+c.ready+' to reconcile</span> ';
     if(c.owner)badges+='<span class="badge b-ind">'+c.owner+' with owner</span> ';
@@ -379,11 +379,11 @@ document.addEventListener("click",function(e){
     return;}
   var api=e.target.closest(".bapignore");
   if(api){var ico=api.getAttribute("data-co"),iid=api.getAttribute("data-id");
-    if(!confirm("Not actually a bill to pay? This removes it from Aged Payables."))return;
+    if(!confirm("Not actually a bill to pay? This removes it from Auto Payables."))return;
     api.disabled=true;api.textContent="…";
     fetch(API+"/ava-aged-payables",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:ico,id:iid,action:"ignore"})})
       .then(function(r){return r.json();}).then(function(d){
-        if(d&&d.ok){toast("Removed from Aged Payables");fetch(API+"/ava-aged-payables?company="+ico).then(function(r){return r.json();}).then(function(fresh){APCACHE[ico]=fresh;var p=document.getElementById("p-"+ico);if(p&&p.style.display==="block")renderPanel(ico);});}
+        if(d&&d.ok){toast("Removed from Auto Payables");fetch(API+"/ava-aged-payables?company="+ico).then(function(r){return r.json();}).then(function(fresh){APCACHE[ico]=fresh;var p=document.getElementById("p-"+ico);if(p&&p.style.display==="block")renderPanel(ico);});}
         else{api.disabled=false;api.textContent="Not real";alert((d&&d.error)||"Couldn't save.");}
       }).catch(function(){api.disabled=false;api.textContent="Not real";});
     return;}
@@ -746,7 +746,7 @@ function acBlock(id){
   // Defaults open only when a human is owed something; an explicit fold wins.
   var stored=FOLDS[id+"|ac"];
   var open=stored===undefined?(needs.length>0):(stored===false);
-  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto AR · chases <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Receivables · chases <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
 // ── Aged Payables: the flag queue ──────────────────────────────────────────
@@ -768,10 +768,10 @@ function apBlock(id){
   var flagged=[],hint="",body="";
   if(ap===undefined){
     hint="loading…";
-    body='<div class="muted">Reading their Aged Payables…</div>';
+    body='<div class="muted">Reading their Auto Payables…</div>';
   }else if(!ap||ap.error){
     hint="couldn't load";
-    body='<div class="muted">Couldn\'t read Aged Payables for this client — refresh to retry.</div>';
+    body='<div class="muted">Couldn\'t read Auto Payables for this client — refresh to retry.</div>';
   }else{
     // Auto AP: JEWEL'S queue is everything Ava found in email that isn't a
     // Xero bill yet — new AND flagged. Waiting for the owner to flag each one
@@ -788,10 +788,10 @@ function apBlock(id){
       body+='<div class="muted">Nothing waiting — every supplier invoice Ava found in their email already matches a bill in Xero.</div>';
     }
   }
-  body+='<div style="margin-top:12px"><a href="payables.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Aged Payables ↗</a></div>';
+  body+='<div style="margin-top:12px"><a href="payables.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Auto Payables ↗</a></div>';
   var stored=FOLDS[id+"|ap"];
   var open=stored===undefined?(flagged.length>0):(stored===false);
-  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Auto AP <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Auto Payables <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
 // ── feature switches ───────────────────────────────────────────────────────

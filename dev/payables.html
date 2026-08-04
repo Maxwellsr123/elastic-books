@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Auto AP — Ava</title>
+<title>Auto Payables — Ava</title>
 <script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +63,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
 <body>
 <div class="app">
   <main class="main"><div class="wrap">
-    <h1>Auto AP <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1>
+    <h1>Auto Payables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1>
     <p class="lede">Supplier bills already in Xero, aged the same way — plus the ones that AREN'T in Xero yet, because a supplier invoice landed in email and nobody entered it. That second half is the one that costs late fees.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
 
@@ -171,7 +171,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     var fl=e.target.closest&&e.target.closest(".bflag");
     if(fl){fl.disabled=true;fl.textContent="…";post("flag",fl.getAttribute("data-id")).then(load);return;}
     var ig=e.target.closest&&e.target.closest(".bignore");
-    if(ig){if(!confirm("Not a real bill to pay? This removes it from Aged Payables."))return;ig.disabled=true;ig.textContent="…";post("ignore",ig.getAttribute("data-id")).then(load);return;}
+    if(ig){if(!confirm("Not a real bill to pay? This removes it from Auto Payables."))return;ig.disabled=true;ig.textContent="…";post("ignore",ig.getAttribute("data-id")).then(load);return;}
   });
 
   function load(){

@@ -44,8 +44,8 @@
     // Auto Rec = the books; Auto AR = what you're owed (Auto Collect lives
     // INSIDE it now, not as its own board); Auto AP = what you owe; GST free.
     { key: "books",   href: "app.html",         icon: "ti-book-2",       label: "Auto Rec", group: "Agent boards" },
-    { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Auto AR" },
-    { key: "ap",      href: "payables.html",    icon: "ti-arrow-up-circle",   label: "Auto AP" },
+    { key: "ar",      href: "receivables.html", icon: "ti-arrow-down-circle", label: "Auto Receivables" },
+    { key: "ap",      href: "payables.html",    icon: "ti-arrow-up-circle",   label: "Auto Payables" },
     { key: "gst",     href: "gst.html",         icon: "ti-pig-money",    label: "Auto GST" },
     // Team management lives inside app.html's own Settings modal (built
     // 2026-07-08, owner-only, already handles invite emails). Rather than
