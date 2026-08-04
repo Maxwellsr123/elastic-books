@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications — Elastic Admin</title>
+<script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){document.title="DEV · "+document.title;});</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff;--grn:#0e7a50;--grnbg:#e7f6ee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+  .wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
+  h1{font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
+  .sub{color:var(--ink2);font-size:13.5px;margin:0 0 22px;line-height:1.6}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:17px 19px;margin-bottom:14px}
+  .fh{display:flex;align-items:center;gap:9px}
+  .fn{font-weight:700;font-size:15px}
+  .pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-left:auto}
+  .p-grn{background:var(--grnbg);color:var(--grn)}
+  .what{font-size:12.5px;color:var(--ink2);margin-top:6px;line-height:1.55}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  .chip{background:#FAFAF7;border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px}
+  .chip .x{cursor:pointer;color:var(--ink3);font-weight:700}
+  .chip .x:hover{color:#B42318}
+  .addrow{display:flex;gap:8px;margin-top:11px;align-items:center;flex-wrap:wrap}
+  .addrow input{flex:1;min-width:200px;border:1px solid var(--line);border-radius:3px;padding:9px 11px;font:inherit;font-size:13px;outline:none}
+  .addrow input:focus{border-color:var(--ind)}
+  .btn{font:inherit;font-size:12.5px;font-weight:700;padding:9px 15px;border:0;border-radius:3px;background:var(--ind);color:#fff;cursor:pointer;white-space:nowrap}
+  .btn:hover{background:#463DA4}
+  .msg{font-size:12px;color:var(--ink2);margin-top:7px;min-height:14px}
+  .slackline{font-size:12px;color:var(--ink3);margin-top:10px}
+  .empty{color:var(--ink3);font-size:13px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Notifications</h1>
+    <p class="sub">Every feature already posts to your Ava Slack channel. Add an email here — yours, or someone who isn't in Slack, like your bookkeeper — and they get copies of that feature's updates. Only the features you've switched on appear.</p>
+    <div id="cards" class="empty">Loading…</div>
+  </div>
+
+<script>
+(function(){
+  var API="https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
+  var CO=(new URLSearchParams(location.search).get("c"))||(function(){
+    try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}
+    location.replace("app.html");return "";})();
+  function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  // What each feature's emails actually contain — honest per feature, so
+  // nobody signs their bookkeeper up for a feed that doesn't exist yet.
+  var WHAT={
+    invoice_chaser:"Every Auto Collect update as it happens: who was emailed, who replied, promised dates, payments landing, anything handed to you.",
+    bookkeeping:"The 8am “your books today” email — what needs a receipt, what's ready to reconcile, what Ava did overnight.",
+    gst_putaway:"Nothing emailed yet for this one — the weekly set-aside figure lives on your GST page. Coming soon."
+  };
+  var LISTS={};
+  function card(f){
+    var emails=f.notify_emails||[];
+    LISTS[f.key]=emails.slice();
+    var chips=emails.length?'<div class="chips">'+emails.map(function(em){
+        return '<span class="chip">'+esc(em)+'<span class="x" data-key="'+esc(f.key)+'" data-em="'+esc(em)+'">×</span></span>';
+      }).join("")+'</div>':'';
+    return '<div class="card"><div class="fh"><span class="fn">'+esc(f.name)+'</span><span class="pill p-grn">On</span></div>'
+      +'<div class="what">'+esc(WHAT[f.key]||"Updates from this feature.")+'</div>'
+      +chips
+      +'<div class="addrow"><input type="email" placeholder="name@example.com" data-key="'+esc(f.key)+'"><button class="btn badd" data-key="'+esc(f.key)+'">Add email</button></div>'
+      +'<div class="msg" data-key="'+esc(f.key)+'"></div>'
+      +'<div class="slackline">Slack channel updates stay on regardless — email is a copy, not a replacement.</div>'
+      +'</div>';
+  }
+  function paint(list){
+    var on=(list||[]).filter(function(f){return f.on&&f.key!=="invoicing";});
+    var el=document.getElementById("cards");
+    el.className="";
+    el.innerHTML=on.length?on.map(card).join("")
+      :'<div class="card"><span class="empty">Nothing switched on yet — turn a feature on from <a href="today.html?c='+CO+'" style="color:var(--ind);font-weight:600">Today</a> and it appears here.</span></div>';
+  }
+  function save(key,emails){
+    var msg=document.querySelector('.msg[data-key="'+key+'"]');
+    if(msg)msg.textContent="Saving…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
+    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,key:key,notify_emails:emails,by:(sess&&sess.email)||"owner"})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d&&d.features){paint(d.features);}
+        else if(msg){msg.textContent=(d&&d.error)||"Didn't save — try again.";}
+      })
+      .catch(function(){if(msg)msg.textContent="Couldn't reach it — try again.";});
+  }
+  document.addEventListener("click",function(e){
+    var add=e.target.closest&&e.target.closest(".badd");
+    if(add){
+      var key=add.getAttribute("data-key");
+      var input=document.querySelector('input[data-key="'+key+'"]');
+      var v=(input&&input.value||"").trim();
+      var msg=document.querySelector('.msg[data-key="'+key+'"]');
+      if(!v){if(msg)msg.textContent="Type an email first.";return;}
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){if(msg)msg.textContent="That email doesn't look right.";return;}
+      save(key,(LISTS[key]||[]).concat([v.toLowerCase()]));
+      return;
+    }
+    var x=e.target.closest&&e.target.closest(".chip .x");
+    if(x){
+      var k=x.getAttribute("data-key"),em=x.getAttribute("data-em");
+      save(k,(LISTS[k]||[]).filter(function(z){return z!==em;}));
+    }
+  });
+  fetch(API+"/features?company="+CO).then(function(r){return r.json();})
+    .then(function(d){paint(d&&d.features);})
+    .catch(function(){document.getElementById("cards").textContent="Couldn't load — refresh to retry.";});
+})();
+</script>
+<script src="ava-nav.js"></script>
+</body>
+</html>

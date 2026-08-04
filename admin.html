@@ -772,21 +772,25 @@ function apBlock(id){
     hint="couldn't load";
     body='<div class="muted">Couldn\'t read Aged Payables for this client — refresh to retry.</div>';
   }else{
-    var u=(ap.email_found&&ap.email_found.unmatched)||[];
-    flagged=u.filter(function(x){return x.status==="flagged";});
-    var pending=u.filter(function(x){return x.status==="new";});
-    hint=flagged.length?flagged.length+' to enter':(pending.length?pending.length+' unreviewed, not flagged yet':'nothing outstanding');
+    // Auto AP: JEWEL'S queue is everything Ava found in email that isn't a
+    // Xero bill yet — new AND flagged. Waiting for the owner to flag each one
+    // buried the work: the whole point is the human loads them so the owner
+    // never has to think about it (Max, 2026-08-04). Flagged ones sort first
+    // (the server already does) — those are the "owner explicitly asked".
+    flagged=(ap.email_found&&ap.email_found.unmatched)||[];
+    var totalAmt=(ap.email_found&&ap.email_found.unmatched_total)||0;
+    hint=flagged.length?flagged.length+' to enter · $'+Math.round(totalAmt).toLocaleString():'nothing outstanding';
     if(flagged.length){
-      body+='<div class="sec" style="margin-top:4px;color:var(--red)">Flagged for us <span class="cnt">the owner (or Ava) asked us to enter these in Xero</span></div>'
+      body+='<div class="sec" style="margin-top:4px;color:var(--red)">To enter in Xero <span class="cnt">found in their email, no matching bill — create each in Xero, then tick it</span></div>'
         +'<div class="list">'+flagged.map(function(x){return apRow(x,id);}).join("")+'</div>';
     }else{
-      body+='<div class="muted">Nothing flagged right now. '+(pending.length?pending.length+' invoice'+(pending.length===1?'':'s')+' found in email '+(pending.length===1?'is':'are')+" sitting unreviewed on their Aged Payables page — the owner hasn't asked us to touch "+(pending.length===1?'it':'them')+' yet.':'')+'</div>';
+      body+='<div class="muted">Nothing waiting — every supplier invoice Ava found in their email already matches a bill in Xero.</div>';
     }
   }
   body+='<div style="margin-top:12px"><a href="payables.html?c='+id+'" target="_blank" style="font-size:12.5px;font-weight:600;text-decoration:none">Open their Aged Payables ↗</a></div>';
   var stored=FOLDS[id+"|ap"];
   var open=stored===undefined?(flagged.length>0):(stored===false);
-  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Aged Payables <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+  return '<div class="sec fhead" data-fold="'+id+'|ap" style="cursor:pointer;color:'+(flagged.length?'var(--red)':'var(--indtx)')+'">Auto AP <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
 // ── feature switches ───────────────────────────────────────────────────────

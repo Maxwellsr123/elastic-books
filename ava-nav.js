@@ -50,6 +50,7 @@
     // duplicate that modal on every page, this just deep-links into it —
     // ?settings=1 opens Settings straight away wherever you clicked from.
     { key: "team",    href: "app.html?settings=1", icon: "ti-users",       label: "Team", group: "Set up" },
+    { key: "notif",   href: "notifications.html", icon: "ti-bell",      label: "Notifications" },
     { key: "conns",   href: "connections.html", icon: "ti-plug",         label: "Connections" },
     { key: "usage",   href: "usage.html",       icon: "ti-chart-bar",    label: "Usage & billing" },
     // Phone-only: opens the sheet holding everything not on the bar.
