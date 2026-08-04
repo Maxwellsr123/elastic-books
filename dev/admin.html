@@ -745,7 +745,7 @@ function acBlock(id){
   // Defaults open only when a human is owed something; an explicit fold wins.
   var stored=FOLDS[id+"|ac"];
   var open=stored===undefined?(needs.length>0):(stored===false);
-  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto Collect <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
+  return '<div class="sec fhead" data-fold="'+id+'|ac" style="cursor:pointer;color:'+(needs.length?'var(--red)':'var(--indtx)')+'">Auto AR · chases <span class="cnt">'+esc(hint)+'</span><i class="ti ti-chevron-'+(open?'up':'down')+'" style="margin-left:auto;color:var(--ink3)"></i></div>'
     +'<div class="fbody"'+(open?'':' style="display:none"')+'>'+body+'</div>';
 }
 // ── Aged Payables: the flag queue ──────────────────────────────────────────
