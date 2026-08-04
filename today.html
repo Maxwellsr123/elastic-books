@@ -197,10 +197,6 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
     <div class="sec" id="hsec" style="display:none">Handled <span class="c">running — nothing needed from you</span></div>
     <div id="handled"></div>
 
-    <div class="sec">What Ava's done <span class="c">tasks and tokens</span></div>
-    <div class="use" id="use"></div>
-    <div class="feats" id="feats"></div>
-
     <div class="sec" id="fsec" style="display:none">Features <span class="c">running · watch the burn</span></div>
     <div class="fttl" id="fttl" style="display:none"></div>
     <div class="fgrid" id="fgrid"></div>
@@ -287,17 +283,6 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
           +(x.board?'<a class="btn" href="'+esc(x.board)+'?c='+CO+'">Open</a>':'')+'</div></div>';
       }).join("")+'</div>';
     }
-
-    // ── tasks and tokens: day, week, month, year ──
-    var u=d.usage||{};
-    document.getElementById("use").innerHTML=[["day","Today"],["week","This week"],["month","This month"],["year","This year"]]
-      .map(function(p){var v=u[p[0]]||{};
-        return '<div class="u"><div class="k">'+p[1]+'</div><div class="n">'+(Number(v.tasks)||0).toLocaleString("en-NZ")+'</div>'
-          +'<div class="t">tasks · '+tok(v.tokens)+' tokens</div></div>';}).join("");
-    var tf=(u.top_features||[]);
-    document.getElementById("feats").innerHTML=tf.length
-      ?'Busiest this year: '+tf.map(function(f){return '<b>'+esc(f.feature)+'</b> '+(Number(f.tasks)||0).toLocaleString("en-NZ");}).join(" · ")
-      :"";
 
     if(d.conns)CONNS=d.conns;
     renderFeatures(d.features||[]);

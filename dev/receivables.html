@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aged Receivables — Ava</title>
+<title>Auto AR — Ava</title>
 <script>window.IS_DEV=/(^|\/)dev(\/|$)/.test(location.pathname)||new URLSearchParams(location.search).get("env")==="dev";window.SANDBOX_CO="8449f5d6-a12f-4238-88e3-4ae6e3e1dac5";if(window.IS_DEV)document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("envbadge");if(b){b.textContent="DEV";b.style.background="#bbf7d0";b.style.color="#166534";}document.title="DEV · "+document.title;});</script>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,9 +60,12 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
 <body>
 <div class="app">
   <main class="main"><div class="wrap">
-    <h1>Aged Receivables</h1>
-    <p class="lede">Every open customer invoice, straight from Xero, aged the way an accountant expects. Auto Collect's chase state rides along — this is the report and the live state of the chase, in one place.</p>
+    <h1>Auto AR <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you're owed</span></h1>
+    <p class="lede">Every open customer invoice, straight from Xero, aged the way an accountant expects. Auto Collect is the engine inside this board — its chase state rides along on every invoice below.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
+    <!-- Auto Collect lives INSIDE Auto AR now (Max, 2026-08-04) — this strip
+         is the engine's pulse plus the door to the full chase board. -->
+    <div id="acstrip" style="display:none;margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-size:13px;color:var(--ink2);display:none;align-items:baseline;gap:14px;flex-wrap:wrap"></div>
 
     <div class="krow" id="kpis">
       <div class="u"><div class="k">Total outstanding</div><div class="n">···</div></div>
@@ -139,6 +142,22 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     var bb=e.target.closest&&e.target.closest("#buckets span[data-b]");
     if(bb){FILTER=bb.getAttribute("data-b");render();return;}
   });
+
+  // the engine's pulse: chase counts + the door to the full chase board
+  fetch(API+"/auto-collect?company="+CO).then(function(r){return r.json();}).then(function(a){
+    var el=document.getElementById("acstrip");
+    if(!el||!a)return;
+    var c=a.counts||{};
+    el.style.display="flex";
+    el.innerHTML=a.enabled
+      ?'<span><b style="color:var(--ink)">Auto Collect</b> — the chase engine</span>'
+        +'<span>'+(c.active||0)+' being chased</span>'
+        +(c.promised?'<span>'+c.promised+' promised</span>':'')
+        +(c.needs_you?'<span style="color:var(--amb);font-weight:600">'+c.needs_you+' need'+(c.needs_you===1?'s':'')+' you</span>':'')
+        +'<a href="collect.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Open the chase board →</a>'
+      :'<span><b style="color:var(--ink)">Auto Collect is off</b> — the overdue invoices below aren\'t being chased.</span>'
+        +'<a href="today.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Switch it on →</a>';
+  }).catch(function(){});
 
   fetch(API+"/ava-aged-receivables?company="+CO).then(function(r){return r.json();}).then(function(d){
     if(!d||d.error){document.getElementById("list").innerHTML='<div class="empty">'+esc((d&&d.error)||"Couldn't load.")+'</div>';return;}
