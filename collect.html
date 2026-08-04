@@ -121,11 +121,14 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
   }
   function tWhen(at){if(!at)return "";var d=new Date(at),n=Math.floor((Date.now()-d.getTime())/864e5);
     return d.toLocaleDateString("en-NZ",{day:"numeric",month:"short"})+" · "+(n<=0?"today":n===1?"yesterday":n+"d ago");}
-  function threadHtml(t){
+  // The thread is where Ava ASKS for things, so it has to be a place you can
+  // ACT: jump links, reply-via-your-own-mailbox, and — when there's no email
+  // on the contact — a way to hand Ava the details right here. It used to be
+  // messages-only, a dead end exactly when Ava said "tell me them here"
+  // (Max, 2026-08-04).
+  function threadHtml(t,chase){
     if(!t||!t.ok)return '<div style="padding:8px 0;color:var(--amb);font-size:12.5px">'+esc((t&&t.error)||"Couldn't load it.")+'</div>';
-    if(!(t.messages||[]).length)return '<div style="padding:8px 0;color:var(--ink3);font-size:12.5px">Nothing in the thread yet.</div>';
-    return '<div style="border:1px solid var(--line);border-radius:4px;padding:2px 12px;margin:8px 0 2px">'
-      +t.messages.map(function(m){
+    var msgs=(t.messages||[]).length?t.messages.map(function(m){
         var who=m.from==="ava"?'<span style="color:var(--indtx)">Ava</span>'
           :m.from==="customer"?'<span style="color:var(--grn)">'+esc(t.customer||"Them")+'</span>'
           :'<span style="color:var(--ink2)">In Slack</span>';
@@ -133,8 +136,72 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
           +'<div style="display:flex;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px">'+who
           +'<span style="margin-left:auto;font-weight:500">'+tWhen(m.at)+'</span></div>'
           +'<div style="font-size:13px;line-height:1.55">'+slackToHtml(m.text)+'</div></div>';
-      }).join("")+'</div>';
+      }).join(""):'<div style="padding:8px 0;color:var(--ink3);font-size:12.5px">Nothing in the thread yet.</div>';
+    var jump=(t.gmail_url||t.xero_invoice_url||t.xero_contact_url)
+      ?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;border-top:1px solid var(--line);padding-top:10px">'
+        +(t.gmail_url?'<a class="btn" href="'+esc(t.gmail_url)+'" target="_blank" rel="noopener"><i class="ti ti-brand-gmail"></i> Open in Gmail</a>':'')
+        +(t.xero_invoice_url?'<a class="btn" href="'+esc(t.xero_invoice_url)+'" target="_blank" rel="noopener"><i class="ti ti-file-invoice"></i> Open in Xero</a>':'')
+        +(t.xero_contact_url?'<a class="btn" href="'+esc(t.xero_contact_url)+'" target="_blank" rel="noopener"><i class="ti ti-user"></i> Their contact</a>':'')
+      +'</div>':'';
+    var act=t.can_reply
+      ?'<div style="display:flex;flex-direction:column;gap:8px;margin:0 0 10px">'
+        +'<textarea class="rtx2" rows="2" data-mode="instruct" data-chase="'+esc(chase||"")+'" placeholder="Tell Ava what you want '+esc(t.customer||"them")+' to hear — she\'ll draft it for you to check first." style="width:100%;border:1px solid var(--line);border-radius:4px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>'
+        +'<div style="display:flex;gap:10px;align-items:center"><button class="btn btn-p rgo2" data-chase="'+esc(chase||"")+'">Draft it</button><span class="rmsg2" style="font-size:12px;color:var(--ink2)"></span></div></div>'
+      :'<div style="margin:0 0 10px"><div style="font-size:12.5px;color:var(--ink2);margin-bottom:7px">No email on their contact card — give it to Ava here and she\'ll get straight onto it.</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+        +'<input class="cml" type="email" placeholder="their email" style="flex:1;min-width:170px;border:1px solid var(--line);border-radius:4px;padding:9px 10px;font:inherit;font-size:13px">'
+        +'<input class="cph" type="tel" placeholder="phone (optional)" style="width:150px;border:1px solid var(--line);border-radius:4px;padding:9px 10px;font:inherit;font-size:13px">'
+        +'<button class="btn btn-p bctc" data-chase="'+esc(chase||"")+'">Give to Ava</button></div>'
+        +'<div class="cmsg" style="font-size:12px;color:var(--ink2);margin-top:6px"></div></div>';
+    return '<div style="border:1px solid var(--line);border-radius:4px;padding:2px 12px;margin:8px 0 2px">'+msgs+jump+act+'</div>';
   }
+  // give-Ava-the-details: writes to Ava's own record and re-arms the chase.
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest(".bctc");
+    if(!b)return;
+    var box=b.parentNode,root=box.parentNode;
+    var email=(box.querySelector(".cml")||{}).value||"",phone=(box.querySelector(".cph")||{}).value||"";
+    var msg=root.querySelector(".cmsg");
+    if(!email.trim()&&!phone.trim()){msg.textContent="Give her an email or a phone number.";return;}
+    b.disabled=true;b.textContent="Saving…";
+    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    fetch(API,{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,action:"contact",chase_id:b.getAttribute("data-chase"),email:email.trim(),phone:phone.trim(),by:(sess&&sess.email)||"owner"})})
+      .then(function(r){return r.json();}).then(function(o){
+        if(o&&o.ok){root.innerHTML='<div style="font-size:12.5px;color:var(--grn);font-weight:600;margin:0 0 10px">Got it — Ava picks this up within the hour and the chase starts properly.</div>';}
+        else{b.disabled=false;b.textContent="Give to Ava";msg.textContent=(o&&o.error)||"Didn't save — try again.";}
+      }).catch(function(){b.disabled=false;b.textContent="Give to Ava";msg.textContent="Couldn't reach it — try again.";});
+  });
+  // reply via the owner's own mailbox — same two-step draft/send as Today.
+  document.addEventListener("click",function(e){
+    var rg=e.target.closest&&e.target.closest(".rgo2");
+    if(!rg)return;
+    var wrap=rg.parentNode.parentNode,ta=wrap.querySelector(".rtx2"),msg=wrap.querySelector(".rmsg2");
+    var chase=rg.getAttribute("data-chase"),mode=ta.getAttribute("data-mode");
+    if(mode==="instruct"){
+      var instruction=(ta.value||"").trim();
+      if(!instruction){msg.textContent="Tell Ava what you want it to say.";return;}
+      rg.disabled=true;rg.textContent="Drafting…";msg.textContent="";
+      fetch(API,{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,action:"draft",chase_id:chase,instruction:instruction})})
+        .then(function(r){return r.json();}).then(function(o){
+          rg.disabled=false;
+          if(o&&o.ok){ta.value=o.draft;ta.setAttribute("data-mode","send");ta.rows=Math.max(4,Math.ceil(o.draft.length/60));rg.textContent="Send this";msg.textContent="Check it, edit anything, then send.";}
+          else{rg.textContent="Draft it";msg.textContent=(o&&o.error)||"Couldn't draft that.";}
+        }).catch(function(){rg.disabled=false;rg.textContent="Draft it";msg.textContent="Couldn't reach it.";});
+      return;
+    }
+    var text=(ta.value||"").trim();
+    if(!text){msg.textContent="There's nothing to send.";return;}
+    rg.disabled=true;rg.textContent="Sending…";msg.textContent="";
+    fetch(API,{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,action:"reply",chase_id:chase,text:text})})
+      .then(function(r){return r.json();}).then(function(o){
+        rg.disabled=false;
+        if(o&&o.ok){ta.value="";ta.setAttribute("data-mode","instruct");ta.rows=2;rg.textContent="Draft it";msg.textContent="Sent from "+(o.sent_from||"your mailbox")+".";}
+        else{rg.textContent="Send this";msg.textContent=(o&&o.error)||"Didn't send.";}
+      }).catch(function(){rg.disabled=false;rg.textContent="Send this";msg.textContent="Couldn't reach it.";});
+  });
   function post(action){return fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:CO,action:action})}).then(function(r){return r.json();});}
   function head(d){
     var st=!d.enabled?"":(d.paused?'<span class="pill p-warn">paused</span>':(d.ready?'<span class="pill p-ok">on</span>':'<span class="pill p-warn">setup needed</span>'));
@@ -203,7 +270,7 @@ h1{font-size:18px;font-weight:600;margin-bottom:4px}
         if(td.getAttribute("data-loaded"))return;
         td.innerHTML='<div style="padding:8px 0;color:var(--ink3);font-size:12.5px">Loading…</div>';
         fetch(API+"?company="+CO+"&thread="+id).then(function(r){return r.json();}).then(function(t){
-          td.setAttribute("data-loaded","1");td.innerHTML=threadHtml(t);
+          td.setAttribute("data-loaded","1");td.innerHTML=threadHtml(t,id);
         }).catch(function(){td.innerHTML='<div style="padding:8px 0;color:var(--amb);font-size:12.5px">Couldn\'t load it — try again.</div>';});
       });
     });

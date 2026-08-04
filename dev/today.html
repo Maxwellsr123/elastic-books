@@ -516,9 +516,32 @@ h1{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
         ?'<textarea class="rtx" rows="2" data-chase="'+esc(chase||"")+'" data-mode="instruct" placeholder="Tell Ava what you want '+esc(t.customer||"them")+' to hear—she\'ll draft it for you to check first."></textarea>'
          +'<div class="racts"><button class="btn p rgo" data-chase="'+esc(chase||"")+'">Draft it</button>'
          +'<span class="rmsg"></span></div>'
-        :'<div class="d">No email address on this customer, so there\'s nothing to reply to yet.</div>')
+        :'<div><div class="d" style="margin-bottom:7px">No email on their contact card — give it to Ava here and she\'ll get straight onto it.</div>'
+         +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+         +'<input class="cml" type="email" placeholder="their email" style="flex:1;min-width:170px;border:1px solid var(--line);border-radius:5px;padding:9px 10px;font:inherit;font-size:13px">'
+         +'<input class="cph" type="tel" placeholder="phone (optional)" style="width:150px;border:1px solid var(--line);border-radius:5px;padding:9px 10px;font:inherit;font-size:13px">'
+         +'<button class="btn p bctc" data-chase="'+esc(chase||"")+'">Give to Ava</button></div>'
+         +'<div class="cmsg" style="font-size:12.5px;color:var(--ink2);margin-top:6px"></div></div>')
       +'</div></div>';
   }
+  // give-Ava-the-details: a needs-contact chase used to be a dead end here —
+  // Ava asked "tell me them here" with nowhere to type (Max, 2026-08-04).
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest(".bctc");
+    if(!b)return;
+    var box=b.parentNode,root=box.parentNode;
+    var email=(box.querySelector(".cml")||{}).value||"",phone=(box.querySelector(".cph")||{}).value||"";
+    var msg=root.querySelector(".cmsg");
+    if(!email.trim()&&!phone.trim()){if(msg)msg.textContent="Give her an email or a phone number.";return;}
+    b.disabled=true;b.textContent="Saving…";
+    var sess2=null;try{sess2=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+    fetch(API+"/auto-collect",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({company_id:CO,action:"contact",chase_id:b.getAttribute("data-chase"),email:email.trim(),phone:phone.trim(),by:(sess2&&sess2.email)||"owner"})})
+      .then(function(r){return r.json();}).then(function(o){
+        if(o&&o.ok){root.innerHTML='<div class="d" style="color:var(--grn);font-weight:600">Got it — Ava picks this up within the hour and the chase starts properly.</div>';}
+        else{b.disabled=false;b.textContent="Give to Ava";if(msg)msg.textContent=(o&&o.error)||"Didn't save — try again.";}
+      }).catch(function(){b.disabled=false;b.textContent="Give to Ava";if(msg)msg.textContent="Couldn't reach it — try again.";});
+  });
   document.addEventListener("click",function(e){
     var rg=e.target.closest&&e.target.closest(".rgo");
     if(rg){
