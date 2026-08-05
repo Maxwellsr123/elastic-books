@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="ava-conns.js"></script>
+<script src="ava-feature-switch.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -60,7 +61,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
 <body>
 <div class="app">
   <main class="main"><div class="wrap">
-    <h1>Auto Receivables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you're owed</span></h1>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h1 style="flex:1;min-width:150px">Auto Receivables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you're owed</span></h1><span id="fsw"></span></div>
     <p class="lede">Every open customer invoice, straight from Xero, aged the way an accountant expects. Auto Collect is the engine inside this board — its chase state rides along on every invoice below.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
     <!-- Auto Collect lives INSIDE Auto AR now (Max, 2026-08-04) — this strip
@@ -96,6 +97,9 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
   var CHASE_PILL={emailed:["awaiting reply","p-ind"],followup:["followed up","p-ind"],calling:["calling","p-ind"],called:["called","p-ind"],
     promised:["promised","p-grn"],needs_human:["needs you","p-amb"],needs_contact:["no contact details","p-red"],paid:["paid ✓","p-grn"]};
   var DATA=null,FILTER="all";
+  // ONE switch per board (Max, 2026-08-06): switching Auto Receivables on IS
+  // switching on its engine, Auto Collect. Same key the collect page flips.
+  if(CO&&window.avaFeatureSwitch)avaFeatureSwitch("fsw",{company:CO,key:"invoice_chaser",name:"Auto Receivables",onChange:function(){location.reload();}});
 
   function render(){
     if(!DATA)return;

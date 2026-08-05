@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="ava-conns.js"></script>
+<script src="ava-feature-switch.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#FFFFFF;--card:#fff;--line:#D9D9CC;--ink:#141418;--ink2:#67676E;--ink3:#9CA3AF;
@@ -63,7 +64,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
 <body>
 <div class="app">
   <main class="main"><div class="wrap">
-    <h1>Auto Payables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h1 style="flex:1;min-width:150px">Auto Payables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1><span id="fsw"></span></div>
     <p class="lede">Supplier bills already in Xero, aged the same way — plus the ones that AREN'T in Xero yet, because a supplier invoice landed in email and nobody entered it. That second half is the one that costs late fees.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
 
@@ -91,6 +92,10 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
   var CO=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){
     try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}
     location.replace("index.html");return "";})());
+  // ONE switch per board (Max, 2026-08-06). Auto Payables runs off the same
+  // inbox-reading engine as Auto Reconcile (bookkeeping) — this is that
+  // switch, labelled for this board. Off here means off there too, honestly.
+  if(CO&&window.avaFeatureSwitch)avaFeatureSwitch("fsw",{company:CO,key:"bookkeeping",name:"Auto Payables",onChange:function(){location.reload();}});
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   function money(n){return "$"+Math.abs(Number(n)||0).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function nd(s){if(!s)return "";try{return new Date(s+"T12:00:00").toLocaleDateString("en-NZ",{day:"numeric",month:"short"});}catch(e){return s;}}
