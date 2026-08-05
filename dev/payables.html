@@ -67,6 +67,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h1 style="flex:1;min-width:150px">Auto Payables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1><span id="fsw"></span></div>
     <p class="lede">Supplier bills already in Xero, aged the same way — plus the ones that AREN'T in Xero yet, because a supplier invoice landed in email and nobody entered it. That second half is the one that costs late fees.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
+    <div id="apstrip" style="display:none;margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-size:13px;color:var(--ink2);align-items:baseline;gap:14px;flex-wrap:wrap"></div>
 
     <div class="krow" id="kpis">
       <div class="u"><div class="k">In Xero, owing</div><div class="n">···</div></div>
@@ -78,6 +79,9 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     <div id="emailnote"></div>
     <div class="sec" id="emailhead" style="display:none">Found in email, not in Xero yet <span class="c" id="emailhint"></span></div>
     <div class="list" id="emaillist"></div>
+
+    <div class="sec" id="obhead" style="display:none">Looks like a different business <span class="c" id="obhint"></span></div>
+    <div class="list" id="oblist" style="display:none"></div>
 
     <div class="buckets" id="buckets" style="margin-top:26px"></div>
     <div class="blegend" id="filters"></div>
@@ -132,6 +136,26 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
         +'<button class="btn mut bignore" data-id="'+esc(r.id)+'" title="Not a real bill — credit note, duplicate, already paid another way">Ignore</button>'
         +'<div class="amt num">'+money(r.amount)+'</div></div>';
     }).join("");
+
+    // ── bills addressed to a different business ──────────────────────────
+    // One inbox can serve several companies. These are supplier invoices Ava
+    // found whose bill-to name doesn't match the business connected here —
+    // kept out of this board's numbers, never hidden. One tap teaches Ava:
+    // "Actually mine" claims it (and remembers the supplier), "Not mine"
+    // dismisses it (and remembers that too).
+    var ob=(d.email_found&&d.email_found.other_business)||[];
+    document.getElementById("obhead").style.display=ob.length?"":"none";
+    document.getElementById("oblist").style.display=ob.length?"":"none";
+    document.getElementById("obhint").textContent=ob.length?ob.length+" found in email, addressed to someone else — not counted above":"";
+    document.getElementById("oblist").innerHTML=ob.map(function(r){
+      return '<div class="row"><div class="nm"><div class="h">'+esc(r.supplier)+(r.invoice_number?' <span style="color:var(--ink3);font-weight:400">· '+esc(r.invoice_number)+'</span>':'')+'</div>'
+        +'<div class="d">billed to <b>'+esc(r.billed_to||"another business")+'</b>'+(r.due_date?' · due '+esc(nd(r.due_date)):'')+'</div></div>'
+        +'<span class="pill p-mut">Different business?</span>'
+        +(r.doc_url?'<a class="btn" href="'+esc(r.doc_url)+'" target="_blank" rel="noopener">View</a>':'')
+        +'<button class="btn bmine" data-id="'+esc(r.id)+'" title="This IS for this business — move it onto the board and remember the supplier">Actually mine</button>'
+        +'<button class="btn mut bnotmine" data-id="'+esc(r.id)+'" title="Right, it\'s for another business — dismiss it and remember the supplier">Not mine</button>'
+        +'<div class="amt num">'+money(r.amount)+'</div></div>';
+    }).join("");
   }
 
   function render(){
@@ -177,7 +201,32 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     if(fl){fl.disabled=true;fl.textContent="…";post("flag",fl.getAttribute("data-id")).then(load);return;}
     var ig=e.target.closest&&e.target.closest(".bignore");
     if(ig){if(!confirm("Not a real bill to pay? This removes it from Auto Payables."))return;ig.disabled=true;ig.textContent="…";post("ignore",ig.getAttribute("data-id")).then(load);return;}
+    var mn=e.target.closest&&e.target.closest(".bmine");
+    if(mn){mn.disabled=true;mn.textContent="…";post("mine",mn.getAttribute("data-id")).then(load);return;}
+    var nm=e.target.closest&&e.target.closest(".bnotmine");
+    if(nm){nm.disabled=true;nm.textContent="…";post("not_mine",nm.getAttribute("data-id")).then(load);return;}
   });
+
+  // the engine's pulse: Auto Payables runs on the Auto Bookkeeping engine
+  // (ava-inbox-receipts fills the email-found lane). This strip is the
+  // board's own on/off story — without it there is no "Switch on" for Auto
+  // Payables ANYWHERE: the switches on Today are named Auto Bookkeeping /
+  // Auto Collect / GST, so an owner hunting for an "Auto Payables" switch
+  // finds nothing (Justin, 2026-08-05). Same pattern as the Auto Collect
+  // strip on receivables.html.
+  fetch(API+"/features?company="+CO).then(function(r){return r.json();}).then(function(d){
+    var el=document.getElementById("apstrip");
+    if(!el||!d||!d.features)return;
+    var bk=null;for(var i=0;i<d.features.length;i++){if(d.features[i].key==="bookkeeping"){bk=d.features[i];break;}}
+    if(!bk)return;
+    el.style.display="flex";
+    el.innerHTML=bk.on
+      ?'<span><b style="color:var(--ink)">Auto Payables is on</b> — it runs on the '+esc(bk.name)+' engine.</span>'
+        +'<span>New supplier invoices are read out of your inbox and checked against the bills in Xero.</span>'
+        +'<a href="today.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Manage on Today →</a>'
+      :'<span><b style="color:var(--ink)">Auto Payables is off</b> — it runs on the '+esc(bk.name)+' engine, which isn\'t switched on, so nothing new is being found in your email.</span>'
+        +'<a href="today.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Switch it on →</a>';
+  }).catch(function(){});
 
   function load(){
     fetch(API+"/ava-aged-payables?company="+CO).then(function(r){return r.json();}).then(function(d){
