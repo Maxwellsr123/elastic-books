@@ -66,6 +66,7 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     <h1>Auto Payables <span style="font-weight:400;font-size:13px;color:var(--ink3)">· what you owe</span></h1>
     <p class="lede">Supplier bills already in Xero, aged the same way — plus the ones that AREN'T in Xero yet, because a supplier invoice landed in email and nobody entered it. That second half is the one that costs late fees.</p>
     <div id="connrow" style="display:none;margin-top:14px"></div>
+    <div id="apstrip" style="display:none;margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-size:13px;color:var(--ink2);align-items:baseline;gap:14px;flex-wrap:wrap"></div>
 
     <div class="krow" id="kpis">
       <div class="u"><div class="k">In Xero, owing</div><div class="n">···</div></div>
@@ -173,6 +174,27 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
     var ig=e.target.closest&&e.target.closest(".bignore");
     if(ig){if(!confirm("Not a real bill to pay? This removes it from Auto Payables."))return;ig.disabled=true;ig.textContent="…";post("ignore",ig.getAttribute("data-id")).then(load);return;}
   });
+
+  // the engine's pulse: Auto Payables runs on the Auto Bookkeeping engine
+  // (ava-inbox-receipts fills the email-found lane). This strip is the
+  // board's own on/off story — without it there is no "Switch on" for Auto
+  // Payables ANYWHERE: the switches on Today are named Auto Bookkeeping /
+  // Auto Collect / GST, so an owner hunting for an "Auto Payables" switch
+  // finds nothing (Justin, 2026-08-05). Same pattern as the Auto Collect
+  // strip on receivables.html.
+  fetch(API+"/features?company="+CO).then(function(r){return r.json();}).then(function(d){
+    var el=document.getElementById("apstrip");
+    if(!el||!d||!d.features)return;
+    var bk=null;for(var i=0;i<d.features.length;i++){if(d.features[i].key==="bookkeeping"){bk=d.features[i];break;}}
+    if(!bk)return;
+    el.style.display="flex";
+    el.innerHTML=bk.on
+      ?'<span><b style="color:var(--ink)">Auto Payables is on</b> — it runs on the '+esc(bk.name)+' engine.</span>'
+        +'<span>New supplier invoices are read out of your inbox and checked against the bills in Xero.</span>'
+        +'<a href="today.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Manage on Today →</a>'
+      :'<span><b style="color:var(--ink)">Auto Payables is off</b> — it runs on the '+esc(bk.name)+' engine, which isn\'t switched on, so nothing new is being found in your email.</span>'
+        +'<a href="today.html?c='+CO+'" style="margin-left:auto;color:var(--ind);font-weight:600;text-decoration:none">Switch it on →</a>';
+  }).catch(function(){});
 
   function load(){
     fetch(API+"/ava-aged-payables?company="+CO).then(function(r){return r.json();}).then(function(d){
