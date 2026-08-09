@@ -72,7 +72,7 @@
       +'</div>';
   }
   function paint(list){
-    var on=(list||[]).filter(function(f){return f.on&&f.key!=="invoicing";});
+    var on=(list||[]).filter(function(f){return f.on;});
     var el=document.getElementById("cards");
     el.className="";
     el.innerHTML=on.length?on.map(card).join("")

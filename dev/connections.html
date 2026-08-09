@@ -90,12 +90,22 @@ function render(g){
     : (g.xero_url?'<a class="btn btn-p" href="'+esc(g.xero_url)+'">Connect Xero</a>':'<span style="font-size:12px;color:var(--ink3)">Ask Elastic to connect Xero</span>');
   var xeroCard='<div class="card"><div class="hd"><div class="ic" style="background:#E7F6FB;color:#13B5EA"><i class="ti ti-calculator"></i></div><div class="t" style="flex:1">Xero</div>'+xeroAct+'</div>'
     +'<div class="sub">For chasing overdue invoices and attaching receipts. Unreconciled lines come in as a manual upload — Ava never reconciles for you.</div></div>';
-  // ── Fergus ──
-  var fergusAct=g.fergus
-    ? '<span class="pill p-ok">CONNECTED</span>'+(g.fergus_url?'<a class="lnk rec" href="'+esc(g.fergus_url)+'">Reconnect</a>':'')+'<button type="button" class="lnk disc" onclick="askDisc(this,\'fergus\',\'\')">Disconnect</button>'
-    : (g.fergus_url?'<a class="btn btn-p" href="'+esc(g.fergus_url)+'">Connect Fergus</a>':'');
-  var fergusCard='<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'+fergusAct+'</div>'
-    +'<div class="sub">Jobs and quotes &mdash; what Ava reads when you ask her about work on the books.</div></div>';
+  // ── Fergus — legacy, never offered ────────────────────────────────────────
+  // Elastic Admin is a books product: Gmail in, Xero out. Fergus is a job
+  // system from the earlier scheduling/quoting shape of Ava, and offering it
+  // here told every new client they needed it (Max, 2026-08-09).
+  //
+  // It is NOT deleted, because it isn't dead: eleven companies still have a
+  // live Fergus integration syncing nightly, and Ava's Slack-side quoting and
+  // booking read it. So the card renders ONLY for a company that already has
+  // it connected — status plus Disconnect, no way back in once they leave.
+  // Hiding a connection somebody actually has would make this page, which is
+  // meant to list everything, quietly untrue.
+  var fergusCard=g.fergus
+    ? '<div class="card"><div class="hd"><div class="ic" style="background:#FBEDE4;color:#C2410C"><i class="ti ti-tools"></i></div><div class="t" style="flex:1">Fergus</div>'
+      +'<span class="pill p-ok">CONNECTED</span><button type="button" class="lnk disc" onclick="askDisc(this,\'fergus\',\'\')">Disconnect</button></div>'
+      +'<div class="sub">Jobs and quotes &mdash; what Ava reads when you ask her about work in Slack. Not part of your books.</div></div>'
+    : '';
   box.innerHTML=gmailCard+xeroCard+fergusCard;
 }
 // Inline confirm → disconnect (no jarring native dialog). Cancel re-renders.

@@ -11,7 +11,7 @@
 //   avaFeatureSwitch("mount-id", {company: "<uuid>", key: "gst_putaway",
 //                                 name: "GST put-away", onChange: fn});
 //
-// `key` is one of bookkeeping | invoice_chaser | gst_putaway | invoicing.
+// `key` is one of bookkeeping | invoice_chaser | gst_putaway.
 (function (global) {
   var API = "https://somgalhkmptkclgvxhca.supabase.co/functions/v1";
 
