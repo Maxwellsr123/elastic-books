@@ -103,7 +103,7 @@
       // sticky there means "in flow, after the content", which on a long page
       // dropped the rail below the fold (Max's usage-page screenshot,
       // 2026-08-03). Floating rails pin instead.
-      "#avanav.nvfloat{position:fixed;left:0;top:0}" +
+      "@media(min-width:821px){#avanav.nvfloat{position:fixed;left:0;top:0}}" +
       // ── phone first: bottom bar, thumb targets, safe area ──
       "@media(max-width:820px){" +
       "html,body{overflow-x:hidden;max-width:100vw}" +
