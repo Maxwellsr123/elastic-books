@@ -381,7 +381,13 @@ h1{letter-spacing:-.03em}
       row=needRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> Nothing needs you — Ava and Elastic have it all.';
     }
     if(head)head.innerHTML=(U_FILTER==="need"?"":'<a class="backneed" style="color:var(--ind);cursor:pointer;font-weight:700;margin-right:10px;white-space:nowrap">← Back to your list</a>')+htxt;
+    // A repaint used to collapse every open coding grid — thumbs-down inside
+    // the grid triggers loadList(), and the grid you were mid-way through
+    // vanished with it (Max, 10 Aug: "i cant finish coding"). Remember which
+    // grids are open and re-open them on the fresh DOM.
+    var openGrids=[];document.querySelectorAll(".editgrid").forEach(function(g){if(g.style.display!=="none")openGrids.push(g.getAttribute("data-id"));});
     box.innerHTML=list.length?list.slice(0,60).map(row).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">'+empty+'</div></div>';
+    openGrids.forEach(function(id){var g=box.querySelector('.editgrid[data-id="'+id+'"]');if(g)g.style.display="block";});
     document.querySelectorAll(".ufilt").forEach(function(el){el.style.outline=el.getAttribute("data-filter")===f?"2px solid var(--ind)":"none";el.style.outlineOffset="-1px";});
   }
   // The Google "hasn't verified this app" explainer — one copy, in ava-conns.js,
