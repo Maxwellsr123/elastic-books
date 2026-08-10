@@ -288,9 +288,26 @@ h1{letter-spacing:-.03em}
         +(i.receipt==="have"?'':'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach receipt</button>')
         +'<button class="tbtn" data-editrow="'+id+'"><i class="ti ti-adjustments-alt"></i> Not quite</button>'
         +'<button class="tbtn" data-cmt="'+id+'"><i class="ti ti-message-2"></i> Chat'+((i.comments||[]).length?' ('+i.comments.length+')':'')+'</button>');
+    // Ava's supplier-ask email, visible ON the card — drafted / sent / replied,
+    // with the send as an explicit click (Max, 10 Aug: "i want to be able to
+    // see the email threads"). No draft yet + receipt still owed → offer to ask.
+    var em=i.emails,emx='';
+    if(confirmed&&!i.receipt_incoming&&i.receipt!=="have"&&!noR){
+      if(em&&em.body){
+        var emState=em.status==="sent"?'<span style="color:var(--grn);font-weight:600">sent to '+esc(em.to||"the supplier")+'</span>'+(em.reply_kind?' · they replied — check the chat':' · waiting on their reply')
+          :em.status==="bounced"?'<span style="color:#B42318;font-weight:600">bounced</span> — that address is dead'
+          :'<span style="color:var(--indtx);font-weight:600">drafted, not sent</span> — goes nowhere until you click';
+        emx='<div style="margin-top:8px;font-size:12.5px;color:var(--ink2)"><i class="ti ti-mail" style="vertical-align:-2px"></i> Ava\'s ask to '+esc(em.contact||em.to||"the supplier")+': '+emState
+          +' · <a class="emview" data-id="'+id+'" style="color:var(--ind);cursor:pointer;font-weight:600">View email</a>'
+          +(em.status==="drafted"?' <button class="tbtn sendout" data-id="'+id+'" style="margin-left:6px;border-color:var(--grn);color:var(--grn)"><i class="ti ti-send"></i> Send it</button>':'')
+          +'</div><div class="emb" data-id="'+id+'" style="display:none;white-space:pre-wrap;background:#FAFAF7;border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:12.5px;margin-top:6px">To: '+esc(em.to||"")+'\nSubject: '+esc(em.subject||"")+'\n\n'+esc(em.body)+'</div>';
+      } else {
+        emx='<div style="margin-top:8px"><button class="tbtn askout" data-id="'+id+'"><i class="ti ti-mail-forward"></i> Ask the supplier for it</button><span class="outmsg" data-id="'+id+'" style="font-size:12px;color:var(--ink2);margin-left:8px"></span></div>';
+      }
+    }
     var box='<div class="think">'+head
       +lead
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+fast+'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+fast+'</div>'+emx
       +'<input type="file" class="rcpt-file" data-id="'+id+'" accept="image/*,.pdf" style="display:none">'
       +'<div class="editgrid" data-id="'+id+'" style="display:none;margin-top:4px">'+qgrid
         +jrow("",'<button class="tbtn draw" data-attach="'+id+'"><i class="ti ti-paperclip"></i> Attach a receipt</button>')+'</div>'
@@ -686,6 +703,8 @@ h1{letter-spacing:-.03em}
     if(jk){var jkid=jk.getAttribute("data-id");jk.style.opacity=".5";
       (jk.getAttribute("data-nojob")?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:jkid,action:"no_job"})}):Promise.resolve())
         .then(function(){toast("Confirmed — Ava takes it from here.");loadList();}).catch(function(){loadList();});return;}
+    var ev=e.target.closest&&e.target.closest(".emview");
+    if(ev){var eb=document.querySelector('.emb[data-id="'+ev.getAttribute("data-id")+'"]');if(eb)eb.style.display=eb.style.display==="none"?"block":"none";return;}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
     var cs=e.target.closest(".cmt-send");
