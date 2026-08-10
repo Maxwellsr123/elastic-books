@@ -17,7 +17,7 @@
 //   ]);
 //
 // `conns` is whatever the page's own endpoint returns — chase-list
-// `integrations`, ava-schedule-list `connections`, or auto-collect `setup`.
+// `integrations` or auto-collect `setup`.
 // Shapes differ (inboxes[] vs gmail_inboxes, connect urls present or not), so
 // everything is read defensively here rather than in four places.
 (function () {
