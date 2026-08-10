@@ -581,6 +581,7 @@ h1{letter-spacing:-.03em}
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:undoId,action:undoAction})}).then(function(){loadList();});};}
   }
   var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
+  var OUTREACH="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-outreach";
   document.addEventListener("click",function(e){
     var b=e.target.closest("[data-fb]");
     if(b){var id=b.getAttribute("data-id"),act=b.getAttribute("data-fb");
@@ -596,6 +597,24 @@ h1{letter-spacing:-.03em}
             var ja=jth.querySelector(".jref-ask");if(ja)ja.focus();}
           else loadList();
           return;}
+        // Non-job confirm: SAY what the click did, in place — a toast that
+        // vanishes isn't an answer ("what happens when i click yes spot on?"
+        // — Max, 10 Aug). And when the hunt is dry, offer the one move left:
+        // Ava emails the supplier for the receipt (chase-outreach).
+        if(itUp){
+          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:"up"})}).catch(function(){});
+          var ucard=b.closest(".qitem"),uth=ucard&&ucard.querySelector(".think");
+          if(uth){
+            var wantsR=!!itUp.needs_receipt&&!itUp.receipt_incoming&&itUp.receipt!=="have"&&itUp.receipt!=="not_needed";
+            uth.innerHTML='<div style="font-size:13px;color:var(--ink);margin:1px 0 7px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed'+(itUp.account?' — coded to <b>'+esc(itUp.account)+'</b>':'')+'. Ava’s learned this payee for next time.</div>'
+              +(wantsR
+                ?'<div style="font-size:12.5px;color:var(--ink2);margin-bottom:8px">Still needs its receipt — Ava keeps hunting your inbox hourly. If it was never emailed, she can ask the supplier for a copy.</div>'
+                 +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="tbtn askout" data-id="'+id+'"><i class="ti ti-mail-forward"></i> Ask the supplier for it</button><span class="outmsg" data-id="'+id+'" style="font-size:12px;color:var(--ink2)"></span></div>'
+                :'<div style="font-size:12.5px;color:var(--ink2)">Nothing more needed from you — it moves to reconcile from here.</div>');
+            var cel2=document.getElementById("u_confirm");if(cel2){var n2=parseInt(cel2.textContent,10);if(!isNaN(n2)&&n2>0)cel2.textContent=n2-1;}
+            return;
+          }
+        }
       }
       // 👍 confirm reliably moves the item out of this list — drop it instantly, sync after
       if(act==="up"&&U_FILTER==="confirm"){
@@ -609,6 +628,31 @@ h1{letter-spacing:-.03em}
         up:["Confirmed — Ava takes it from here.",null]};
       var dm=doneMsg[act];if(dm)setTimeout(function(){toast(dm[0],dm[1],id);},400);
       fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
+    // "Ask the supplier" → Ava drafts (grounded in evidence, never a guessed
+    // address); the SEND is this second, explicit human click.
+    var ao=e.target.closest(".askout");
+    if(ao){var aid=ao.getAttribute("data-id");ao.style.opacity=".6";ao.textContent="Finding who to ask…";
+      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:aid,action:"draft"})})
+        .then(function(r){return r.json();}).then(function(d){
+          var m=document.querySelector('.outmsg[data-id="'+aid+'"]');
+          if(d&&d.drafted&&d.outreach&&d.outreach.to){
+            ao.outerHTML='<button class="tbtn sendout" data-id="'+aid+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-send"></i> Send it</button>';
+            if(m)m.textContent="Ava drafted a polite ask to "+(d.outreach.contact_name?d.outreach.contact_name+" · ":"")+d.outreach.to+" — nothing sends until you click.";
+          }else{
+            ao.textContent="Couldn’t find who to ask";ao.style.opacity="1";ao.disabled=true;
+            if(m)m.textContent=(d&&d.note)||"No contact address in the evidence — snap or forward the receipt instead.";
+          }
+        }).catch(function(){ao.textContent="Try again";ao.style.opacity="1";});
+      return;}
+    var so=e.target.closest(".sendout");
+    if(so){var sid=so.getAttribute("data-id");so.style.opacity=".6";so.textContent="Sending…";
+      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:sid,action:"send"})})
+        .then(function(r){return r.json();}).then(function(d){
+          var m=document.querySelector('.outmsg[data-id="'+sid+'"]');
+          if(d&&d.sent){so.textContent="Sent ✓";so.style.opacity="1";if(m)m.textContent="Asked "+(d.to||"the supplier")+" for a copy — the reply lands back on this card.";}
+          else{so.textContent="Send it";so.style.opacity="1";if(m)m.textContent=(d&&(d.error||d.note))||"Didn’t send — try again.";}
+        }).catch(function(){so.textContent="Send it";so.style.opacity="1";});
+      return;}
     var js=e.target.closest(".jref-save");
     if(js){var jsid=js.getAttribute("data-id");var jin=document.querySelector('.jref-ask[data-id="'+jsid+'"]');var jval=jin?jin.value.trim():"";
       js.style.opacity=".5";
