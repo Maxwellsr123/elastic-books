@@ -188,6 +188,7 @@ h1{letter-spacing:-.03em}
           <div class="card stat ufilt" data-filter="reconciled" style="cursor:pointer"><div class="l"><i class="ti ti-checks" style="font-size:16px;color:var(--grn)"></i> Reconciled</div><div class="n" id="u_recon">—</div><div class="d">ticked off — kept here so nothing just vanishes</div></div>
         </div>
         <div class="sec" id="usechead">Receipts Ava needs from you</div>
+        <div style="margin:2px 0 10px"><input id="usearch" type="search" placeholder="Find any transaction — type a supplier or amount" style="width:100%;max-width:420px;border:1px solid var(--line);border-radius:3px;padding:9px 12px;font-family:inherit;font-size:13px;outline:none"></div>
         <div class="card" id="uneed"><div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Loading your list…</div></div></div>
       </section>
 
@@ -355,9 +356,28 @@ h1{letter-spacing:-.03em}
       :"Receipt in hand — waiting for the bank line. Ava matches it up automatically when it lands.";
     return '<div class="qitem"><div class="row"><div class="ic"><i class="ti ti-paperclip"></i></div><div style="flex:1"><div style="font-weight:500">'+(i.supplier||"—")+(i.amount!=null?(" — "+uMoney(i.amount)):"")+'</div><div style="font-size:12.5px;color:var(--ink2)">'+sub+'</div></div>'+pill+'</div>'+'<div class="think"><div class="acts">'+rc+vc+ig+'</div></div>'+'</div>';
   }
+  // One search across EVERY lane — "where did X go?" must never again depend
+  // on knowing which tile to click (Sovereign Leads sat 12 cards deep in
+  // Reconciled while Max hunted the whole board, 10 Aug).
+  var LANE_LABEL={guess:"needs your confirm",open:"new",review:"being checked",await_receipt:"waiting on its receipt",ready:"to reconcile",done:"reconciled ✓",pile:"receipt pile",looper:"with Elastic",to_pay:"bill to pay"};
+  var LANE_VIEW={done:"reconciled",pile:"pile",to_pay:"bills",looper:"looper",ready:"ready"};
+  function searchRow(i){
+    var lane=i.lane||"open";
+    return '<div class="row" style="align-items:center;gap:10px"><div style="flex:1;min-width:0"><b style="font-size:13.5px">'+esc(i.supplier||"?")+'</b> — '+uMoney(i.amount)
+      +'<div style="font-size:12px;color:var(--ink3)">'+esc(i.txn_date||"")+(i.account?' · '+esc(i.account):'')+'</div></div>'
+      +'<span class="pill '+(lane==="done"?"p-ok":"p-ind")+'" style="white-space:nowrap">'+esc(LANE_LABEL[lane]||lane)+'</span>'
+      +'<button class="tbtn goview" data-view="'+esc(LANE_VIEW[lane]||"send")+'">Open</button></div>';
+  }
   function renderHome(){
     var box=document.getElementById("uneed"),head=document.getElementById("usechead");if(!box)return;
     var f=U_FILTER,list,htxt,row,empty;
+    var q=(document.getElementById("usearch")||{}).value;q=(q||"").trim().toLowerCase();
+    if(q.length>=2){
+      list=U_ITEMS.filter(function(i){return String(i.supplier||"").toLowerCase().indexOf(q)>=0||String(Math.abs(Number(i.amount)||0)).indexOf(q)>=0;});
+      if(head)head.innerHTML='Everything matching “'+esc(q)+'” <span style="font-weight:400;font-size:12px;color:var(--ink3)">· '+list.length+' across all lanes</span>';
+      box.innerHTML=list.length?list.slice(0,40).map(searchRow).join(""):'<div class="row"><div style="flex:1;color:var(--ink2);font-size:13px">Nothing matches — Ava may not have this transaction yet.</div></div>';
+      return;
+    }
     if(f==="bills"){list=U_ITEMS.filter(function(i){return i.lane==="to_pay";});htxt="Bills to pay — incoming, not yet paid";row=billRow;empty='<i class="ti ti-circle-check" style="vertical-align:-2px"></i> No bills waiting — Ava is watching your inbox.';}
     // ticked rows sink to the bottom — the Desk has always sorted the pile this
     // way (admin.html), so the half Jewel has already uploaded stops sitting on
@@ -560,6 +580,8 @@ h1{letter-spacing:-.03em}
       try{(document.scrollingElement||document.documentElement).scrollTop=_sy;}catch(_e){}
     }).catch(function(){});
   }
+  (function(){var si=document.getElementById("usearch");if(si)si.addEventListener("input",function(){renderHome();});})();
+  document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest(".goview");if(g){var si=document.getElementById("usearch");if(si)si.value="";U_FILTER=g.getAttribute("data-view");renderHome();}});
   document.querySelectorAll(".ufilt").forEach(function(el){el.addEventListener("click",function(){U_FILTER=this.getAttribute("data-filter");renderHome();var h=document.getElementById("usechead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});});});
   // ?focus=need — Ava's triage sends people straight to the questions waiting
   // on them, rather than to the top of the board to go hunting (Max, 31 Jul).
