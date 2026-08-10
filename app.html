@@ -226,6 +226,7 @@ h1{letter-spacing:-.03em}
   // company comes from the private link (?c=<id>); falls back to KPA for the original demo
   var KPA=(new URLSearchParams(location.search).get("c"))||(window.IS_DEV?window.SANDBOX_CO:(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}return "";})());
   function uMoney(n){return n==null?"":"$"+Math.abs(Number(n)).toLocaleString("en-NZ",{minimumFractionDigits:2,maximumFractionDigits:2});}
+  var WHOAMI=(function(){try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");return (s&&s.email)||"owner";}catch(e){return "owner";}})();
   var U_ITEMS=[],U_FILTER="need";
   function needRow(i){
     var id=i.id;
@@ -578,7 +579,7 @@ h1{letter-spacing:-.03em}
     t.style.display="flex";
     clearTimeout(t._h);t._h=setTimeout(function(){t.style.display="none";},9000);
     if(undoAction){document.getElementById("avaundo").onclick=function(){t.style.display="none";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:undoId,action:undoAction})}).then(function(){loadList();});};}
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:undoId,action:undoAction})}).then(function(){loadList();});};}
   }
   var CHAT="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-chat";
   var OUTREACH="https://somgalhkmptkclgvxhca.supabase.co/functions/v1/chase-outreach";
@@ -590,7 +591,7 @@ h1{letter-spacing:-.03em}
       if(act==="up"){
         var itUp=null;for(var ui=0;ui<U_ITEMS.length;ui++){if(U_ITEMS[ui].id===id){itUp=U_ITEMS[ui];break;}}
         if(itUp&&!itUp.job_ref&&(itUp.is_job===true||(itUp.is_job==null&&itUp.ava_job))){
-          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:"up"})}).catch(function(){});
+          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:id,action:"up"})}).catch(function(){});
           var jcard=b.closest(".qitem"),jth=jcard&&jcard.querySelector(".think");
           if(jth){jth.innerHTML='<div style="font-size:13px;color:var(--ink);margin:1px 0 9px"><i class="ti ti-circle-check" style="color:var(--grn);vertical-align:-2px"></i> Confirmed. Which job is this for?</div>'
             +'<div style="display:flex;gap:6px;flex-wrap:wrap"><input type="text" class="jref-ask" data-id="'+id+'" placeholder="Job # e.g. KPA-2711" style="width:160px;padding:7px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:12.5px"><button class="tbtn jref-save" data-id="'+id+'" style="border-color:var(--grn);color:var(--grn)"><i class="ti ti-check"></i> Save</button><button class="tbtn jref-skip" data-id="'+id+'" data-nojob="1">Not for a job</button><button class="tbtn jref-skip" data-id="'+id+'">Skip</button></div>';
@@ -602,7 +603,7 @@ h1{letter-spacing:-.03em}
         // — Max, 10 Aug). And when the hunt is dry, offer the one move left:
         // Ava emails the supplier for the receipt (chase-outreach).
         if(itUp){
-          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:"up"})}).catch(function(){});
+          fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:id,action:"up"})}).catch(function(){});
           var ucard=b.closest(".qitem"),uth=ucard&&ucard.querySelector(".think");
           if(uth){
             var wantsR=!!itUp.needs_receipt&&!itUp.receipt_incoming&&itUp.receipt!=="have"&&itUp.receipt!=="not_needed";
@@ -627,12 +628,12 @@ h1{letter-spacing:-.03em}
         cant_find:["Noted as can't-find — it reconciles anyway, flagged as missing.","needs_receipt"],
         up:["Confirmed — Ava takes it from here.",null]};
       var dm=doneMsg[act];if(dm)setTimeout(function(){toast(dm[0],dm[1],id);},400);
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:id,action:act})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){loadList();});return;}
     // "Ask the supplier" → Ava drafts (grounded in evidence, never a guessed
     // address); the SEND is this second, explicit human click.
     var ao=e.target.closest(".askout");
     if(ao){var aid=ao.getAttribute("data-id");ao.style.opacity=".6";ao.textContent="Finding who to ask…";
-      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:aid,action:"draft"})})
+      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:aid,action:"draft"})})
         .then(function(r){return r.json();}).then(function(d){
           var m=document.querySelector('.outmsg[data-id="'+aid+'"]');
           if(d&&d.drafted&&d.outreach&&d.outreach.to){
@@ -646,7 +647,7 @@ h1{letter-spacing:-.03em}
       return;}
     var so=e.target.closest(".sendout");
     if(so){var sid=so.getAttribute("data-id");so.style.opacity=".6";so.textContent="Sending…";
-      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:sid,action:"send"})})
+      fetch(OUTREACH,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:sid,action:"send"})})
         .then(function(r){return r.json();}).then(function(d){
           var m=document.querySelector('.outmsg[data-id="'+sid+'"]');
           if(d&&d.sent){so.textContent="Sent ✓";so.style.opacity="1";if(m)m.textContent="Asked "+(d.to||"the supplier")+" for a copy — the reply lands back on this card.";}
@@ -656,27 +657,27 @@ h1{letter-spacing:-.03em}
     var js=e.target.closest(".jref-save");
     if(js){var jsid=js.getAttribute("data-id");var jin=document.querySelector('.jref-ask[data-id="'+jsid+'"]');var jval=jin?jin.value.trim():"";
       js.style.opacity=".5";
-      (jval?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:jsid,action:"job_ref",job_ref:jval})}):Promise.resolve())
+      (jval?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:jsid,action:"job_ref",job_ref:jval})}):Promise.resolve())
         .then(function(){toast(jval?("Tagged to "+jval+" — Ava takes it from here."):"Confirmed — Ava takes it from here.");loadList();}).catch(function(){loadList();});return;}
     var jk=e.target.closest(".jref-skip");
     if(jk){var jkid=jk.getAttribute("data-id");jk.style.opacity=".5";
-      (jk.getAttribute("data-nojob")?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:jkid,action:"no_job"})}):Promise.resolve())
+      (jk.getAttribute("data-nojob")?fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:jkid,action:"no_job"})}):Promise.resolve())
         .then(function(){toast("Confirmed — Ava takes it from here.");loadList();}).catch(function(){loadList();});return;}
     var ct=e.target.closest("[data-cmt]");
     if(ct){var w=document.querySelector('.cmt-wrap[data-id="'+ct.getAttribute("data-cmt")+'"]');if(w)w.style.display=w.style.display==="none"?"block":"none";return;}
     var cs=e.target.closest(".cmt-send");
     if(cs){var cid=cs.getAttribute("data-id");var inp=document.querySelector('.cmt-in[data-id="'+cid+'"]');var t=inp&&inp.value.trim();if(!t)return;cs.style.opacity=".5";cs.textContent="Ava…";if(inp)inp.value="";
-      fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
+      fetch(CHAT,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:cid,message:t})}).then(function(r){return r.json();}).then(function(){loadList();}).catch(function(){cs.style.opacity="1";cs.textContent="Send";});return;}
     var er=e.target.closest("[data-editrow]");
     if(er){var g=document.querySelector('.editgrid[data-id="'+er.getAttribute("data-editrow")+'"]');if(g)g.style.display=g.style.display==="none"?"block":"none";return;}
     var at=e.target.closest("[data-attach]");
     if(at){var f=document.querySelector('.rcpt-file[data-id="'+at.getAttribute("data-attach")+'"]');if(f)f.click();return;}
     var rk=e.target.closest("[data-recon]");
     if(rk){var rid=rk.getAttribute("data-recon");rk.style.opacity=".5";rk.textContent="…";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:rid,action:"reconciled"})}).then(function(r){return r.json();}).then(function(m){if(m&&m.error){rk.style.opacity="1";alert(m.error);}else loadList();}).catch(function(){rk.style.opacity="1";});return;}
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:rid,action:"reconciled"})}).then(function(r){return r.json();}).then(function(m){if(m&&m.error){rk.style.opacity="1";alert(m.error);}else loadList();}).catch(function(){rk.style.opacity="1";});return;}
     var rp=e.target.closest("[data-reopen]");
     if(rp){var pid=rp.getAttribute("data-reopen");rp.style.opacity=".5";
-      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
+      fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:pid,action:"reopen"})}).then(function(){loadList();}).catch(function(){rp.style.opacity="1";});return;}
   });
   document.addEventListener("keydown",function(e){
     if(e.key!=="Enter")return;
@@ -685,7 +686,7 @@ h1{letter-spacing:-.03em}
   });
   document.addEventListener("change",function(e){
     var j=e.target.closest(".jref-in");
-    if(j){fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,id:j.getAttribute("data-id"),action:"job_ref",job_ref:j.value.trim()})}).catch(function(){});return;}
+    if(j){fetch(FB,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,by:WHOAMI,id:j.getAttribute("data-id"),action:"job_ref",job_ref:j.value.trim()})}).catch(function(){});return;}
     var f=e.target.closest(".rcpt-file");if(!f||!f.files||!f.files[0])return;
     var id=f.getAttribute("data-id"),file=f.files[0];f.value="";
     readB64(file).then(function(b64){return fetch(FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:KPA,kind:"receipt",target_id:id,filename:file.name,mime:file.type||"application/octet-stream",file_base64:b64})}).then(function(r){return r.json();});}).then(function(d){if(d&&d.error)alert(d.error);loadList();}).catch(function(){});

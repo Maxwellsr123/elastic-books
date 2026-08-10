@@ -488,9 +488,9 @@ document.addEventListener("click",function(e){
   if(b){var f=document.querySelector('.bfile[data-id="'+b.getAttribute("data-id")+'"]');if(f)f.click();return;}
   var r=e.target.closest(".brec");
   if(r){var rid=r.getAttribute("data-id"),rco=r.getAttribute("data-co");track(rco,"reconcile");r.disabled=true;r.textContent="…";
-    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"reconciled"})})
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,by:(SESSION&&SESSION.email)||"desk",id:rid,action:"reconciled"})})
       .then(function(x){return x.json();}).then(function(m){if(m&&m.error){alert(m.error);r.disabled=false;r.textContent="Reconciled";}else{refresh(rco);
-        toast("Ticked off as reconciled",function(){fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,id:rid,action:"unreconcile"})}).then(function(){refresh(rco);});});}}).catch(function(){r.disabled=false;});
+        toast("Ticked off as reconciled",function(){fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:rco,by:(SESSION&&SESSION.email)||"desk",id:rid,action:"unreconcile"})}).then(function(){refresh(rco);});});}}).catch(function(){r.disabled=false;});
     return;}
   var sm=e.target.closest(".showmore");
   if(sm){var om=document.getElementById("om-"+sm.getAttribute("data-id"));if(om){om.style.display="block";sm.parentNode.style.display="none";}return;}
@@ -498,7 +498,7 @@ document.addEventListener("click",function(e){
   if(sp){var pm=document.getElementById("pm-"+sp.getAttribute("data-id"));if(pm){pm.style.display="block";sp.parentNode.style.display="none";}return;}
   var pv=e.target.closest(".bvac");
   if(pv){var vid=pv.getAttribute("data-id"),vco=pv.getAttribute("data-co"),vact=pv.getAttribute("data-act");track(vco,vact);pv.disabled=true;
-    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:vco,id:vid,action:vact})})
+    fetch(API+"/chase-feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({company_id:vco,by:(SESSION&&SESSION.email)||"desk",id:vid,action:vact})})
       .then(function(){refresh(vco);}).catch(function(){pv.disabled=false;});
     return;}
   var pg=e.target.closest(".bpig");
