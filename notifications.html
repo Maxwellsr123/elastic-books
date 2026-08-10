@@ -42,6 +42,7 @@
     <h1>Notifications</h1>
     <p class="sub">One list for everything Ava emails — the 8am &ldquo;your books today&rdquo; rundown, Auto Collect updates, the lot. Tick who should get them, untick who shouldn&rsquo;t, and add anyone who isn&rsquo;t here (like your bookkeeper). It applies to every feature.</p>
     <div id="card" class="card"><span class="empty">Loading…</span></div>
+    <div id="fromcard" class="card"><span class="empty">Loading…</span></div>
   </div>
 
 <script>
@@ -72,10 +73,27 @@
       +'<div class="slackline">Slack channel updates stay on regardless — email is a copy, not a replacement.</div>';
     var w=document.getElementById("warnnone");
     if(w)w.style.display=PEOPLE.length&&!PEOPLE.some(function(p){return p.on;})?"block":"none";
+    paintFrom();
+  }
+  // Which inbox Ava SENDS from — supplier asks, invoice chases, the lot.
+  var SENDF=null,SENDC=[];
+  function paintFrom(){
+    var card=document.getElementById("fromcard");if(!card)return;
+    if(!SENDC.length){card.innerHTML='<span class="fn">Where Ava\'s emails come from</span><div class="what">Connect a Gmail inbox with send permission and it appears here.</div>';return;}
+    var eff=SENDF||SENDC[0];
+    card.innerHTML='<span class="fn">Where Ava\'s emails come from</span>'
+      +'<div class="what">Supplier asks and invoice chases send from this inbox, so customers see your address, not Ava\'s.</div>'
+      +'<div style="margin-top:9px">'+SENDC.map(function(em){
+        return '<label class="person"><input type="radio" name="sfrom" value="'+esc(em)+'"'+(em===eff?' checked':'')+' style="width:16px;height:16px;accent-color:var(--ind);flex:none;cursor:pointer">'
+          +'<span class="pemail">'+esc(em)+'</span>'+(em===eff&&!SENDF?'<span class="pmeta" style="margin-left:auto">current default</span>':'')+'</label>';
+      }).join("")+'</div>'
+      +'<div class="savebar"><button class="btn" id="fromsave">Save</button><span class="msg" id="frommsg"></span></div>';
   }
   function load(){
     fetch(API+"/features?company="+CO).then(function(r){return r.json();}).then(function(d){
       PEOPLE=(d&&d.notify&&d.notify.candidates)||[];
+      SENDF=(d&&d.notify&&d.notify.send_from)||null;
+      SENDC=(d&&d.notify&&d.notify.send_candidates)||[];
       paint();
     }).catch(function(){document.getElementById("card").innerHTML='<span class="empty">Couldn’t load — refresh to retry.</span>';});
   }
@@ -91,6 +109,20 @@
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){if(msg)msg.textContent="That email doesn’t look right.";return;}
       if(PEOPLE.some(function(p){return p.email===v;})){if(msg)msg.textContent="Already on the list.";return;}
       PEOPLE.push({email:v,name:"",source:"added",on:true});paint();
+      return;
+    }
+    if(e.target.closest&&e.target.closest("#fromsave")){
+      var sel=document.querySelector('input[name="sfrom"]:checked');
+      var fm=document.getElementById("frommsg");
+      if(!sel){if(fm)fm.textContent="Pick an inbox first.";return;}
+      if(fm)fm.textContent="Saving…";
+      var ses2=null;try{ses2=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err2){}
+      fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,send_from:sel.value,by:(ses2&&ses2.email)||"owner"})})
+        .then(function(r){return r.json();})
+        .then(function(d){if(d&&d.notify){SENDF=d.notify.send_from;SENDC=d.notify.send_candidates||SENDC;paintFrom();var f2=document.getElementById("frommsg");if(f2)f2.textContent="Saved — Ava sends from "+(SENDF||SENDC[0])+" now.";}
+          else{var f3=document.getElementById("frommsg");if(f3)f3.textContent=(d&&d.error)||"Didn't save — try again.";}})
+        .catch(function(){var f4=document.getElementById("frommsg");if(f4)f4.textContent="Couldn't reach it — try again.";});
       return;
     }
     if(e.target.closest&&e.target.closest("#savebtn")){
