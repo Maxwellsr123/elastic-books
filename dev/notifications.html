@@ -9,37 +9,39 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <style>
-  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff;--grn:#0e7a50;--grnbg:#e7f6ee}
+  :root{--ind:#534AB7;--ind2:#6F66DB;--ink:#141418;--ink2:#67676e;--ink3:#9CA3AF;--bg:#FFFFFF;--line:#D9D9CC;--card:#fff;--grn:#0e7a50;--grnbg:#e7f6ee;--amber:#92400E;--amberbg:#FEF3C7}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
   .wrap{max-width:720px;margin:0 auto;padding:26px 20px 60px}
   h1{font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
   .sub{color:var(--ink2);font-size:13.5px;margin:0 0 22px;line-height:1.6}
   .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:17px 19px;margin-bottom:14px}
-  .fh{display:flex;align-items:center;gap:9px}
   .fn{font-weight:700;font-size:15px}
-  .pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-left:auto}
-  .p-grn{background:var(--grnbg);color:var(--grn)}
   .what{font-size:12.5px;color:var(--ink2);margin-top:6px;line-height:1.55}
-  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
-  .chip{background:#FAFAF7;border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px}
-  .chip .x{cursor:pointer;color:var(--ink3);font-weight:700}
-  .chip .x:hover{color:#B42318}
-  .addrow{display:flex;gap:8px;margin-top:11px;align-items:center;flex-wrap:wrap}
+  .person{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px solid #EFEFE8;cursor:pointer}
+  .person:last-of-type{border-bottom:0}
+  .person input[type=checkbox]{width:17px;height:17px;accent-color:var(--ind);cursor:pointer;flex:none}
+  .pemail{font-size:13.5px;font-weight:600;word-break:break-all}
+  .pmeta{font-size:11.5px;color:var(--ink3);margin-top:1px}
+  .off .pemail{color:var(--ink3);font-weight:500;text-decoration:line-through}
+  .addrow{display:flex;gap:8px;margin-top:13px;align-items:center;flex-wrap:wrap}
   .addrow input{flex:1;min-width:200px;border:1px solid var(--line);border-radius:3px;padding:9px 11px;font:inherit;font-size:13px;outline:none}
   .addrow input:focus{border-color:var(--ind)}
   .btn{font:inherit;font-size:12.5px;font-weight:700;padding:9px 15px;border:0;border-radius:3px;background:var(--ind);color:#fff;cursor:pointer;white-space:nowrap}
   .btn:hover{background:#463DA4}
-  .msg{font-size:12px;color:var(--ink2);margin-top:7px;min-height:14px}
-  .slackline{font-size:12px;color:var(--ink3);margin-top:10px}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .msg{font-size:12px;margin-top:9px;min-height:15px;color:var(--ink2)}
+  .warn{background:var(--amberbg);color:var(--amber);border-radius:3px;padding:8px 11px;font-size:12.5px;margin-top:11px;line-height:1.5;display:none}
+  .slackline{font-size:12px;color:var(--ink3);margin-top:13px}
   .empty{color:var(--ink3);font-size:13px}
+  .savebar{display:flex;align-items:center;gap:10px;margin-top:14px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Notifications</h1>
-    <p class="sub">Every feature already posts to your Ava Slack channel. Add an email here — yours, or someone who isn't in Slack, like your bookkeeper — and they get copies of that feature's updates. Only the features you've switched on appear.</p>
-    <div id="cards" class="empty">Loading…</div>
+    <p class="sub">One list for everything Ava emails — the 8am &ldquo;your books today&rdquo; rundown, Auto Collect updates, the lot. Tick who should get them, untick who shouldn&rsquo;t, and add anyone who isn&rsquo;t here (like your bookkeeper). It applies to every feature.</p>
+    <div id="card" class="card"><span class="empty">Loading…</span></div>
   </div>
 
 <script>
@@ -49,69 +51,63 @@
     try{var s=JSON.parse(localStorage.getItem("ava_session")||"null");if(s&&s.companies&&s.companies.length)return s.companies[0].id;}catch(e){}
     location.replace("app.html");return "";})();
   function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
-  // What each feature's emails actually contain — honest per feature, so
-  // nobody signs their bookkeeper up for a feed that doesn't exist yet.
-  var WHAT={
-    invoice_chaser:"Every Auto Collect update as it happens: who was emailed, who replied, promised dates, payments landing, anything handed to you.",
-    bookkeeping:"The 8am “your books today” email — what needs a receipt, what's ready to reconcile, what Ava did overnight.",
-    gst_putaway:"Nothing emailed yet for this one — the weekly set-aside figure lives on your GST page. Coming soon."
-  };
-  var LISTS={};
-  function card(f){
-    var emails=f.notify_emails||[];
-    LISTS[f.key]=emails.slice();
-    var chips=emails.length?'<div class="chips">'+emails.map(function(em){
-        return '<span class="chip">'+esc(em)+'<span class="x" data-key="'+esc(f.key)+'" data-em="'+esc(em)+'">×</span></span>';
-      }).join("")+'</div>':'';
-    return '<div class="card"><div class="fh"><span class="fn">'+esc(f.name)+'</span><span class="pill p-grn">On</span></div>'
-      +'<div class="what">'+esc(WHAT[f.key]||"Updates from this feature.")+'</div>'
-      +chips
-      +'<div class="addrow"><input type="email" placeholder="name@example.com" data-key="'+esc(f.key)+'"><button class="btn badd" data-key="'+esc(f.key)+'">Add email</button></div>'
-      +'<div class="msg" data-key="'+esc(f.key)+'"></div>'
-      +'<div class="slackline">Slack channel updates stay on regardless — email is a copy, not a replacement.</div>'
-      +'</div>';
+  var SRC={owner:"owner",bookkeeper:"bookkeeper",added:"added here"};
+  var PEOPLE=[]; // [{email,name,source,on}]
+
+  function paint(){
+    var card=document.getElementById("card");
+    var rows=PEOPLE.map(function(p,ix){
+      return '<label class="person'+(p.on?'':' off')+'">'
+        +'<input type="checkbox" data-ix="'+ix+'"'+(p.on?' checked':'')+'>'
+        +'<span style="flex:1"><span class="pemail">'+esc(p.email)+'</span>'
+        +'<div class="pmeta">'+esc(p.name?p.name+" · ":"")+esc(SRC[p.source]||p.source)+(p.on?'':' · won’t be emailed')+'</div></span>'
+        +'</label>';
+    }).join("");
+    card.innerHTML='<span class="fn">Who gets Ava’s emails</span>'
+      +'<div class="what">Everyone ticked gets every email update.</div>'
+      +'<div style="margin-top:9px">'+(rows||'<div class="empty" style="padding:10px 2px">Nobody yet — add an email below.</div>')+'</div>'
+      +'<div class="warn" id="warnnone"><i class="ti ti-alert-triangle" style="vertical-align:-2px"></i> Nobody ticked — Ava will stop emailing this company entirely. Slack still works.</div>'
+      +'<div class="addrow"><input type="email" id="addin" placeholder="name@example.com"><button class="btn" id="addbtn">Add email</button></div>'
+      +'<div class="savebar"><button class="btn" id="savebtn">Save</button><span class="msg" id="msg"></span></div>'
+      +'<div class="slackline">Slack channel updates stay on regardless — email is a copy, not a replacement.</div>';
+    var w=document.getElementById("warnnone");
+    if(w)w.style.display=PEOPLE.length&&!PEOPLE.some(function(p){return p.on;})?"block":"none";
   }
-  function paint(list){
-    var on=(list||[]).filter(function(f){return f.on;});
-    var el=document.getElementById("cards");
-    el.className="";
-    el.innerHTML=on.length?on.map(card).join("")
-      :'<div class="card"><span class="empty">Nothing switched on yet — turn a feature on from <a href="today.html?c='+CO+'" style="color:var(--ind);font-weight:600">Today</a> and it appears here.</span></div>';
+  function load(){
+    fetch(API+"/features?company="+CO).then(function(r){return r.json();}).then(function(d){
+      PEOPLE=(d&&d.notify&&d.notify.candidates)||[];
+      paint();
+    }).catch(function(){document.getElementById("card").innerHTML='<span class="empty">Couldn’t load — refresh to retry.</span>';});
   }
-  function save(key,emails){
-    var msg=document.querySelector('.msg[data-key="'+key+'"]');
-    if(msg)msg.textContent="Saving…";
-    var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(e){}
-    fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
-      body:JSON.stringify({company_id:CO,key:key,notify_emails:emails,by:(sess&&sess.email)||"owner"})})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d&&d.features){paint(d.features);}
-        else if(msg){msg.textContent=(d&&d.error)||"Didn't save — try again.";}
-      })
-      .catch(function(){if(msg)msg.textContent="Couldn't reach it — try again.";});
-  }
+  document.addEventListener("change",function(e){
+    var cb=e.target.closest&&e.target.closest('input[type=checkbox][data-ix]');
+    if(cb){var p=PEOPLE[parseInt(cb.getAttribute("data-ix"),10)];if(p){p.on=cb.checked;paint();}}
+  });
   document.addEventListener("click",function(e){
-    var add=e.target.closest&&e.target.closest(".badd");
-    if(add){
-      var key=add.getAttribute("data-key");
-      var input=document.querySelector('input[data-key="'+key+'"]');
-      var v=(input&&input.value||"").trim();
-      var msg=document.querySelector('.msg[data-key="'+key+'"]');
+    if(e.target.closest&&e.target.closest("#addbtn")){
+      var input=document.getElementById("addin"),msg=document.getElementById("msg");
+      var v=(input&&input.value||"").trim().toLowerCase();
       if(!v){if(msg)msg.textContent="Type an email first.";return;}
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){if(msg)msg.textContent="That email doesn't look right.";return;}
-      save(key,(LISTS[key]||[]).concat([v.toLowerCase()]));
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){if(msg)msg.textContent="That email doesn’t look right.";return;}
+      if(PEOPLE.some(function(p){return p.email===v;})){if(msg)msg.textContent="Already on the list.";return;}
+      PEOPLE.push({email:v,name:"",source:"added",on:true});paint();
       return;
     }
-    var x=e.target.closest&&e.target.closest(".chip .x");
-    if(x){
-      var k=x.getAttribute("data-key"),em=x.getAttribute("data-em");
-      save(k,(LISTS[k]||[]).filter(function(z){return z!==em;}));
+    if(e.target.closest&&e.target.closest("#savebtn")){
+      var btn=document.getElementById("savebtn"),m=document.getElementById("msg");
+      btn.disabled=true;if(m)m.textContent="Saving…";
+      var sess=null;try{sess=JSON.parse(localStorage.getItem("ava_session")||"null");}catch(err){}
+      fetch(API+"/features",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({company_id:CO,notify_all:PEOPLE.filter(function(p){return p.on;}).map(function(p){return p.email;}),by:(sess&&sess.email)||"owner"})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d&&d.notify){PEOPLE=d.notify.candidates||PEOPLE;paint();var m2=document.getElementById("msg");if(m2)m2.textContent="Saved — Ava emails exactly this list now.";}
+          else{var m3=document.getElementById("msg");if(m3)m3.textContent=(d&&d.error)||"Didn’t save — try again.";document.getElementById("savebtn").disabled=false;}
+        })
+        .catch(function(){var m4=document.getElementById("msg");if(m4)m4.textContent="Couldn’t reach it — try again.";document.getElementById("savebtn").disabled=false;});
     }
   });
-  fetch(API+"/features?company="+CO).then(function(r){return r.json();})
-    .then(function(d){paint(d&&d.features);})
-    .catch(function(){document.getElementById("cards").textContent="Couldn't load — refresh to retry.";});
+  load();
 })();
 </script>
 <script src="ava-nav.js"></script>
